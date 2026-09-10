@@ -1,87 +1,104 @@
-# OpenWrt for Buffalo LinkStation LS420D
+# OpenWrt for the Buffalo LinkStation LS420D
 
-Experimental RAM-only firmware integration, not an OpenWrt fork and not yet a
-supported firmware release. The full source build is configured to run in GitHub Actions.
+This project develops a RAM-based Linux system for the Buffalo LinkStation
+LS420D. The goal is a quiet **pull-backup NAS**: it fetches backups from other
+machines on its own schedule, then puts its hard drives into standby while
+remaining reachable over the network.
 
-## Two boot files, one generic build
+The repository provides the operating-system build and configuration tools.
+Backup jobs, storage layout and disk-sleep policy are configured separately;
+this is the foundation for a backup server, not a finished backup appliance.
 
-- **uImage.buffalo** contains the kernel, LS420D device tree, built-in OpenWrt
-  root filesystem, common packages and hardware services. No deployment keys,
-  host identity or backup destinations belong here.
-- **initrd.buffalo** is a small external, uncompressed CPIO initramfs in a legacy
-  U-Boot RAMdisk wrapper. Linux extracts it over the built-in RAM filesystem
-  **before starting init**. It supplies site configuration and, for a private
-  deployment, SSH credentials. There is no runtime deployment loader.
+## Why run a NAS from RAM?
 
-CI supplies an **anonymous example** companion: DHCP client, neutral hostname,
-SSH disabled, no keys. It is a template, not a remotely accessible appliance.
-Generate your private companion locally without rebuilding the kernel:
-[deployment guide](docs/deployment.md).
+A backup disk should not have to keep spinning because it also holds the
+operating system. Running from RAM lets both drive bays serve as data storage,
+without a permanently mounted system partition.
 
-## What differs from official OpenWrt?
+Booting and running are separate concerns. The boot files can come from a SATA
+boot partition or a separately configured TFTP server on the network. After
+boot, Linux no longer depends on that storage. With network boot, updates can
+be prepared on the server without removing a disk from the NAS.
 
-The locked baseline is OpenWrt **25.12.5 / Linux 6.12.94**. Changes are separated:
+RAM-only operation makes disk standby possible, not automatic: backup jobs and
+temperature monitoring must also avoid unwanted disk access.
 
-1. Native LS420D device description, RAM-only image profile and board integration.
-2. A small ARM ATAG conversion patch retaining external initramfs addresses while
-   preserving OpenWrt's vendor command-line filtering.
-3. Explicit package selection and generic, inspectable runtime files, including
-   safe network defaults, PHY setup and temperature-based fan control.
+## One shared operating system, your own configuration
 
-See the [complete delta map](docs/upstream-delta.md). Every successful full build
-publishes text-only evidence: source diff, package manifest, file inventory and
-product checksums. Kernel/rootfs downloads remain gated by the
-[corresponding-source policy](docs/distribution.md); the anonymous data-only
-example remains downloadable.
-This is **not** a claim that the result is an official image with only its DTB
-changed.
+Software common to every LS420D and settings belonging to one particular NAS
+are delivered separately, using two filenames expected by Buffalo's bootloader:
 
-## Status and boundaries
+- **`uImage.buffalo` — the shared operating system.** It contains the Linux
+  kernel, the LS420D hardware description, OpenWrt, selected tools and common
+  services such as fan control. The same image can serve multiple devices.
+- **`initrd.buffalo` — your configuration.** It supplies the hostname, network
+  settings and SSH access credentials. A local generator creates this small
+  file from your settings and keys; they do not go into the public build.
 
-The split-image mechanism was hardware-tested with an earlier
-**25.12.2 / Linux 6.12.74 pilot**. The native 25.12.5 build in this repository
-requires its own cold/warm boot, network, external-initramfs and cooling tests.
-Successful host tests or CI do not establish hardware support.
+Linux unpacks the operating system into RAM, adds the configuration from the
+second file, and only then starts services. This uses Linux's existing
+initramfs mechanism: an archive of files loaded during boot.
 
-No flashing, disk partitioning, boot-environment modification, reboot or
-deployment is performed by these build scripts. Existing stock boot priority
-and a separately configured TFTP path are not changed by an image build.
-Do not use LS421DE NAND installation or sysupgrade instructions on an LS420D.
+The benefit is independent updates. A kernel or package update needs a new
+shared image. Changing a hostname or SSH key needs only a new configuration
+file, without compiling Linux again. Keep a known-good pair for rollback.
 
-## Start here
+Interactive changes disappear at reboot. To make them permanent, put them in
+the build inputs or your local configuration and regenerate the relevant file.
 
-- [Build and CI lifecycle](docs/build.md)
-- [Personalize the example initrd](docs/deployment.md)
-- [Architecture and trust boundaries](docs/architecture.md)
-- [Exact upstream deltas](docs/upstream-delta.md)
-- [Hardware acceptance checklist](docs/hardware-test-protocol.md)
-- [Roadmap](docs/ROADMAP.md)
-- [Licenses and attribution](NOTICE.md)
-- [Source publication checklist](docs/publication.md)
-- [Security policy](SECURITY.md)
-- [Contributing](CONTRIBUTING.md)
+## Why OpenWrt, and what does this repository add?
 
-Public standard runners are the intended canonical build infrastructure.
-While the repository is private, automatic heavy firmware builds remain gated;
-lightweight tests and example-initrd generation still run. A manual full build
-can consume private Actions minutes. Changing visibility and releasing validated
-firmware are separate decisions.
+OpenWrt provides a compact Linux system, a package collection and an established
+build process. Here it is used as a NAS operating system, not as a router. The
+selected tools include Btrfs support, SMART diagnostics, disk and network tools;
+shared hardware services handle the fan and Ethernet setup.
 
-## Layout
+This repository maintains a small set of changes on top of upstream OpenWrt:
 
-```text
-openwrt.lock, feeds.lock  immutable upstream inputs
-config/                  explicit generic package/build selection
-openwrt/patches/          native LS420D board and image integration
-kernel-patches/           small external-initramfs kernel change
-openwrt/files/            generic runtime files, never private provisioning
-examples/                anonymous and private-configuration JSON templates
-scripts/                 build, companion generator and audits
-tests/                   host-side regression tests
-docs/                    design, differences, instructions and evidence
-private/                 ignored local provisioning inputs and output
-```
+- An LS420D-specific hardware description and RAM-boot image profile, building
+  on OpenWrt's support for the related LS421DE without assuming identical hardware.
+- A small kernel change that lets the external configuration archive reach
+  Linux. OpenWrt's boot-argument filtering otherwise suppresses the information
+  needed to load it.
+- Build recipes, a configuration generator and tests to maintain this setup
+  across OpenWrt updates.
 
-Boot files containing private credentials must never be uploaded as public CI
-artifacts. TFTP and legacy uImage CRCs provide **no authentication or secrecy**.
-Use a trusted boot network and protect the TFTP server.
+The [upstream change guide](docs/upstream-delta.md) explains each modification.
+Full builds are intended to run on standard GitHub Actions runners, using the
+free infrastructure available to public repositories. OpenWrt and its package
+sources are pinned to exact revisions, so others can rebuild from the same
+inputs without maintaining their own compiler setup.
+
+## What works today?
+
+An earlier **OpenWrt 25.12.2 / Linux 6.12.74** pilot booted on a real LS420D,
+ran from RAM and provided SSH access. It also demonstrated that configuration
+from the second boot file appeared in the running system. See the
+[hardware bring-up record](docs/findings/local-bringup.md).
+
+The current repository targets **OpenWrt 25.12.5 / Linux 6.12.94**. Its host-side
+tests, upstream-source checks and example generation have passed in GitHub
+Actions. A complete build and hardware acceptance of this newer version are
+still outstanding; it is not yet a supported firmware release.
+
+You can download the example `initrd.buffalo`, which contains neutral settings,
+no keys and disabled SSH. There is currently **no downloadable generic kernel**:
+CI is configured to compile it, but kernel downloads remain on hold until the
+accompanying source and license package is ready. The [build guide](docs/build.md)
+and [distribution policy](docs/distribution.md) describe that process.
+
+## Where to go next
+
+The [configuration guide](docs/deployment.md) shows how the example becomes
+your own `initrd.buffalo`. The [architecture document](docs/architecture.md)
+explains the boot sequence and treatment of credentials. For development,
+see the [hardware test checklist](docs/hardware-test-protocol.md) and
+[contribution guide](CONTRIBUTING.md).
+
+Establish a recovery route before booting a candidate. These tools do not
+configure the bootloader, flash the NAS or partition disks. LS421DE NAND
+installation instructions do not apply to the LS420D.
+
+Keep your configuration file private and use a trusted boot network: it
+contains credentials, and TFTP does not encrypt or authenticate the transfer.
+See [security](SECURITY.md) and [licenses and attribution](NOTICE.md).
