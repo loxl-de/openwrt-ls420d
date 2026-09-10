@@ -1,0 +1,174 @@
+#!/bin/sh
+# shellcheck shell=dash
+# One worker plus an independently scheduled supervisor. procd supervises the
+# supervisor. Runtime files live in RAM; no filesystem on a disk is accessed.
+# shellcheck source=openwrt/files/usr/libexec/ls420d-fan-policy.sh
+. /usr/libexec/ls420d-fan-policy.sh
+RUN=/var/run/ls420d-fan
+SELF=/usr/sbin/ls420d-fan
+umask 077
+
+worker() {
+    local c now h name t cpu phy disk disks expected=0 bad
+    local cpu_state=0 phy_state=0 disk_state=0 state=3 target last=3
+    local low_since=0 fault_since=0 hot_since=0 alarm_bad=0 alarm=0 fanhw
+    local disk_time=0 disk_bad=0 disk_cached=0 disks_cached=0 last_log='' message b present
+    c="$(fan_find)" || return 1
+    fan_full || return 1
+    trap 'fan_full; exit 0' INT TERM
+    while :; do
+        now="$(fan_now)"; cpu=0; phy=0; bad=0; fanhw=''
+        disk="$disk_cached"; disks="$disks_cached"
+        # Disk temperatures are read only every 20 seconds (not every CPU tick).
+        if [ "$((now-disk_time))" -ge 20 ]; then
+            disk=0; disks=0; disk_bad=0
+        fi
+        for h in /sys/class/hwmon/hwmon*; do
+            name="$(cat "$h/name" 2>/dev/null)"
+            case "$name" in
+                d0018300.thermal)
+                    t="$(fan_temperature "$h/temp1_input")" || { bad=1; continue; }
+                    cpu="$t";;
+                d0072004mdiomii00)
+                    t="$(fan_temperature "$h/temp1_input")" || { bad=1; continue; }
+                    phy="$t";;
+                drivetemp)
+                    [ "$((now-disk_time))" -ge 20 ] || continue
+                    disks="$((disks+1))"
+                    t="$(fan_temperature "$h/temp1_input")" || { disk_bad=1; continue; }
+                    [ "$t" -le "$disk" ] || disk="$t";;
+                gpio_fan) fanhw="$h";;
+            esac
+        done
+        if [ "$((now-disk_time))" -ge 20 ]; then
+            disk_cached="$disk"; disks_cached="$disks"; disk_time="$now"
+        fi
+        # Diskless operation is valid. A sensor disappearing after discovery is
+        # NOT silently treated as a cool disk. A newly attached disk is included.
+        [ "$disks" -le "$expected" ] || expected="$disks"
+        present=0
+        for b in /sys/block/sd*; do
+            case "$(cat "$b/device/vendor" 2>/dev/null)" in
+                *ATA*) present="$((present+1))";;
+            esac
+        done
+        [ "$present" -le "$expected" ] || expected="$present"
+        [ "$cpu" -gt 0 ] && [ "$phy" -gt 0 ] && [ -n "$fanhw" ] || bad=1
+        [ "$disks" -ge "$expected" ] && [ "$disk_bad" = 0 ] || bad=1
+        cpu_state="$(fan_curve "$cpu" "$cpu_state" 60000 65000 75000 4000)"
+        phy_state="$(fan_curve "$phy" "$phy_state" 55000 65000 75000 4000)"
+        disk_state="$(fan_curve "$disk" "$disk_state" 36000 42000 48000 2000)"
+        target="$cpu_state"
+        [ "$phy_state" -le "$target" ] || target="$phy_state"
+        [ "$disk_state" -le "$target" ] || target="$disk_state"
+        alarm="$(cat "$fanhw/fan1_alarm" 2>/dev/null)"
+        # The board asserts its alarm for an intentionally stopped fan too.
+        if [ "$last" -gt 0 ] && [ "$alarm" != 0 ]; then
+            alarm_bad="$((alarm_bad+1))"
+        else
+            alarm_bad=0
+        fi
+        [ "$alarm_bad" -lt 3 ] || bad=1
+        if [ "$bad" = 1 ]; then
+            target=3
+            [ "$fault_since" != 0 ] || fault_since="$now"
+            if [ "$((now-fault_since))" -ge 120 ]; then
+                fan_emergency 'sensor/fan alarm fault persisted for 120 seconds'
+            fi
+        else
+            fault_since=0
+        fi
+        # Conservative operating policy, not a manufacturer's silicon rating.
+        # HDD/PHY critical limits preserve the old kernel 60/100 C thresholds.
+        if [ "$cpu" -ge 90000 ] || [ "$disk" -ge 60000 ] || [ "$phy" -ge 100000 ]; then
+            target=3
+            [ "$hot_since" != 0 ] || hot_since="$now"
+            if [ "$cpu" -ge 95000 ] || [ "$((now-hot_since))" -ge 10 ]; then
+                fan_emergency "cpu=$cpu disk=$disk phy=$phy"
+            fi
+        else
+            hot_since=0
+        fi
+        # Speed increases are immediate. Reductions require 60 continuous cool
+        # seconds, in addition to per-sensor hysteresis.
+        if [ "$target" -lt "$state" ]; then
+            [ "$low_since" != 0 ] || low_since="$now"
+            [ "$((now-low_since))" -lt 60 ] || { state="$target"; low_since=0; }
+        else
+            state="$target"; low_since=0
+        fi
+        fan_take_control "$c" || return 1
+        if [ "$last" = 0 ] && [ "$state" -gt 0 ]; then
+            echo 3 >"$c/cur_state" || return 1
+            sleep 2  # starting pulse before low speed
+        fi
+        echo "$state" >"$c/cur_state" || return 1
+        [ "$(cat "$c/cur_state")" = "$state" ] || return 1
+        message="state=$state target=$target fault=$bad"
+        if [ "$message" != "$last_log" ]; then
+            logger -t ls420d-fan "$message cpu=$cpu hdd=$disk phy=$phy alarm=$alarm"
+            last_log="$message"
+        fi
+        printf 'uptime=%s cpu_mC=%s hdd_max_mC=%s phy_mC=%s disks=%s state=%s target=%s fault=%s alarm=%s\n' \
+            "$now" "$cpu" "$disk" "$phy" "$disks" "$state" "$target" "$bad" "$alarm" >"$RUN/status.new"
+        mv "$RUN/status.new" "$RUN/status"
+        # Heartbeat only AFTER a complete sensor read and successful fan write.
+        echo "$now" >"$RUN/heartbeat.new"
+        mv "$RUN/heartbeat.new" "$RUN/heartbeat"
+        last="$state"
+        sleep 5
+    done
+}
+
+supervise() {
+    local child='' now beat started fault_start=0 old commandline
+    mkdir -p "$RUN" || return 1
+    # Full cooling precedes all sensor reads and takeover.
+    fan_full || return 1
+    # Retire a worker orphaned by a SIGKILL of the previous supervisor.
+    old="$(cat "$RUN/worker.pid" 2>/dev/null)"
+    case "$old" in
+        ''|*[!0-9]*) ;;
+        *)
+            commandline="$(tr '\000' ' ' <"/proc/$old/cmdline" 2>/dev/null)"
+            case "$commandline" in
+                *"$SELF worker"*) kill -KILL "$old" 2>/dev/null || true;;
+            esac
+            ;;
+    esac
+    fan_full || return 1
+    trap 'trap - INT TERM EXIT; fan_full; [ -z "$child" ] || kill -TERM "$child" 2>/dev/null; exit 0' INT TERM EXIT
+    while :; do
+        started="$(fan_now)"
+        echo "$started" >"$RUN/heartbeat"
+        "$SELF" worker & child=$!
+        echo "$child" >"$RUN/worker.pid"
+        while kill -0 "$child" 2>/dev/null; do
+            sleep 2
+            now="$(fan_now)"; beat="$(cat "$RUN/heartbeat" 2>/dev/null)"
+            case "$beat" in ''|*[!0-9]*) beat=0;; esac
+            if [ "$((now-beat))" -gt 12 ] || [ "$beat" -gt "$now" ]; then
+                fan_full || true
+                logger -p daemon.err -t ls420d-fan 'worker stalled; full cooling, restarting worker'
+                kill -KILL "$child" 2>/dev/null
+                break
+            fi
+            [ "$beat" -le "$started" ] || fault_start=0
+        done
+        # Never wait for a possibly uninterruptible SATA read; pending SIGKILL
+        # prevents that worker from resuming writes when the read returns.
+        fan_full || true
+        now="$(fan_now)"
+        [ "$fault_start" != 0 ] || fault_start="$now"
+        [ "$((now-fault_start))" -lt 120 ] || fan_emergency 'controller cannot complete a cycle'
+        sleep 2
+    done
+}
+
+case "${1:-}" in
+    supervise) supervise;;
+    worker) worker;;
+    full) fan_full;;
+    status) cat "$RUN/status";;
+    *) echo 'usage: ls420d-fan {supervise|worker|status|full}' >&2; exit 2;;
+esac

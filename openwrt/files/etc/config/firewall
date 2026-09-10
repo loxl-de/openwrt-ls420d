@@ -1,0 +1,33 @@
+config defaults
+	option input 'REJECT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+
+config zone
+	option name 'lan'
+	list network 'lan'
+	option input 'REJECT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+
+config rule
+	option name 'Allow-SSH'
+	option src 'lan'
+	option proto 'tcp'
+	option dest_port '22'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-DHCP-client'
+	option src 'lan'
+	option proto 'udp'
+	option dest_port '68'
+	option family 'ipv4'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ICMPv6'
+	option src 'lan'
+	option proto 'icmp'
+	option family 'ipv6'
+	option target 'ACCEPT'

@@ -1,0 +1,6 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# Generic services only. No network download or deployment loader.
+/etc/init.d/ls420d-phy enable
+/etc/init.d/ls420d-fan enable
+exit 0

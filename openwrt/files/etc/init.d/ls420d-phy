@@ -1,0 +1,17 @@
+#!/bin/sh /etc/rc.common
+# shellcheck disable=SC2034 # rc.common consumes service metadata.
+# Preserve the Ethernet PHY across a warm reboot of the original Buffalo U-Boot.
+# No disk access, wake alarm, or magic-packet transmission occurs here.
+START=99
+STOP=89
+
+prepare_phy() {
+	/usr/sbin/ethtool -s eth0 wol g || {
+		logger -t ls420d-phy 'could not enable PHY warm-reboot workaround'
+		return 1
+	}
+	logger -t ls420d-phy 'PHY warm-reboot workaround enabled'
+}
+
+start() { prepare_phy; }
+stop() { prepare_phy; }

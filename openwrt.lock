@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: MIT
+OPENWRT_VERSION=25.12.5
+OPENWRT_TAG=v25.12.5
+OPENWRT_TAG_OBJECT=e20bc3ec9eb9e3dbd0519ddc18f81f3eedc0f45e
+OPENWRT_COMMIT=f0a60eee2fe051741c643ea6118718aae1ef17fb
+OPENWRT_SOURCE_URL=https://git.openwrt.org/openwrt/openwrt.git
+OPENWRT_FALLBACK_URL=https://github.com/openwrt/openwrt.git

@@ -1,0 +1,65 @@
+SPDX-License-Identifier: GPL-2.0-only
+
+Subject: [PATCH] ARM: preserve INITRD2 while filtering vendor boot arguments
+
+Keep MANGLE command-line and memory-tag policy unchanged, but allow the
+standard ATAG_INITRD2 conversion independently of that policy. The external
+initramfs needs its start/end addresses even with a built-in RAM root.
+
+--- a/arch/arm/boot/compressed/atags_to_fdt.c
++++ b/arch/arm/boot/compressed/atags_to_fdt.c
+@@ -43,7 +43,6 @@
+ 	return fdt_setprop_string(fdt, offset, property, string);
+ }
+ 
+-#ifndef CONFIG_ARM_ATAG_DTB_COMPAT_CMDLINE_MANGLE
+ static int setprop_cell(void *fdt, const char *node_path,
+ 			const char *property, uint32_t val)
+ {
+@@ -52,7 +51,6 @@
+ 		return offset;
+ 	return fdt_setprop_cell(fdt, offset, property, val);
+ }
+-#endif
+ 
+ static const void *getprop(const void *fdt, const char *node_path,
+ 			   const char *property, int *len)
+@@ -258,6 +256,14 @@
+ 			else
+ 				setprop_string(fdt, "/chosen", "bootargs",
+ 					       atag->u.cmdline.cmdline);
++		} else if (atag->hdr.tag == ATAG_INITRD2) {
++			uint32_t initrd_start, initrd_size;
++			initrd_start = atag->u.initrd.start;
++			initrd_size = atag->u.initrd.size;
++			setprop_cell(fdt, "/chosen", "linux,initrd-start",
++					initrd_start);
++			setprop_cell(fdt, "/chosen", "linux,initrd-end",
++					initrd_start + initrd_size);
+ 		}
+ #ifndef CONFIG_ARM_ATAG_DTB_COMPAT_CMDLINE_MANGLE
+ 		else if (atag->hdr.tag == ATAG_MEM) {
+@@ -287,14 +293,6 @@
+ 					cpu_to_fdt32(atag->u.mem.size);
+ 			}
+ 
+-		} else if (atag->hdr.tag == ATAG_INITRD2) {
+-			uint32_t initrd_start, initrd_size;
+-			initrd_start = atag->u.initrd.start;
+-			initrd_size = atag->u.initrd.size;
+-			setprop_cell(fdt, "/chosen", "linux,initrd-start",
+-					initrd_start);
+-			setprop_cell(fdt, "/chosen", "linux,initrd-end",
+-					initrd_start + initrd_size);
+ 		} else if (atag->hdr.tag == ATAG_SERIAL) {
+ 			char serno[16+2];
+ 			hex_str(serno, atag->u.serialnr.high);
+
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -1511,2 +1511,3 @@
+-	  Only command line ATAG will be processed, the rest of the ATAGs
+-	  sent by bootloader will be ignored.
++	  Command line tags are filtered as described above. ATAG_INITRD2
++	  is forwarded to the device tree for an external initramfs.
++	  Other bootloader ATAGs, including memory tags, are ignored.

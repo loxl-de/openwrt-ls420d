@@ -1,0 +1,2 @@
+# Keep source and deterministic text artifacts identical across platforms.
+* text=auto eol=lf

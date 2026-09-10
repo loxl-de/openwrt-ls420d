@@ -1,0 +1,224 @@
+SPDX-License-Identifier: GPL-2.0-only
+See NOTICE.md for the new DTS's dual-license alternative and upstream attribution.
+
+diff --git a/package/boot/uboot-tools/uboot-envtools/files/mvebu b/package/boot/uboot-tools/uboot-envtools/files/mvebu
+index 5cf8137b1045181f5d05c284a60cb34cc28679bb..8caaafdda5b2d7120b7a4654f1647dbd83956ff7 100644
+--- a/package/boot/uboot-tools/uboot-envtools/files/mvebu
++++ b/package/boot/uboot-tools/uboot-envtools/files/mvebu
+@@ -13,6 +13,9 @@ touch /etc/config/ubootenv
+ board=$(board_name)
+ 
+ case "$board" in
++buffalo,ls420d)
++	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x10000" "0x10000"
++	;;
+ buffalo,ls220de|\
+ buffalo,ls421de)
+ 	ubootenv_add_uci_config "/dev/mtd3" "0x0" "0x10000"
+diff --git a/target/linux/mvebu/cortexa9/base-files/etc/board.d/02_network b/target/linux/mvebu/cortexa9/base-files/etc/board.d/02_network
+index 9833143d7537bf9e94e85cf57ad63a2faa4dacef..507409441a57fc7c3fd18d13b325a4fae139c81d 100644
+--- a/target/linux/mvebu/cortexa9/base-files/etc/board.d/02_network
++++ b/target/linux/mvebu/cortexa9/base-files/etc/board.d/02_network
+@@ -78,6 +78,7 @@ mvebu_setup_macs()
+ 
+ 	case "$board" in
+ 	buffalo,ls220de|\
++	buffalo,ls420d|\
+ 	buffalo,ls421de)
+ 		lan_mac=$(mtd_get_mac_ascii u-boot-env eth1addr)
+ 		;;
+diff --git a/target/linux/mvebu/cortexa9/base-files/lib/upgrade/platform.sh b/target/linux/mvebu/cortexa9/base-files/lib/upgrade/platform.sh
+index 45a54c1d22bb5e8b7e117be76526f4c362a8e010..5664c7e5d16973a0fda6c96a133436950193b5a5 100755
+--- a/target/linux/mvebu/cortexa9/base-files/lib/upgrade/platform.sh
++++ b/target/linux/mvebu/cortexa9/base-files/lib/upgrade/platform.sh
+@@ -18,6 +18,10 @@ nas326_initial_setup()
+ 
+ platform_check_image() {
+ 	case "$(board_name)" in
++	buffalo,ls420d)
++		echo "NAND sysupgrade is disabled: LS420D boots an initramfs from SATA."
++		return 1
++		;;
+ 	cznic,turris-omnia|\
+ 	kobol,helios4|\
+ 	solidrun,clearfog-base-a1|\
+@@ -32,6 +36,10 @@ platform_check_image() {
+ 
+ platform_do_upgrade() {
+ 	case "$(board_name)" in
++	buffalo,ls420d)
++		echo "Refusing to write LS420D SPI NOR from sysupgrade."
++		return 1
++		;;
+ 	buffalo,ls220de)
+ 		# Kernel UBI volume name must be "boot"
+ 		CI_KERNPART=boot
+diff --git a/target/linux/mvebu/files/arch/arm/boot/dts/marvell/armada-370-buffalo-ls420d.dts b/target/linux/mvebu/files/arch/arm/boot/dts/marvell/armada-370-buffalo-ls420d.dts
+new file mode 100644
+index 0000000000000000000000000000000000000000..ead9c12821ec1f05a20e22d8409f47a790fff7e1
+--- /dev/null
++++ b/target/linux/mvebu/files/arch/arm/boot/dts/marvell/armada-370-buffalo-ls420d.dts
+@@ -0,0 +1,122 @@
++// SPDX-License-Identifier: (GPL-2.0-or-later OR MIT)
++/*
++ * Device Tree for the Buffalo LinkStation LS420D.
++ *
++ * LS420D hardware information adapted from work by Jeremy J. Peper,
++ * based on device trees by Steve Shih <shihsung@gmail.com> and
++ * Toha <tohenk@yahoo.com>. OpenWrt integration for the Buffalo LS420D.
++ *
++ * The LS420D shares the Armada 370 platform and most board wiring with the
++ * LS421DE. Keep that maintained OpenWrt description as the source base and
++ * override only the hardware differences verified during LS420D bring-up.
++ */
++
++/dts-v1/;
++
++#include "armada-370-buffalo-ls421de.dts"
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++
++/ {
++	model = "Buffalo LinkStation LS420D";
++	compatible = "buffalo,ls420d", "marvell,armada370",
++		     "marvell,armada-370-xp";
++};
++
++/* The LS420D has no LS421DE PCIe-connected Renesas USB 3 controller. */
++&pciec {
++	status = "disabled";
++};
++
++/* No SD-card slot is fitted. */
++&sdio {
++	status = "disabled";
++};
++
++/* This board contains SPI NOR only; exposing imaginary NAND is dangerous. */
++&nand_controller {
++	status = "disabled";
++};
++
++/* The Armada USB 2 port is present. Its power-enable line is active-low. */
++&{/regulators/regulator@0} {
++	/delete-property/ enable-active-high;
++	gpios = <&gpio0 5 GPIO_ACTIVE_LOW>;
++};
++
++/* Do not poll sleeping backup disks through the drivetemp thermal zone. */
++&{/thermal-zones/hdd-thermal} {
++	status = "disabled";
++};
++
++/*
++ * gpio-button-hotplug has a deliberately small code map. Use accepted event
++ * codes for the verified LS420D GPIOs; disk-presence contacts are switches.
++ */
++&{/gpio_keys} {
++	pinctrl-0 = <&pmx_buttons &pmx_hdd_present>;
++
++	hdd1-present {
++		label = "Hard Disk 1 Present";
++		linux,code = <BTN_0>;
++		linux,input-type = <EV_SW>;
++		gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
++	};
++
++	hdd2-present {
++		label = "Hard Disk 2 Present";
++		linux,code = <BTN_1>;
++		linux,input-type = <EV_SW>;
++		gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
++	};
++};
++
++&{/gpio_keys/power} {
++	linux,code = <KEY_POWER>;
++	linux,input-type = <EV_SW>;
++};
++
++&{/gpio_keys/function} {
++	linux,code = <KEY_CONFIG>;
++};
++
++&{/gpio_leds/system_red} {
++	label = "ls420d:red:function";
++};
++
++&{/gpio_leds/power_white} {
++	label = "ls420d:white:power";
++};
++
++&{/gpio_leds/power_red} {
++	label = "ls420d:red:power";
++};
++
++&{/gpio_leds/power_orange} {
++	label = "ls420d:orange:power";
++};
++
++&{/gpio_leds/system_white} {
++	label = "ls420d:white:function";
++};
++
++&{/gpio_leds/hdd1_red} {
++	label = "ls420d:red:hdd1";
++};
++
++&{/gpio_leds/hdd2_red} {
++	label = "ls420d:red:hdd2";
++};
++
++&ethphy0 {
++	/* LED2/INTn signals restart versus poweroff to the Buffalo bootloader. */
++	marvell,reg-init = <0x3 0x10 0xf000 0x0981>;
++};
++
++&pinctrl {
++	pmx_hdd_present: pmx-hdd-present {
++		marvell,pins = "mpp11", "mpp12";
++		marvell,function = "gpio";
++	};
++};
+diff --git a/target/linux/mvebu/image/cortexa9.mk b/target/linux/mvebu/image/cortexa9.mk
+index 894a0f1948e87e3fcd702326a4f8b29050768eb6..52363c3ae13e0ec1d72292c99341dbeca99752af 100644
+--- a/target/linux/mvebu/image/cortexa9.mk
++++ b/target/linux/mvebu/image/cortexa9.mk
+@@ -61,6 +61,18 @@ define Device/buffalo_ls220de
+ endef
+ TARGET_DEVICES += buffalo_ls220de
+ 
++define Device/buffalo_ls420d
++  DEVICE_VENDOR := Buffalo
++  DEVICE_MODEL := LinkStation LS420D
++  DEVICE_DTS := armada-370-buffalo-ls420d
++  KERNEL_INITRAMFS := kernel-bin | append-dtb | uImage none
++  IMAGES :=
++  DEVICE_PACKAGES := \
++    kmod-rtc-rs5c372a kmod-hwmon-gpiofan kmod-linkstation-poweroff \
++    e2fsprogs partx-utils
++endef
++TARGET_DEVICES += buffalo_ls420d
++
+ define Device/buffalo_ls421de
+   $(Device/NAND-128K)
+   DEVICE_VENDOR := Buffalo
+diff --git a/target/linux/mvebu/patches-6.12/106-power-reset-linkstation-poweroff-add-ls420d.patch b/target/linux/mvebu/patches-6.12/106-power-reset-linkstation-poweroff-add-ls420d.patch
+new file mode 100644
+index 0000000000000000000000000000000000000000..92554bac12b447cd19406837a07d67ef2bf45697
+--- /dev/null
++++ b/target/linux/mvebu/patches-6.12/106-power-reset-linkstation-poweroff-add-ls420d.patch
+@@ -0,0 +1,12 @@
++--- a/drivers/power/reset/linkstation-poweroff.c
+++++ b/drivers/power/reset/linkstation-poweroff.c
++@@ -148,6 +148,9 @@ static const struct of_device_id ls_power
++ 	{ .compatible = "buffalo,ls220de",
++ 	  .data = &linkstation_power_off_cfg,
++ 	},
+++	{ .compatible = "buffalo,ls420d",
+++	  .data = &linkstation_power_off_cfg,
+++	},
++ 	{ .compatible = "buffalo,ls421d",
++ 	  .data = &linkstation_power_off_cfg,
++ 	},

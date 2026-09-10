@@ -1,0 +1,58 @@
+# OpenWrt source and build output
+/build/
+/dl/
+/openwrt-src/
+/staging_dir/
+/tmp/
+
+# Generated firmware and local evidence (commit curated text manifests instead)
+/artifacts/*
+!/artifacts/.gitkeep
+!/artifacts/*.manifest
+!/artifacts/*.sha256
+!/artifacts/*.txt
+*.bin
+*.img
+*.itb
+*.ubi
+*.ubifs
+*.squashfs
+*.tar.gz
+uImage.buffalo
+initrd.buffalo
+
+# Never version deployment identity, credentials, dumps, or inventories
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite
+*.sqlite3
+*.key
+*.pem
+*.pub
+known_hosts
+ssh_host_*_key*
+id_rsa*
+id_ed25519*
+*.pcap
+*.dump
+*fw_env*.txt
+*u-boot-env*.txt
+inventory-manifest*
+
+# Editors and operating systems
+*~
+*.swp
+.DS_Store
+
+# Local companion configuration and Python build cache
+/private/
+__pycache__/
+*.pyc
+*.cpio
+*.orig
+*.rej
+
+# Dropbear server identity must remain private
+dropbear_*_host_key*

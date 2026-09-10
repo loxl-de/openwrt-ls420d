@@ -1,0 +1,6 @@
+{
+  "hostname": "ls420d-backup",
+  "network": {"mode": "dhcp"},
+  "ssh_public_key": "admin.pub",
+  "dropbear_host_key": "dropbear_ed25519_host_key"
+}

@@ -1,0 +1,3 @@
+# Ordered OpenWrt patch list. Add one patch filename per line.
+# The LS420D DTS must live in this series; do not maintain a second copy.
+100-add-buffalo-ls420d-ram-initramfs-support.patch

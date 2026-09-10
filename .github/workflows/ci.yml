@@ -1,0 +1,206 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: '23 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      reproducibility:
+        description: Build twice on independent runners and compare artifacts
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: ls420d-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install pinned secret scanner
+        run: sh scripts/install-gitleaks.sh "$RUNNER_TEMP/ls420d-gitleaks"
+      - name: Scan complete checked-out history without exposing findings
+        env:
+          GITLEAKS: ${{ runner.temp }}/ls420d-gitleaks/gitleaks
+        run: sh scripts/scan-secrets.sh
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca # master, pinned 2026-08-31
+        with:
+          check_together: true
+          scandir: .
+          version: v0.11.0
+      - name: Parse workflow YAML
+        run: >-
+          ruby -e 'require "yaml";
+          YAML.load_file(".github/workflows/ci.yml", aliases: true)'
+      - name: Install host test tools
+        run: sudo apt-get update && sudo apt-get install --yes busybox shellcheck
+      - name: Lint OpenWrt runtime scripts
+        run: shellcheck -s dash openwrt/files/etc/init.d/* openwrt/files/etc/hotplug.d/iface/* openwrt/files/etc/uci-defaults/* openwrt/files/usr/sbin/* openwrt/files/usr/libexec/*.sh
+      - name: Run Python companion and fan tests
+        env:
+          GITLEAKS: ${{ runner.temp }}/ls420d-gitleaks/gitleaks
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Run script tests
+        run: ./tests/test-scripts.sh
+      - name: Audit tree for public-source hazards
+        run: ./scripts/audit-public-tree.sh
+      - name: Check whitespace
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if test -n "$BASE_SHA" && ! printf '%s' "$BASE_SHA" | grep -Eq '^0+$'; then
+            git diff --check "$BASE_SHA...HEAD" -- . ':(exclude)openwrt/patches/*.patch' ':(exclude)kernel-patches/*.patch'
+          else
+            git show --check --format= HEAD -- . ':(exclude)openwrt/patches/*.patch' ':(exclude)kernel-patches/*.patch'
+          fi
+
+  example-initrd:
+    needs: static-and-unit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Build anonymous example without credentials
+        run: |
+          python3 scripts/make_initrd.py --example --output build/example/initrd.buffalo
+          python3 scripts/make_initrd.py --example --output build/repro/initrd.buffalo
+          cmp build/example/initrd.buffalo build/repro/initrd.buffalo
+          cp docs/deployment.md build/example/README.md
+          cp LICENSE build/example/LICENSE
+          cd build/example
+          sha256sum initrd.buffalo README.md LICENSE > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ls420d-example-initrd-${{ github.sha }}
+          path: build/example/
+          if-no-files-found: error
+          retention-days: 14
+
+  upstream-bootstrap:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Verify locked OpenWrt and feed inputs
+        run: ./scripts/prepare-openwrt.sh --verify-inputs
+
+  firmware:
+    name: firmware-${{ matrix.copy }}
+    needs:
+      - static-and-unit
+      - upstream-bootstrap
+    if: github.event_name == 'workflow_dispatch' || github.event.repository.visibility == 'public'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        copy: ${{ fromJSON((github.event_name == 'schedule' || github.event_name == 'push' || inputs.reproducibility) && '["a","b"]' || '["a"]') }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record initial runner capacity
+        run: |
+          uname -a
+          nproc
+          free -h
+          df -h .
+      - name: Install OpenWrt build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential ccache clang flex bison g++ gawk gcc-multilib \
+            g++-multilib \
+            gettext git libelf-dev libncurses-dev libssl-dev libzstd-dev \
+            python3 python3-pyelftools python3-setuptools rsync swig unzip \
+            zlib1g-dev file wget xz-utils
+          sudo apt-get clean
+      - name: Restore downloads and compiler cache
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            build/dl
+            build/ccache-${{ matrix.copy }}
+          key: ${{ runner.os }}-ls420d-${{ matrix.copy }}-${{ hashFiles('openwrt.lock', 'feeds.lock', 'config/ls420d.config', 'openwrt/patches/**', 'kernel-patches/**', 'openwrt/files/**') }}
+          restore-keys: |
+            ${{ runner.os }}-ls420d-${{ matrix.copy }}-
+      - name: Build and package RAM-only firmware
+        env:
+          ARTIFACT_DIR: ${{ github.workspace }}/build/artifacts-${{ matrix.copy }}
+          JOBS: '4'
+          OPENWRT_CCACHE_DIR: ${{ github.workspace }}/build/ccache-${{ matrix.copy }}
+          OPENWRT_DOWNLOAD_DIR: ${{ github.workspace }}/build/dl
+        run: ./scripts/build.sh
+      - name: Record runner provenance
+        env:
+          ARTIFACT_DIR: ${{ github.workspace }}/build/artifacts-${{ matrix.copy }}
+        run: |
+          {
+            printf 'ImageOS=%s\n' "${ImageOS:-unknown}"
+            printf 'ImageVersion=%s\n' "${ImageVersion:-unknown}"
+            printf 'RUNNER_ARCH=%s\n' "$RUNNER_ARCH"
+            printf 'RUNNER_NAME=%s\n' "$RUNNER_NAME"
+            uname -a
+            nproc
+            free -h
+            df -h .
+          } > "$ARTIFACT_DIR/runner.txt"
+      # No firmware upload until corresponding-source distribution is reviewed.
+      # No dispatch input or repository variable bypasses this code-review gate.
+      - name: Prepare compile-only evidence
+        run: python3 scripts/compile-evidence.py "build/artifacts-${{ matrix.copy }}" "build/evidence-${{ matrix.copy }}"
+      - name: Upload compile-only evidence (no firmware)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ls420d-compile-evidence-${{ github.sha }}-${{ matrix.copy }}
+          retention-days: 14
+          if-no-files-found: error
+          path: build/evidence-${{ matrix.copy }}/
+      - name: Report final disk usage
+        if: always()
+        run: df -h .
+
+  reproducibility:
+    needs:
+      - firmware
+    if: needs.firmware.result == 'success' && (github.event_name == 'schedule' || github.event_name == 'push' || inputs.reproducibility)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Download build A
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: ls420d-compile-evidence-${{ github.sha }}-a
+          path: build-a
+      - name: Download build B
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: ls420d-compile-evidence-${{ github.sha }}-b
+          path: build-b
+      - name: Compare reproducible products
+        run: |
+          cmp build-a/products.sha256 build-b/products.sha256

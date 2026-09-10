@@ -1,0 +1,5 @@
+#!/bin/sh
+# Network setup is asynchronous; handle interfaces that become ready after S99.
+case "${ACTION:-}" in
+	ifup|ifupdate) /etc/init.d/ls420d-phy start ;;
+esac

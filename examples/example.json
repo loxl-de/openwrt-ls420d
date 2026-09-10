@@ -1,0 +1,4 @@
+{
+  "hostname": "ls420d-example",
+  "network": {"mode": "dhcp"}
+}

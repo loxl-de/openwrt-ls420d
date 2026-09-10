@@ -1,0 +1,12 @@
+config dnsmasq
+	option port '0'
+
+config dhcp 'lan'
+	option interface 'lan'
+	option ignore '1'
+	option ra 'disabled'
+	option dhcpv6 'disabled'
+	option ndp 'disabled'
+
+config odhcpd 'odhcpd'
+	option maindhcp '0'
