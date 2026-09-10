@@ -1,47 +1,69 @@
 # OpenWrt for the Buffalo LinkStation LS420D
 
-This project develops an OpenWrt system that runs entirely in RAM on the Buffalo
-LinkStation LS420D. The goal is a quiet pull-backup NAS that fetches backups from
-other machines on its own schedule. Between backups, its hard drives can stay
-in standby while the NAS remains reachable over the network.
+This repository provides build recipes, documented patches and configuration
+tools for running OpenWrt on the Buffalo LinkStation LS420D. Its purpose is to
+make the firmware reproducible and updatable as OpenWrt evolves, while allowing
+owners to adapt it to their own devices and uses.
 
-The repository provides the operating-system build and configuration tools.
-You configure backup jobs, storage layout and disk standby separately. Those
-parts still need to be set up before using it as a backup server.
+The design separates the firmware into two boot artifacts: a shared kernel and
+base system, kept as close to official OpenWrt as possible, and a custom initrd
+companion for deployment-specific configuration.
 
-## Running without a mounted system disk
+## Design: minimal kernel changes, flexible initrd companion
 
-A disk-based operating system can keep a backup drive spinning even when no
-backup is running. Running from RAM lets both drive bays hold data without a
-permanently mounted system partition.
+1. **Keep the custom kernel close to upstream.** Change only what is needed for
+   the LS420D and this boot method. Keep those changes small and documented so
+   they can be reviewed and carried forward when OpenWrt is updated.
+   Device-specific settings and credentials belong outside the shared image.
+2. **Put customization in a separate initrd.** The shared image should be usable
+   across different deployments. A locally generated companion supplies the
+   files that configure it for a particular NAS, without rebuilding the kernel
+   or putting private settings into the public build.
 
-The NAS still needs somewhere to load its boot files from: a SATA boot partition
-or a separately configured TFTP server on the network. Once Linux is running,
-it no longer needs that storage. With network boot, you can prepare updates on
-the server without removing a disk from the NAS.
+The two artifacts use the filenames expected by Buffalo's bootloader:
 
-Backup jobs and temperature monitoring must also avoid unwanted disk access;
-running from RAM alone does not put the disks into standby.
+- `uImage.buffalo` contains the Linux kernel, the LS420D hardware description
+  and the shared OpenWrt base system. It includes selected tools and common
+  services such as fan control. It is more than a kernel binary; the same
+  image can serve multiple devices.
+- `initrd.buffalo` is the custom companion. Linux unpacks its files over the
+  base system in RAM before starting services. This is the place for
+  deployment-specific configuration, including credentials.
 
-## One shared operating system, your own configuration
+The companion uses Linux's existing initramfs mechanism, an archive of files
+loaded during boot. Configuration takes effect before services start, without
+a separate post-boot loader. The archive can add or replace files in the base
+system; its design is not limited to a fixed set of network or SSH settings.
 
-The bootloader expects two files. This project uses them to keep the shared
-operating system separate from the settings and credentials for your NAS:
+The current generator implements a small subset of that flexibility: hostname,
+network settings and SSH access credentials. It creates the companion locally
+from your settings and keys. Supporting additional files or settings through
+this generator requires extending its schema and tests; it does not yet accept
+arbitrary custom files or scripts.
 
-- `uImage.buffalo` contains the shared operating system: the Linux
-  kernel, the LS420D hardware description, OpenWrt, selected tools and common
-  services such as fan control. The same image can serve multiple devices.
-- `initrd.buffalo` contains your configuration: the hostname, network
-  settings and SSH access credentials. A local generator creates this small
-  file from your settings and keys. They do not go into the public build.
-
-Linux unpacks the operating system into RAM, adds the configuration from the
-second file, and only then starts services. This uses Linux's existing
-initramfs mechanism: an archive of files loaded during boot.
-
-A kernel or package update needs a new shared image. Changing a hostname or SSH
-key needs only a new configuration file, without compiling Linux again. Keep a
+A kernel or package update needs a new shared image. A configuration change
+needs only a new companion, provided it remains compatible with the base system.
+Changing a hostname or SSH key therefore needs no Linux compilation. Keep a
 known-good pair so you can return to it if an update fails.
+
+## Use case: an off-disk backup system
+
+The intended use is a quiet pull-backup NAS that fetches backups from other
+machines on its own schedule. Between backups, its hard drives can stay in
+standby while the NAS remains reachable over the network.
+
+The operating system runs entirely in RAM, so both drive bays can hold data
+without a permanently mounted system partition keeping a disk spinning.
+Boot files can come from a SATA boot partition or a separately configured TFTP
+server. Once Linux is running, it no longer needs that boot storage. Network
+boot also removes the need for a local boot partition and lets you prepare
+updates on the server without removing a disk from the NAS.
+
+You configure backup jobs, storage layout and disk standby separately.
+Backup jobs and temperature monitoring must avoid unwanted disk access;
+running from RAM alone does not put the disks into standby. This repository
+provides the operating-system build and configuration tools, not a finished
+backup appliance.
 
 Interactive changes disappear at reboot. To make them permanent, put them in
 the build inputs or your local configuration and regenerate the relevant file.
