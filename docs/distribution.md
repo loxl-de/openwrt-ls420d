@@ -18,6 +18,26 @@ It requires a reviewed workflow change implementing the source requirements
 below. This is a temporary **distribution** gate, not a claim that a kernel
 must be hardware-validated before its source can be public.
 
+## Source inputs available for review
+
+After a successful full build, CI also collects a source review candidate.
+It contains the exact committed project, OpenWrt and feed trees, including
+their build recipes, patches and license files. Separate archives contain the
+downloaded source inputs. The resolved OpenWrt and Linux configurations,
+package metadata, build manifest and runner information accompany them.
+
+The collector excludes Git metadata, untracked worktree files and built
+firmware. It refuses missing inputs, unexpected download entries and an
+existing output directory. The SHA-256 inventory identifies every collected
+download and every output file.
+
+This candidate is preparation for review, not a declaration of complete source
+availability or license compliance. In particular, an offline reconstruction
+and build from these archives has not yet been implemented or passed.
+Its report explicitly records those checks as incomplete. The temporary
+14-day Actions artifact is not the long-term source offering required below.
+The firmware-upload gate remains closed.
+
 ## Acceptance criteria for downloadable firmware
 
 Before enabling any public kernel/rootfs download, including an experimental

@@ -180,6 +180,21 @@ jobs:
           retention-days: 14
           if-no-files-found: error
           path: build/evidence-${{ matrix.copy }}/
+      - name: Collect source inputs for distribution review
+        run: |
+          python3 scripts/collect-source-review.py \
+            --source openwrt-src \
+            --downloads build/dl \
+            --artifacts "build/artifacts-${{ matrix.copy }}" \
+            --output "build/source-review-${{ matrix.copy }}"
+      - name: Upload source review candidate (no built firmware)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ls420d-source-review-${{ github.sha }}-${{ matrix.copy }}
+          retention-days: 14
+          compression-level: 1
+          if-no-files-found: error
+          path: build/source-review-${{ matrix.copy }}/
       - name: Report final disk usage
         if: always()
         run: df -h .
