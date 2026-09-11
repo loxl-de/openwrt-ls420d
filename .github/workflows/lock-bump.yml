@@ -61,29 +61,18 @@ jobs:
             echo "::notice::a proposal for $VERSION was closed without merging; not reopening it"
             exit 0
           fi
-          # Never overwrite a proposal branch that a person has touched. The
-          # test is content-based, not author-based: the branch may be
-          # replaced only while it differs from the base branch in nothing but
-          # the two lock files, which is all this workflow ever commits.
-          push_needed=1
+          # An existing proposal branch is never overwritten, whatever it
+          # contains: a person may have corrected the lock files on it, and
+          # no automatic test can tell such a correction from the bot's own
+          # commit. Delete the branch to get a fresh proposal. Only a missing
+          # pull request is made good below.
           if git fetch -q origin "refs/heads/$branch:refs/remotes/origin/$branch" 2>/dev/null; then
-            if git diff --name-only "origin/${GITHUB_REF_NAME}" "origin/$branch" | grep -qvx -e openwrt.lock -e feeds.lock; then
-              echo "::notice::$branch carries changes beyond the lock files; leaving it untouched"
-              exit 0
-            fi
-            if git diff --quiet "origin/$branch" -- openwrt.lock feeds.lock; then
-              echo "::notice::$branch already proposes these locks; nothing to push"
-              push_needed=0
-            fi
-            lease="--force-with-lease=refs/heads/$branch:$(git rev-parse "origin/$branch")"
+            echo "::notice::$branch already exists; leaving it untouched"
           else
-            lease="--force-with-lease=refs/heads/$branch:"
-          fi
-          if [ "$push_needed" = 1 ]; then
             git checkout -B "$branch"
             git add openwrt.lock feeds.lock
             git commit -q -m "lock: propose OpenWrt $VERSION" -m 'Automated proposal. Verify against the official release announcement before merging.'
-            git push "$lease" origin "$branch"
+            git push origin "$branch"
           fi
           if [ -z "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]; then
             gh pr create --base main --head "$branch" \
