@@ -140,6 +140,8 @@ ok 'manifest path is exercised and output is deterministic and path-independent'
 good_footprint=$(cat "$manifest_root/out/kernel-footprint.txt")
 [ "$(validate_kernel_footprint "$manifest_root/out/kernel-footprint.txt")" = "$good_footprint" ]
 ok 'complete kernel footprint record is accepted verbatim'
+# shellcheck disable=SC2016 # the literal $(touch executed) must reach the
+# validator unexpanded: the test proves that a record is never evaluated.
 for bad_footprint in \
     's/^KERNEL_FOOTPRINT_BYTES=.*/KERNEL_FOOTPRINT_BYTES=123garbage/' \
     's/^INITRD_LOAD_ADDRESS=.*/INITRD_LOAD_ADDRESS=0x2nothex/' \
@@ -155,7 +157,9 @@ do
     expect_failure "kernel footprint record is rejected: $bad_footprint" \
         validate_kernel_footprint "$TEST_TMP/bad-footprint.txt"
 done
-[ ! -e "$TEST_TMP/executed" ] && [ ! -e "$manifest_root/executed" ] || fail 'footprint record was executed'
+if [ -e "$TEST_TMP/executed" ] || [ -e "$manifest_root/executed" ]; then
+    fail 'footprint record was executed'
+fi
 
 mv "$manifest_root/out/initrd.buffalo" "$manifest_root/out/not-initrd.buffalo"
 expect_failure 'manifest fails when an exact Buffalo artifact is missing' env \
