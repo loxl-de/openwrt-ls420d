@@ -123,19 +123,18 @@ and hardware-test the intended pair. Preserve a known-good pair privately.
 
 ## Alternatives considered
 
-**Debian** through Debian_on_Buffalo is the mature route for this exact board
-and has native packages for every backup tool. It was retired for this
-project because a Debian root in RAM is an order of magnitude larger and its
-kernel would still need the same device tree and boot work; see
-[the contribution guide](../CONTRIBUTING.md).
+**Debian** through Debian_on_Buffalo targets this exact board and has native
+packages for every backup tool. It was retired for this project in favour of
+the smaller RAM root and the reproducible cross-build; see
+[the contribution guide](../CONTRIBUTING.md). The device-tree and boot work
+would be the same there.
 
 **Alpine Linux** in diskless mode, with the `apkovl` overlay and `lbu`, is
 the closest existing implementation of this architecture: a generic image
 plus a small archive of local changes applied at boot. It was not chosen
-because Alpine has no support for the Armada 370 boards and no reproducible
-cross-build of a kernel with the required patches, so the kernel and device
-tree effort would be the same while the Buffalo-specific drivers, fan and
-power-off support that OpenWrt already carries would have to be ported.
+because it would not remove the board-specific work (the LS420D device tree,
+the external-initramfs handoff under Buffalo's U-Boot, the fan and power-off
+support) while dropping the OpenWrt integration that already carries it.
 
 **OpenWrt** was chosen for the small RAM root, the existing LS421DE board
 support, the reproducible pinned source build and procd/UCI as a

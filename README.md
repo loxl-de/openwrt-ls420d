@@ -111,11 +111,14 @@ and [distribution policy](docs/distribution.md) describe that process.
 
 **Build it yourself.** Fork this repository as a public fork and run the CI
 workflow there: the firmware job runs on the free standard runners for public
-repositories, and the products stay on your own runner and in your own
-artifacts. Nothing is distributed, so the corresponding-source gate does not
-apply to you; you built it from the pinned sources yourself. The evidence
-job in your fork also tells you whether your fork reproduces the upstream
-hashes.
+repositories. The workflow itself uploads no kernel or root filesystem, so
+in your fork add one upload step after the build that publishes your
+`build/artifacts-*` directory as an Actions artifact for your own use, or run
+`scripts/build.sh` locally. Nothing is distributed by that, so the
+corresponding-source gate does not apply to you; you built it from the
+pinned sources yourself. Compare the product hashes in your fork's compile
+evidence with those of this repository's evidence artifacts if you want to
+know whether your build matches.
 
 ## Where to go next
 
