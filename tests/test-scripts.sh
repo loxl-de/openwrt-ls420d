@@ -25,7 +25,10 @@ expect_failure() {
 }
 
 load_openwrt_lock "$REPO_ROOT/openwrt.lock"
-[ "$OPENWRT_COMMIT" = f0a60eee2fe051741c643ea6118718aae1ef17fb ]
+# Compare against the raw file rather than a hard-coded commit, so a lock
+# bump proposal does not fail its own validation before it can be reviewed.
+[ "$OPENWRT_COMMIT" = "$(sed -n 's/^OPENWRT_COMMIT=//p' "$REPO_ROOT/openwrt.lock")" ]
+[ "$OPENWRT_TAG" = "$(sed -n 's/^OPENWRT_TAG=//p' "$REPO_ROOT/openwrt.lock")" ]
 ok 'versioned OpenWrt lock parses without shell evaluation'
 
 cp "$REPO_ROOT/openwrt.lock" "$TEST_TMP/duplicate.lock"
@@ -48,8 +51,9 @@ expect_failure 'shell syntax in lock values is rejected' load_openwrt_lock "$TES
 validate_feeds_lock "$REPO_ROOT/feeds.lock"
 generate_feeds_conf "$REPO_ROOT/feeds.lock" "$TEST_TMP/feeds.conf"
 [ "$(wc -l < "$TEST_TMP/feeds.conf" | tr -d ' ')" -eq 5 ]
+first_feed=$(grep -v '^#' "$REPO_ROOT/feeds.lock" | sed -n '1p')
 [ "$(sed -n '1p' "$TEST_TMP/feeds.conf")" = \
-  'src-git packages https://github.com/openwrt/packages.git^5caa62e0bc9f7fb9b0c12a23267bceb7724214dd' ]
+  "src-git $(printf '%s' "$first_feed" | cut -d'|' -f1) $(printf '%s' "$first_feed" | cut -d'|' -f2)^$(printf '%s' "$first_feed" | cut -d'|' -f3)" ]
 ok 'feed lock produces exact commit-qualified feed configuration'
 
 awk '1; /^packages\|/ { print }' "$REPO_ROOT/feeds.lock" > "$TEST_TMP/duplicate-feeds.lock"
@@ -149,5 +153,33 @@ if grep -RIE 'BEGIN (OPENSSH|RSA|EC|DSA) PRIVATE KEY|([0-9A-Fa-f]{2}:){5}[0-9A-F
     fail 'public build inputs contain deployment identity or private key material'
 fi
 ok 'public LS420D build inputs are RAM-only and deployment-neutral'
+
+printf '%s\trefs/tags/v25.12.4\n%s\trefs/tags/v25.12.4^{}\n%s\trefs/tags/v25.12.10-rc1\n%s\trefs/tags/v25.12.10\n%s\trefs/tags/v25.12.10^{}\n%s\trefs/tags/v25.12.5\n%s\trefs/tags/v25.12.5^{}\n%s\trefs/tags/v26.1.0\n' \
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
+    cccccccccccccccccccccccccccccccccccccccc dddddddddddddddddddddddddddddddddddddddd \
+    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ffffffffffffffffffffffffffffffffffffffff \
+    0000000000000000000000000000000000000000 1111111111111111111111111111111111111111 > "$TEST_TMP/tags"
+[ "$(newest_release_tag 25.12 < "$TEST_TMP/tags")" = '25.12.10 dddddddddddddddddddddddddddddddddddddddd' ]
+[ "$(peeled_tag_commit v25.12.10 < "$TEST_TMP/tags")" = eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ]
+expect_failure 'a lightweight tag without a peeled commit is rejected' peeled_tag_commit v26.1.0 < "$TEST_TMP/tags"
+expect_failure 'a series without release tags is rejected' newest_release_tag 24.10 < "$TEST_TMP/tags"
+ok 'newest point release is chosen numerically and release candidates are ignored'
+
+cat > "$TEST_TMP/feeds.conf.default" <<'EOF_FEEDS'
+src-git packages https://git.openwrt.org/feed/packages.git^1111111111111111111111111111111111111111
+src-git luci https://git.openwrt.org/project/luci.git^2222222222222222222222222222222222222222
+src-git-full routing https://git.openwrt.org/feed/routing.git^3333333333333333333333333333333333333333
+src-git telephony https://git.openwrt.org/feed/telephony.git^4444444444444444444444444444444444444444
+src-git video https://github.com/openwrt/video.git^5555555555555555555555555555555555555555
+#src-git extra https://example.invalid/extra.git
+EOF_FEEDS
+feeds_lock_from_conf "$TEST_TMP/feeds.conf.default" "$REPO_ROOT/feeds.lock" "$TEST_TMP/feeds.lock" 25.12.10
+grep -q '^packages|https://github.com/openwrt/packages.git|1111111111111111111111111111111111111111$' "$TEST_TMP/feeds.lock"
+grep -q '^routing|https://github.com/openwrt/routing.git|3333333333333333333333333333333333333333$' "$TEST_TMP/feeds.lock"
+grep -q 'OpenWrt v25.12.10 feeds.conf.default' "$TEST_TMP/feeds.lock"
+sed '/^src-git luci/d' "$TEST_TMP/feeds.conf.default" > "$TEST_TMP/feeds.short"
+expect_failure 'a feed missing from feeds.conf.default is rejected' \
+    feeds_lock_from_conf "$TEST_TMP/feeds.short" "$REPO_ROOT/feeds.lock" "$TEST_TMP/feeds.bad" 25.12.10
+ok 'feed lock is rewritten with upstream commits and the chosen mirror URLs'
 
 printf '1..%d\n' "$pass"

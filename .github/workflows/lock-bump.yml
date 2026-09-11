@@ -1,0 +1,81 @@
+name: Lock bump
+
+# Proposes the newest OpenWrt point release of the locked series as a pull
+# request. It never changes main and never floats a build: a maintainer
+# reviews the proposal against the official release announcement and merges
+# it deliberately, after which the ordinary CI runs on the new pin.
+
+on:
+  schedule:
+    - cron: '17 4 * * 2'
+  workflow_dispatch:
+
+concurrency:
+  group: ls420d-lock-bump
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  propose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Look for a newer point release
+        id: bump
+        run: |
+          ./scripts/bump-openwrt-lock.sh | tee "$RUNNER_TEMP/bump.out"
+          if grep -q '^UPDATE_AVAILABLE=' "$RUNNER_TEMP/bump.out"; then
+            version=$(sed -n 's/^UPDATE_AVAILABLE=//p' "$RUNNER_TEMP/bump.out")
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Validate the rewritten locks
+        if: steps.bump.outputs.version != ''
+        run: |
+          ./tests/test-scripts.sh >/dev/null
+          ./scripts/prepare-openwrt.sh --verify-inputs
+      - name: Open or update the proposal
+        if: steps.bump.outputs.version != ''
+        env:
+          # A PR opened with the default token does not trigger CI. Set the
+          # optional LOCK_BUMP_TOKEN secret (fine-grained, contents and
+          # pull-requests write on this repository) to let CI run on it.
+          GH_TOKEN: ${{ secrets.LOCK_BUMP_TOKEN || github.token }}
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          branch="bump/openwrt-$VERSION"
+          bot='github-actions[bot]'
+          git config user.name "$bot"
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          # A closed, unmerged proposal for this version was rejected by a
+          # person; do not reopen it. A newer release gets a new branch name,
+          # so proposals resume automatically for the next version.
+          if [ -n "$(gh pr list --head "$branch" --state closed --json number,mergedAt --jq '.[] | select(.mergedAt == null) | .number')" ]; then
+            echo "::notice::a proposal for $VERSION was closed without merging; not reopening it"
+            exit 0
+          fi
+          # An existing proposal branch is never overwritten, whatever it
+          # contains: a person may have corrected the lock files on it, and
+          # no automatic test can tell such a correction from the bot's own
+          # commit. Delete the branch to get a fresh proposal. Only a missing
+          # pull request is made good below.
+          if git fetch -q origin "refs/heads/$branch:refs/remotes/origin/$branch" 2>/dev/null; then
+            echo "::notice::$branch already exists; leaving it untouched"
+          else
+            git checkout -B "$branch"
+            git add openwrt.lock feeds.lock
+            git commit -q -m "lock: propose OpenWrt $VERSION" -m 'Automated proposal. Verify against the official release announcement before merging.'
+            git push origin "$branch"
+          fi
+          if [ -z "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --base main --head "$branch" \
+              --title "lock: propose OpenWrt $VERSION" \
+              --body "$(printf 'Automated proposal from the lock-bump workflow.\n\nBefore merging:\n\n- compare the tag object and commit with the official OpenWrt %s release announcement;\n- read the offline-source and reproducibility results on this branch;\n- run the reproducibility dispatch on this branch;\n- a hardware acceptance run is still required before any release.\n' "$VERSION")"
+          fi

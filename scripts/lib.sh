@@ -128,3 +128,64 @@ apply_patch_series() {
         case $listed in *" $patch_name "*) ;; *) fail "unlisted patch file: $patch_name" ;; esac
     done
 }
+
+# Print "version tag_object commit" for the newest release tag of a
+# major.minor series, reading `git ls-remote --tags` output on stdin.
+# Only plain vX.Y.Z tags count; release candidates and other suffixes do not.
+newest_release_tag() {
+    series=$1
+    case $series in *[!0-9.]*|'') fail 'invalid release series' ;; esac
+    best_patch=-1
+    best_version=''
+    best_object=''
+    while IFS='	' read -r object ref; do
+        case $ref in "refs/tags/v$series."*) ;; *) continue ;; esac
+        case $ref in *'^{}') continue ;; esac
+        patch=${ref#refs/tags/v"$series".}
+        case $patch in *[!0-9]*|'') continue ;; esac
+        is_sha1 "$object" || fail "invalid tag object in remote listing: $ref"
+        if [ "$patch" -gt "$best_patch" ]; then
+            best_patch=$patch
+            best_version=$series.$patch
+            best_object=$object
+        fi
+    done
+    [ -n "$best_version" ] || fail "no release tag found for series $series"
+    printf '%s %s\n' "$best_version" "$best_object"
+}
+
+# Look up the peeled commit of a tag in `git ls-remote --tags` output on stdin.
+peeled_tag_commit() {
+    tag=$1
+    while IFS='	' read -r object ref; do
+        [ "$ref" = "refs/tags/$tag^{}" ] || continue
+        is_sha1 "$object" || fail "invalid peeled commit for $tag"
+        printf '%s\n' "$object"
+        return 0
+    done
+    fail "tag $tag is not an annotated tag with a peeled commit"
+}
+
+# Rewrite a feeds lock with the commits from an upstream feeds.conf.default,
+# keeping the source URLs already chosen in the current lock.
+feeds_lock_from_conf() {
+    conf_file=$1
+    current_lock=$2
+    output=$3
+    version=$4
+    {
+        printf '# SPDX-License-Identifier: MIT\n'
+        printf '# name|source URL|commit from OpenWrt v%s feeds.conf.default\n' "$version"
+        while IFS='|' read -r feed_name feed_url feed_commit feed_extra ||
+            [ -n "${feed_name}${feed_url}${feed_commit}${feed_extra}" ]; do
+            case $feed_name in ''|'#'*) continue ;; esac
+            feed_new_commit=$(awk -v name="$feed_name" '
+                ($1 == "src-git" || $1 == "src-git-full") && $2 == name {
+                    split($3, parts, "^"); print parts[2]; exit
+                }' "$conf_file")
+            is_sha1 "$feed_new_commit" || fail "feed $feed_name has no pinned commit in feeds.conf.default"
+            printf '%s|%s|%s\n' "$feed_name" "$feed_url" "$feed_new_commit"
+        done < "$current_lock"
+    } > "$output"
+    validate_feeds_lock "$output"
+}

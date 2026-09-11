@@ -70,6 +70,36 @@ history; neither check inventories remote PR metadata, logs or artifacts.
 Tests include a secret removed in a later commit. These are defense-in-depth
 checks, not a guarantee that arbitrary secrets are absent.
 
+## Updating the OpenWrt pin
+
+`scripts/bump-openwrt-lock.sh` looks up the newest point release of the
+locked series (a new minor series is a deliberate decision, not a bump),
+verifies that the tag peels to the listed commit, and rewrites `openwrt.lock`
+and `feeds.lock` from that release's `feeds.conf.default`, keeping the mirror
+URLs already chosen for the feeds. With `--check` it only reports. The
+`lock-bump` workflow runs it weekly and opens a pull request on a
+`bump/openwrt-<version>` branch after the script tests and the upstream
+input verification have passed on the rewritten locks. Nothing floats: main
+changes only when a maintainer has compared the proposal with the official
+release announcement and merged it. The script tests read the expected
+values from the lock files instead of hard-coding a commit, so a proposal
+validates itself without a manual test edit.
+
+An existing proposal branch is never overwritten, whatever it contains: a
+person may have corrected the lock files on it, and no automatic test can
+tell such a correction from the workflow's own commit. Delete the branch to
+get a fresh proposal; a missing pull request for an existing branch is
+created. A proposal whose pull request was closed without merging is not
+reopened. A newer point release gets a new branch name, so proposals resume
+by themselves for the next version.
+
+Two owner settings apply. The workflow needs "Allow GitHub Actions to create
+and approve pull requests" under Actions permissions. A pull request opened
+with the default workflow token does not trigger CI; set an optional
+`LOCK_BUMP_TOKEN` secret (fine-grained, contents and pull-requests write on
+this repository only) if you want CI to run on the proposal automatically,
+otherwise close and reopen it once.
+
 ## Full build
 
 Use the dependencies listed in `.github/workflows/ci.yml`, a clean committed
