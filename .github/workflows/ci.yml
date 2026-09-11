@@ -191,6 +191,27 @@ jobs:
           retention-days: 14
           if-no-files-found: error
           path: build/evidence-${{ matrix.copy }}/
+      - name: Fingerprint metadata of the two differing APK packages
+        shell: bash
+        run: |
+          diagnostic_dir="build/apk-metadata-${{ matrix.copy }}"
+          mkdir -p "$diagnostic_dir"
+          for package in mtd kmod-gpio-button-hotplug; do
+            candidates=(openwrt-src/bin/targets/mvebu/cortexa9/packages/"$package"-*.apk)
+            test "${#candidates[@]}" -eq 1
+            test -f "${candidates[0]}"
+            test ! -L "${candidates[0]}"
+            openwrt-src/staging_dir/host/bin/apk adbdump --format json "${candidates[0]}" |
+              python3 scripts/apk_metadata_evidence.py > "$diagnostic_dir/$package.json"
+          done
+          (cd "$diagnostic_dir" && sha256sum mtd.json kmod-gpio-button-hotplug.json > SHA256SUMS)
+      - name: Upload metadata fingerprints (no package contents)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ls420d-apk-metadata-${{ github.sha }}-${{ matrix.copy }}
+          retention-days: 14
+          if-no-files-found: error
+          path: build/apk-metadata-${{ matrix.copy }}/
       - name: Collect source inputs for distribution review
         run: |
           python3 scripts/collect-source-review.py \
