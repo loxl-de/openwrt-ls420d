@@ -10,6 +10,8 @@ work=$(CDPATH='' cd -- "$1" && pwd)
 # ordinary runner user. Fail rather than silently running this test online.
 python3 "$script_dir/check-offline-network.py"
 [ "$(id -u)" -ne 0 ] || { echo 'do not compile as root' >&2; exit 1; }
+printf 'Rust inside isolation with runner PATH: '
+rustc --version 2>/dev/null || echo unavailable
 
 project=$work/project
 export OPENWRT_SOURCE_DIR="$work/openwrt"
@@ -55,29 +57,17 @@ sh "$script_dir/make-with-diagnostics.sh" -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_
 sh "$script_dir/make-with-diagnostics.sh" -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_DIR="$work/downloads/dl"
 kernel_tree=$(find "$OPENWRT_SOURCE_DIR/build_dir/target-"* -maxdepth 2 -type d -name 'linux-6.12.*' -print)
 [ "$(printf '%s\n' "$kernel_tree" | wc -l)" -eq 1 ] && [ -d "$kernel_tree" ]
+config_status=0
 python3 "$script_dir/compare-kernel-config.py" "$work/bundle/linux.config" "$kernel_tree/.config" \
-    --source-root "$OPENWRT_SOURCE_DIR"
+    --source-root "$OPENWRT_SOURCE_DIR" --report "$work/offline-config-result.json" || config_status=$?
+# Status 1 means valid inputs with a real mismatch. Continue only to collect
+# diagnostics; the final report must still fail. Invalid paths or tool failures
+# must stop immediately.
+[ "$config_status" -le 1 ] || exit "$config_status"
+[ -s "$work/offline-config-result.json" ] || exit 1
 python3 "$project/tests/check-atags.py" "$kernel_tree"
 "$project/scripts/package-buffalo.sh"
-python3 - "$work" <<'PY'
-import hashlib, json, pathlib, sys
-work = pathlib.Path(sys.argv[1])
-manifest = dict(line.split('=', 1) for line in (work/'bundle/build.manifest').read_text().splitlines())
-products = {}
-for name in ('uImage.buffalo', 'initrd.buffalo', 'packages.manifest'):
-    actual = hashlib.sha256((work/'artifacts'/name).read_bytes()).hexdigest()
-    expected = manifest[f'ARTIFACT_SHA256[{name}]']
-    products[name] = {'sha256': actual, 'expected_sha256': expected, 'match': actual == expected}
-report = {
-    'source_zip_sha256': json.loads((work/'RESTORED.json').read_text())['source_zip_sha256'],
-    'source_project_commit': manifest['REPOSITORY_COMMIT'],
-    'network_isolated': True, 'compiler_cache_used': False,
-    'offline_compile_and_packaging_passed': True,
-    'products': products, 'all_products_match': all(p['match'] for p in products.values()),
-    'license_review_complete': False, 'firmware_distribution_authorized': False,
-}
-(work/'offline-result.json').write_text(json.dumps(report, indent=2)+'\n')
-print(json.dumps(report, indent=2))
-if not report['all_products_match']:
-    raise SystemExit('offline build completed but product hashes differ; review required')
-PY
+rootfs=$(find "$OPENWRT_SOURCE_DIR/build_dir" -maxdepth 2 -type d -name root-mvebu -print)
+[ "$(printf '%s\n' "$rootfs" | wc -l)" -eq 1 ] && [ -d "$rootfs" ]
+python3 "$script_dir/audit-rootfs.py" "$rootfs" "$work/offline-rootfs-inventory.json"
+python3 "$script_dir/report-offline-products.py" "$work"

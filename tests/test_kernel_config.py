@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
 import importlib.util
+import json
+import subprocess
+import tempfile
 from pathlib import Path
 import unittest
 
@@ -51,6 +54,41 @@ class KernelConfigTests(unittest.TestCase):
         for actual in ['CONFIG_BTRFS_FS=y\n', config()+config()]:
             with self.subTest(actual=actual), self.assertRaises(ValueError):
                 MODULE.compare(config(), actual, Path('/original/openwrt'))
+
+
+    def test_report_keeps_compiler_version_difference(self):
+        report = MODULE.comparison_report(
+            config()+'CONFIG_RUSTC_VERSION=109801\n',
+            config('/offline/openwrt')+'CONFIG_RUSTC_VERSION=109900\n',
+            Path('/offline/openwrt'))
+        self.assertTrue(report['valid_inputs'])
+        self.assertFalse(report['match'])
+        self.assertIn('-CONFIG_RUSTC_VERSION=109801', report['differences'])
+        self.assertIn('+CONFIG_RUSTC_VERSION=109900', report['differences'])
+
+    def test_report_rebases_only_paths_and_records_original_hashes(self):
+        report = MODULE.comparison_report(config(), config('/offline/openwrt'),
+                                          Path('/offline/openwrt'))
+        self.assertTrue(report['match'])
+        self.assertEqual(report['differences'], [])
+        self.assertNotEqual(report['expected_sha256'], report['actual_sha256'])
+
+    def test_cli_saves_mismatch_and_invalid_input_reports(self):
+        cases = [(config('/offline/openwrt').replace('BTRFS_FS=y', 'BTRFS_FS=m'), 1, True),
+                 (config('/wrong/openwrt'), 2, False)]
+        for actual, status, valid in cases:
+            with self.subTest(status=status), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                (root/'expected').write_text(config())
+                (root/'actual').write_text(actual)
+                process = subprocess.run(
+                    ['python3', str(REPO/'scripts/compare-kernel-config.py'),
+                     str(root/'expected'), str(root/'actual'), '--source-root', '/offline/openwrt',
+                     '--report', str(root/'report.json')], capture_output=True, text=True)
+                self.assertEqual(process.returncode, status)
+                report = json.loads((root/'report.json').read_text())
+                self.assertEqual(report['valid_inputs'], valid)
+                self.assertFalse(report['match'])
 
 
 if __name__ == '__main__':

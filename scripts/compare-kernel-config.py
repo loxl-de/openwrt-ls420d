@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: MIT
 """Compare Linux configs, rebasing only validated LS420D initramfs input paths."""
 import argparse
+import difflib
+import hashlib
+import json
 from pathlib import Path, PurePosixPath
 import re
 
@@ -38,8 +41,32 @@ def normalized(text, required_root=None):
     return ''.join(lines)
 
 
+def comparison_report(expected, actual, actual_root):
+    report = {
+        'format': 1, 'valid_inputs': False, 'match': False,
+        'expected_sha256': hashlib.sha256(expected.encode()).hexdigest(),
+        'actual_sha256': hashlib.sha256(actual.encode()).hexdigest(),
+        'differences': [],
+    }
+    try:
+        left = normalized(expected)
+        right = normalized(actual, actual_root)
+    except ValueError as error:
+        report['validation_error'] = str(error)
+        return report
+    report['valid_inputs'] = True
+    report['match'] = left == right
+    report['differences'] = list(difflib.unified_diff(
+        left.splitlines(), right.splitlines(),
+        fromfile='archived-linux.config', tofile='offline-linux.config', lineterm=''))
+    return report
+
+
 def compare(expected, actual, actual_root):
-    if normalized(expected) != normalized(actual, actual_root):
+    report = comparison_report(expected, actual, actual_root)
+    if not report['valid_inputs']:
+        raise ValueError(report['validation_error'])
+    if not report['match']:
         raise ValueError('kernel configurations differ beyond validated source-root relocation')
 
 
@@ -48,6 +75,17 @@ if __name__ == '__main__':
     parser.add_argument('expected', type=Path)
     parser.add_argument('actual', type=Path)
     parser.add_argument('--source-root', required=True, type=Path)
+    parser.add_argument('--report', type=Path)
     args = parser.parse_args()
-    compare(args.expected.read_text(), args.actual.read_text(), args.source_root)
+    report = comparison_report(args.expected.read_text(), args.actual.read_text(), args.source_root)
+    if args.report:
+        with args.report.open('x') as stream:
+            json.dump(report, stream, indent=2, sort_keys=True)
+            stream.write('\n')
+    if not report['valid_inputs']:
+        print(report['validation_error'])
+        raise SystemExit(2)
+    if not report['match']:
+        print('\n'.join(report['differences']))
+        raise SystemExit(1)
     print('Kernel configs match after validating and rebasing initramfs source roots')

@@ -116,9 +116,22 @@ workflow on that branch with `offline_source_artifact` and
 firmware compilation. A normal dispatch with `reproducibility=true` still runs
 two independent online-source builds.
 
-Only the JSON test result is uploaded, never the rebuilt firmware.
+Only three explicitly named JSON diagnostics can be uploaded: the overall
+result, the kernel-configuration comparison and the audited rootfs file
+inventory. No file contents or rebuilt firmware are uploaded. A valid but
+different kernel configuration permits diagnostic packaging and hashing, but
+still makes the final result fail even if all product hashes happen to agree.
+Invalid initramfs input paths stop the test before that diagnostic packaging.
+
 [The first offline run](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34570805512)
-failed during package building. The corrected test enables loopback for
-fakeroot and retains verbose diagnostics on failure.
-[The replacement run](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34576303964)
-is in progress; no successful offline rebuild has yet been established.
+failed during package building. After loopback was enabled for fakeroot,
+[the replacement run](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34576303964)
+completed full offline compilation on September 11. Its subsequent Linux-config
+comparison failed first at CONFIG_RUSTC_VERSION, before Buffalo packaging.
+Thus offline compilation is demonstrated; matching configurations and final
+products are not.
+
+The next test preserves the original runner PATH through sudo/runuser and logs
+Rust compiler detection before and after network isolation. This checks a
+possible environment-dependent cause without ignoring compiler-version
+differences. The configuration diff and product comparison remain required.

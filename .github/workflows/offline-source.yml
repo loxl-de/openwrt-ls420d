@@ -67,16 +67,23 @@ jobs:
             --sha256 "$SOURCE_ARCHIVE_SHA256" --output "$RUNNER_TEMP/offline-source"
       - name: Rebuild with no network or compiler cache
         run: |
+          printf 'Rust before isolation: '
+          rustc --version 2>/dev/null || echo unavailable
           sudo unshare --net -- sh -eu -c '
             ip link set lo up
-            exec runuser -u "$1" -- sh "$2" "$3"
-          ' sh "$(id -un)" "$GITHUB_WORKSPACE/scripts/rebuild-offline.sh" "$RUNNER_TEMP/offline-source"
+            printf "Rust under sudo PATH: "
+            runuser -u "$1" -- sh -c "rustc --version 2>/dev/null || echo unavailable"
+            exec runuser -u "$1" -- env PATH="$4" sh "$2" "$3"
+          ' sh "$(id -un)" "$GITHUB_WORKSPACE/scripts/rebuild-offline.sh" "$RUNNER_TEMP/offline-source" "$PATH"
       - name: Upload offline verification report (no firmware)
         if: success() || failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ls420d-offline-result-${{ github.run_id }}
-          path: ${{ runner.temp }}/offline-source/offline-result.json
+          path: |
+            ${{ runner.temp }}/offline-source/offline-result.json
+            ${{ runner.temp }}/offline-source/offline-config-result.json
+            ${{ runner.temp }}/offline-source/offline-rootfs-inventory.json
           if-no-files-found: warn
           retention-days: 14
       - name: Report final disk usage
