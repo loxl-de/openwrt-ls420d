@@ -59,8 +59,8 @@ done
 # RAM boot never writes the SPI NOR: every flash partition must be read-only
 # in the compiled DTB, so the kernel itself refuses writes.
 for partition in \
-    /soc/internal-regs/spi@10600/spi-flash@0/partitions/partition@0 \
-    /soc/internal-regs/spi@10600/spi-flash@0/partitions/partition@f0000
+    /soc/spi@10600/spi-flash@0/partitions/partition@0 \
+    /soc/spi@10600/spi-flash@0/partitions/partition@f0000
 do
     "$FDTGET" -p "$dtb" "$partition" | grep -qx 'read-only' ||
         fail "SPI NOR partition is writable in the compiled DTB: $partition"
