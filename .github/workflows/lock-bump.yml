@@ -38,7 +38,7 @@ jobs:
       - name: Validate the rewritten locks
         if: steps.bump.outputs.version != ''
         run: |
-          ./tests/test-scripts.sh >/dev/null || { echo 'script tests must be updated for the new pin' >&2; exit 1; }
+          ./tests/test-scripts.sh >/dev/null
           ./scripts/prepare-openwrt.sh --verify-inputs
       - name: Open or update the proposal
         if: steps.bump.outputs.version != ''

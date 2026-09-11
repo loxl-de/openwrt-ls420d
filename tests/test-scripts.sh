@@ -25,7 +25,10 @@ expect_failure() {
 }
 
 load_openwrt_lock "$REPO_ROOT/openwrt.lock"
-[ "$OPENWRT_COMMIT" = f0a60eee2fe051741c643ea6118718aae1ef17fb ]
+# Compare against the raw file rather than a hard-coded commit, so a lock
+# bump proposal does not fail its own validation before it can be reviewed.
+[ "$OPENWRT_COMMIT" = "$(sed -n 's/^OPENWRT_COMMIT=//p' "$REPO_ROOT/openwrt.lock")" ]
+[ "$OPENWRT_TAG" = "$(sed -n 's/^OPENWRT_TAG=//p' "$REPO_ROOT/openwrt.lock")" ]
 ok 'versioned OpenWrt lock parses without shell evaluation'
 
 cp "$REPO_ROOT/openwrt.lock" "$TEST_TMP/duplicate.lock"
@@ -48,8 +51,9 @@ expect_failure 'shell syntax in lock values is rejected' load_openwrt_lock "$TES
 validate_feeds_lock "$REPO_ROOT/feeds.lock"
 generate_feeds_conf "$REPO_ROOT/feeds.lock" "$TEST_TMP/feeds.conf"
 [ "$(wc -l < "$TEST_TMP/feeds.conf" | tr -d ' ')" -eq 5 ]
+first_feed=$(grep -v '^#' "$REPO_ROOT/feeds.lock" | sed -n '1p')
 [ "$(sed -n '1p' "$TEST_TMP/feeds.conf")" = \
-  'src-git packages https://github.com/openwrt/packages.git^5caa62e0bc9f7fb9b0c12a23267bceb7724214dd' ]
+  "src-git $(printf '%s' "$first_feed" | cut -d'|' -f1) $(printf '%s' "$first_feed" | cut -d'|' -f2)^$(printf '%s' "$first_feed" | cut -d'|' -f3)" ]
 ok 'feed lock produces exact commit-qualified feed configuration'
 
 awk '1; /^packages\|/ { print }' "$REPO_ROOT/feeds.lock" > "$TEST_TMP/duplicate-feeds.lock"

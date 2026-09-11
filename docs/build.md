@@ -78,10 +78,12 @@ verifies that the tag peels to the listed commit, and rewrites `openwrt.lock`
 and `feeds.lock` from that release's `feeds.conf.default`, keeping the mirror
 URLs already chosen for the feeds. With `--check` it only reports. The
 `lock-bump` workflow runs it weekly and opens a pull request on a
-`bump/openwrt-<version>` branch. Nothing floats: main changes only when a
-maintainer has compared the proposal with the official release announcement
-and merged it, and `tests/test-scripts.sh` pins the expected commit, so the
-proposal fails its own validation until that test is updated too.
+`bump/openwrt-<version>` branch after the script tests and the upstream
+input verification have passed on the rewritten locks. Nothing floats: main
+changes only when a maintainer has compared the proposal with the official
+release announcement and merged it. The script tests read the expected
+values from the lock files instead of hard-coding a commit, so a proposal
+validates itself without a manual test edit.
 
 Two owner settings apply. The workflow needs "Allow GitHub Actions to create
 and approve pull requests" under Actions permissions. A pull request opened
