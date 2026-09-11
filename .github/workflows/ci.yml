@@ -15,6 +15,17 @@ on:
         default: false
         type: boolean
 
+      offline_source_artifact:
+        description: Optional source-review artifact ID for an offline rebuild instead of normal compilation
+        required: false
+        default: ''
+        type: string
+      offline_source_sha256:
+        description: Independently verified SHA-256 of the source ZIP
+        required: false
+        default: ''
+        type: string
+
 concurrency:
   group: ls420d-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -110,7 +121,7 @@ jobs:
     needs:
       - static-and-unit
       - upstream-bootstrap
-    if: github.event_name == 'workflow_dispatch' || github.event.repository.visibility == 'public'
+    if: (github.event_name == 'workflow_dispatch' || github.event.repository.visibility == 'public') && !inputs.offline_source_artifact
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
@@ -219,3 +230,14 @@ jobs:
       - name: Compare reproducible products
         run: |
           cmp build-a/products.sha256 build-b/products.sha256
+
+  offline-source:
+    if: github.event_name == 'workflow_dispatch' && inputs.offline_source_artifact != ''
+    needs: [static-and-unit, upstream-bootstrap]
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/offline-source.yml
+    with:
+      artifact_id: ${{ inputs.offline_source_artifact }}
+      archive_sha256: ${{ inputs.offline_source_sha256 }}

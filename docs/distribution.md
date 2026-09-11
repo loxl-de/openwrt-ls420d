@@ -33,7 +33,8 @@ download and every output file.
 
 This candidate is preparation for review, not a declaration of complete source
 availability or license compliance. In particular, an offline reconstruction
-and build from these archives has not yet been implemented or passed.
+and build from these archives has not yet passed. The explicit offline test
+below implements restoration and a clean, network-isolated rebuild.
 Its report explicitly records those checks as incomplete. The temporary
 14-day Actions artifact is not the long-term source offering required below.
 The firmware-upload gate remains closed.
@@ -77,3 +78,33 @@ remain possible, but anyone redistributing them must satisfy the same conditions
 Primary references: [OpenWrt licensing](https://openwrt.org/license),
 [GPLv2 text](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html),
 [GNU source distribution FAQ](https://www.gnu.org/licenses/gpl-faq.html#UnchangedJustBinary).
+
+## Offline source test
+
+The `Offline source rebuild` workflow accepts a source-review artifact ID from
+this repository and the independently checked SHA-256 digest of its ZIP. It
+verifies the ZIP and every member before restoring project, OpenWrt, feeds and
+downloads into a new directory. Existing output is never overwritten. Archive
+paths and symlinks must stay inside their source tree.
+
+The test installs host dependencies before entering an empty network namespace.
+It then builds as the ordinary runner user, with no restored toolchain, compiled
+objects or compiler cache. Feed indexing uses the archived feeds without fetching.
+Both resolved configurations are checked against the original build. The ATAG
+test and Buffalo packaging checks run again; the resulting kernel, example
+companion and package manifest are compared with the original product hashes.
+
+The archived OpenWrt `version` file supplies the revision string. A temporary
+Git baseline permits patch application and reporting; it is not presented as
+the original Git history. The result identifies the original source revision
+from the verified bundle. It does not authorize firmware distribution or replace
+the separate license review.
+
+To test a workflow change before it is merged, dispatch the existing `CI`
+workflow on that branch with `offline_source_artifact` and
+`offline_source_sha256`. It calls the reusable offline workflow and skips normal
+firmware compilation. A normal dispatch with `reproducibility=true` still runs
+two independent online-source builds.
+
+Only the JSON test result is uploaded, never the rebuilt firmware. The first
+offline run is pending; this section describes the test, not a passed result.
