@@ -35,11 +35,13 @@ loaded during boot. Configuration takes effect before services start, without
 a separate post-boot loader. The archive can add or replace files in the base
 system; its design is not limited to a fixed set of network or SSH settings.
 
-The current generator implements a small subset of that flexibility: hostname,
-network settings and SSH access credentials. It creates the companion locally
-from your settings and keys. Supporting additional files or settings through
-this generator requires extending its schema and tests; it does not yet accept
-arbitrary custom files or scripts.
+The generator accepts two kinds of input. A small JSON description covers
+hostname, network settings and SSH access credentials for a first boot. A
+configuration backup taken on the running NAS with `sysupgrade -b` covers
+everything you configured interactively afterwards: UCI files, SSH keys, the
+crontab, hosts and accounts. Both routes produce a data-only archive; scripts
+and executables are rejected, and settings that would otherwise be lost at
+reboot become the next companion instead.
 
 A kernel or package update needs a new shared image. A configuration change
 needs only a new companion, provided it remains compatible with the base system.

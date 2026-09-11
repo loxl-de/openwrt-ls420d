@@ -93,9 +93,10 @@ For a static IPv4 address replace the network object, for example:
 ```
 
 Use addresses appropriate to your network. These Linux settings do not change
-U-Boot's TFTP addresses. The generator intentionally supports only this small
-schema; arbitrary scripts, extra files, IPv6 provisioning and application secrets
-are not accepted. Extend the schema and tests deliberately if needed.
+U-Boot's TFTP addresses. The JSON schema intentionally stays this small; it is
+the first-boot route. Everything else, including backup jobs, disk standby
+settings and client keys for pull backups, is configured on the running NAS
+and captured with the backup route in the next section.
 
 ```sh
 python3 scripts/make_initrd.py --config private/site.json --output private/initrd.buffalo
@@ -107,6 +108,39 @@ Changing configuration requires no kernel compile and no generic-image rebuild.
 The private archive enables SSH on port 22 with public-key authentication only.
 The generator checks framing/type and permissions of key inputs; it is not a
 cryptographic key-validation service. Use valid keys from the stated tools.
+
+## 4b. Capture a configured system as the next companion
+
+Once the NAS boots with your private companion, configure it interactively
+over SSH as you would any OpenWrt system: `uci set`, a crontab, `hd-idle`,
+mounts, a client key under `/root/.ssh/` for pull jobs. Then snapshot that
+state with OpenWrt's own backup tool and turn the snapshot into a companion:
+
+```sh
+# on the NAS
+echo /root/.ssh/ >> /etc/sysupgrade.conf
+sysupgrade -b /tmp/backup.tar.gz
+# on the workstation
+scp root@ls420d-backup:/tmp/backup.tar.gz private/
+python3 scripts/make_initrd.py --backup private/backup.tar.gz --output private/initrd-2.buffalo
+```
+
+The generator takes only data from the archive: files under `/etc/config/`,
+`/etc/dropbear/`, `/etc/crontabs/` and `/root/.ssh/`, plus `/etc/hosts`,
+`/etc/passwd`, `/etc/group` and `/etc/shadow`. It refuses scripts and
+executables (`/etc/init.d/`, `/etc/uci-defaults/`, `/etc/hotplug.d/`, a
+non-trivial `/etc/rc.local`), symlinks, nested directories, and any other
+path. Every `dropbear` section must set `PasswordAuth` and
+`RootPasswordAuth` to `off` explicitly, because Dropbear treats an absent
+option as `on`; the generic overlay's configuration already does. Comments are
+stripped from `authorized_keys`, key files get mode 0600 and configuration
+files 0644. Unlike the JSON route, this snapshot ships the whole
+`/etc/config/system` of the system it was taken from, which is correct because
+that system already contained the generated board defaults.
+
+The backup holds the host key and every other secret in plaintext, exactly
+like the generated companion. Keep it under `private/` and delete the copy
+on the NAS.
 
 ## 5. Deploy the pair through an already validated boot path
 

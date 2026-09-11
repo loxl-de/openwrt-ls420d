@@ -3,6 +3,7 @@
 import argparse
 import base64
 import hashlib
+import io
 import ipaddress
 import json
 import os
@@ -10,9 +11,11 @@ from pathlib import Path
 import re
 import stat
 import struct
+import tarfile
 from cpio_newc import Entry, encode, decode, wrap_ramdisk, unwrap_ramdisk
 
 MAX_PAYLOAD = 1024 * 1024
+MAX_MEMBER = 256 * 1024
 FORMAT = 2
 MARKER = 'etc/ls420d-deployment'
 SITE_UCI = 'etc/ls420d-site.uci'
@@ -22,8 +25,14 @@ SITE_UCI = 'etc/ls420d-site.uci'
 SECRET_DIRS = ('etc/dropbear/', 'root/.ssh/')
 SECRET_FILES = {'etc/shadow'}
 
-PUBLIC_KEY_TYPES = ('ssh-ed25519',)
-HOST_KEY_TYPES = ('ssh-ed25519',)
+# What a sysupgrade backup may contribute. Paths are relative, without './'.
+BACKUP_DIRS = ('etc/config/', 'etc/dropbear/', 'etc/crontabs/', 'root/.ssh/')
+BACKUP_FILES = {'etc/hosts', 'etc/passwd', 'etc/group', 'etc/shadow'}
+BACKUP_IGNORED = {'etc/sysupgrade.conf', 'etc/inittab', 'etc/profile', 'etc/shells',
+                  'etc/shinit', 'etc/sysctl.conf'}
+PUBLIC_KEY_TYPES = ('ssh-ed25519', 'ssh-rsa', 'ecdsa-sha2-nistp256',
+                    'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521')
+HOST_KEY_TYPES = ('ssh-ed25519', 'ssh-rsa')
 HOSTNAME = re.compile(r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?')
 
 
@@ -49,6 +58,36 @@ def check_host_key(data, allowed=HOST_KEY_TYPES):
     if len(data) < 64 or not any(data.startswith(ssh_type_prefix(t)) for t in allowed):
         raise ValueError('host key must be a Dropbear private key of type %s, not an OpenSSH key'
                          % ' or '.join(allowed))
+
+
+OFF_VALUES = ('off', '0', 'no', 'false')
+
+
+def check_dropbear_config(text):
+    """Every dropbear section must switch password login off explicitly.
+
+    Dropbear's init script defaults PasswordAuth and RootPasswordAuth to on
+    when the option is absent, so a check that only rejects 'on' is bypassed
+    by leaving the option out. Each section is a separate SSH instance.
+    """
+    sections = []
+    for line in text.splitlines():
+        words = line.split()
+        if not words or words[0].startswith('#'):
+            continue
+        if words[0] == 'config':
+            if len(words) < 2 or words[1] != 'dropbear':
+                raise ValueError('dropbear config may only contain dropbear sections')
+            sections.append({})
+        elif words[0] in ('option', 'list') and len(words) >= 3 and sections:
+            sections[-1][words[1]] = words[2].strip("'\"").lower()
+    if not sections:
+        raise ValueError('dropbear config has no dropbear section')
+    for section in sections:
+        for key in ('PasswordAuth', 'RootPasswordAuth'):
+            if section.get(key) not in OFF_VALUES:
+                raise ValueError('every dropbear section must set %s to off; '
+                                 'Dropbear defaults it to on when absent' % key)
 
 
 def config_files(config, root, example=False):
@@ -106,6 +145,76 @@ def config_files(config, root, example=False):
     return files
 
 
+def backup_member_name(info):
+    name = info.name
+    while name.startswith('./') or name.startswith('/'):
+        name = name[2:] if name.startswith('./') else name[1:]
+    if not name or any(part in ('', '.', '..') for part in name.split('/')):
+        raise ValueError('unsafe path in backup archive')
+    return name
+
+
+def backup_files(data):
+    """Select and validate the files of an OpenWrt sysupgrade backup."""
+    files = {}
+    hostname = ''
+    try:
+        archive = tarfile.open(fileobj=io.BytesIO(data), mode='r:*')
+    except tarfile.TarError as error:
+        raise ValueError('backup is not a readable tar archive') from error
+    with archive:
+        for info in archive:
+            if info.isdir():
+                continue
+            name = backup_member_name(info)
+            if not info.isfile():
+                raise ValueError('backup member is not a regular file: %s' % name)
+            if info.size > MAX_MEMBER:
+                raise ValueError('backup member too large: %s' % name)
+            content = archive.extractfile(info).read()
+            if name in BACKUP_IGNORED:
+                continue
+            if name == 'etc/rc.local':
+                lines = [l.strip() for l in content.decode('utf-8', 'replace').splitlines()]
+                if [l for l in lines if l and not l.startswith('#')] in ([], ['exit 0']):
+                    continue
+                raise ValueError('etc/rc.local carries commands; the companion is data only')
+            if name in BACKUP_FILES:
+                pass
+            elif name.startswith(BACKUP_DIRS):
+                directory = next(d for d in BACKUP_DIRS if name.startswith(d))
+                if '/' in name[len(directory):]:
+                    raise ValueError('nested directory not allowed in backup: %s' % name)
+            else:
+                raise ValueError('path not allowed in a companion: %s' % name)
+            if name in ('etc/dropbear/authorized_keys', 'root/.ssh/authorized_keys'):
+                # Dropbear honours both files for root; validate both alike.
+                lines = [public_key_line(l) for l in content.decode('ascii').splitlines()
+                         if l.strip() and not l.lstrip().startswith('#')]
+                content = ''.join(l + '\n' for l in lines).encode()
+            elif name.startswith('etc/dropbear/'):
+                if not re.fullmatch(r'dropbear_[a-z0-9]+_host_key', name[len('etc/dropbear/'):]):
+                    raise ValueError('unexpected file in etc/dropbear: %s' % name)
+                check_host_key(content)
+            elif name == 'etc/config/dropbear':
+                check_dropbear_config(content.decode('utf-8', 'replace'))
+            elif name == 'etc/config/system':
+                match = re.search(r"option\s+hostname\s+'([^']*)'", content.decode('utf-8', 'replace'))
+                if match and HOSTNAME.fullmatch(match.group(1)):
+                    hostname = match.group(1)
+            elif name.startswith('etc/config/ls420d') or name == SITE_UCI:
+                raise ValueError('reserved companion path in backup: %s' % name)
+            if name.startswith('etc/config/') and not re.fullmatch(r'[A-Za-z0-9_-]+', name[len('etc/config/'):]):
+                raise ValueError('not a UCI configuration name: %s' % name)
+            if b'\0' in content and not name.startswith('etc/dropbear/') and not name.startswith('root/.ssh/'):
+                raise ValueError('binary content in configuration file: %s' % name)
+            files[name] = content
+    if not files:
+        raise ValueError('backup contains no usable configuration files')
+    files[MARKER] = (f'format={FORMAT}\nexample=0\nsource=backup\nhostname={hostname}\n').encode()
+    return files
+
+
 def file_mode(name):
     if name in SECRET_FILES or name.startswith(SECRET_DIRS):
         return stat.S_IFREG | 0o600
@@ -139,16 +248,24 @@ def image(config, root, example=False):
     return build(config_files(config, root, example))
 
 
+def image_from_backup(data):
+    return build(backup_files(data))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--example', action='store_true', help='public, anonymous, SSH-disabled example')
     group.add_argument('--config', type=Path, help='private deployment JSON; key paths are relative to it')
+    group.add_argument('--backup', type=Path, help='private OpenWrt sysupgrade backup (sysupgrade -b) archive')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    config_path = args.config or Path(__file__).resolve().parents[1]/'examples/example.json'
-    config = json.loads(config_path.read_text())
-    result = image(config, config_path.parent, args.example)
+    if args.backup:
+        result = image_from_backup(args.backup.read_bytes())
+    else:
+        config_path = args.config or Path(__file__).resolve().parents[1]/'examples/example.json'
+        config = json.loads(config_path.read_text())
+        result = image(config, config_path.parent, args.example)
     os.umask(0o077)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     # Exclusive creation prevents accidentally replacing a known-good companion.
