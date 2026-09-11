@@ -109,6 +109,19 @@ The GitHub Actions workflow can compile it, but downloads remain on hold until
 the accompanying source and license package is ready. The [build guide](docs/build.md)
 and [distribution policy](docs/distribution.md) describe that process.
 
+**Build it yourself.** The workflow uploads no kernel or root filesystem,
+and that is deliberate: an Actions artifact of a public repository is
+downloadable by anyone, so uploading firmware there would be distribution
+and would trigger the corresponding-source obligations described in the
+[distribution policy](docs/distribution.md). To obtain the firmware for your
+own device, run `scripts/build.sh` locally following the
+[build guide](docs/build.md), or run the workflow in a private fork with an
+added upload step, where the artifact stays with you. A public fork can run
+the workflow on free runners to reproduce the compile evidence, but must not
+add a firmware upload. Compare the product hashes in your evidence with this
+repository's evidence artifacts if you want to know whether your build
+matches.
+
 ## Where to go next
 
 The [configuration guide](docs/deployment.md) shows how the example becomes

@@ -86,6 +86,24 @@ Record exact tools, durations, data sizes, hashes, kernel messages, and SMART da
 - [ ] Malformed companion failure and recovery to a known-good pair are recorded.
 - [ ] No flash/sysupgrade operation is offered or required.
 
+## F. Disk standby endurance
+
+This section measures the core benefit of the RAM root; without it the
+concept is not demonstrated. Mandatory for a release candidate.
+
+- [ ] Configure the intended standby mechanism (`hd-idle` or drive firmware
+      timer) and the intended monitoring, fan service and backup schedule.
+- [ ] Sample `hdparm -C` for every data disk at least every 5 minutes for
+      24 hours from a RAM-resident script that does not touch the volume;
+      record timestamps and states.
+- [ ] Count spin-ups. Every spin-up outside a scheduled job must be attributed
+      to a cause (fan service, SMART query, mount access, filesystem
+      background work) and either fixed or accepted with a documented reason.
+- [ ] Record power draw at the wall if a meter is available, idle versus
+      spinning.
+- [ ] Pass criterion: no unattributed spin-up in 24 hours, and disks asleep
+      for the whole interval between scheduled jobs minus the standby timeout.
+
 ## Result
 
 - Overall: PASS / FAIL / PARTIAL

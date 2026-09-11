@@ -13,6 +13,13 @@ The separate anonymous data-only example companion is still downloadable. It
 contains no kernel, executable OS, keys or operating configuration for a real
 site. Its MIT license accompanies it. Nothing runs on the NAS from CI.
 
+The gate does not stop anyone from building the firmware for themselves:
+a local build, or a private fork whose workflow uploads the products only to
+its owner, is not distribution. A public fork must not add a firmware
+upload, because an Actions artifact of a public repository is available to
+everyone and would be distribution under the same conditions as a release.
+That is the route for testers until the source bundle below exists.
+
 Firmware upload cannot be enabled with a dispatch input or repository variable.
 It requires a reviewed workflow change implementing the source requirements
 below. This is a temporary **distribution** gate, not a claim that a kernel

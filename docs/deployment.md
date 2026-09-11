@@ -142,6 +142,12 @@ pair and a proven recovery route before trying a new one.
   build, checksums and tests, then test with a compatible private companion.
 - Interactive changes and package installations affect RAM only and do not
   survive reboot. They are not an update mechanism.
+- Keep a **recovery companion**: a second, minimal private companion with
+  DHCP, a hostname such as `ls420d-recovery` and its own authorized key,
+  generated once and stored with the known-good pair. If a new companion
+  boots without reachable SSH, swapping in the recovery companion restores
+  access without the serial console, which needs the enclosure opened.
+  The recovery companion holds a host key too; treat it as a secret.
 
 The 25.12.2 pilot proved the mechanism. This repository's native 25.12.5 image
 still needs hardware acceptance; neither the example artifact nor a green CI
