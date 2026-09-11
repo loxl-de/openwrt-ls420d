@@ -57,14 +57,25 @@ echo /root/.ssh/ >> /etc/sysupgrade.conf                                # includ
 ## 4. The job
 
 One line in root's crontab, run by the BusyBox cron that the base image
-already starts:
+already starts. Two guards come first: the volume must be mounted, and the
+marker file must exist on it. Without them a failed mount would send the
+whole transfer into the RAM root until memory runs out, which on a RAM-only
+system also takes the operating system down.
 
 ```sh
+mkdir -p /mnt/backup/data && touch /mnt/backup/.ls420d-volume
 cat >> /etc/crontabs/root <<'EOF'
-15 3 * * * /usr/bin/rsync -aH --delete --numeric-ids -e 'ssh -i /root/.ssh/id_ed25519' backup@source.example:/srv/data/ /mnt/backup/data/ 2>&1 | logger -t pull-backup
+15 3 * * * grep -qs ' /mnt/backup ' /proc/mounts && [ -f /mnt/backup/.ls420d-volume ] && /usr/bin/rsync -aH --numeric-ids -e 'ssh -i /root/.ssh/id_ed25519' backup@source.example:/srv/data/ /mnt/backup/data/ 2>&1 | logger -t pull-backup
 EOF
 /etc/init.d/cron restart
 ```
+
+The line deliberately does not pass `--delete`. A mirror that follows
+deletions also follows an accidental `rm` or a ransomware run on the source,
+and then the backup is gone with the original. Keep deletions out of the
+mirror, or keep history instead: `--link-dest` against the previous run
+gives hard-linked daily snapshots at the cost of one directory per day. Add
+`--delete` only after deciding that a mirror is what you want.
 
 The disk wakes for the transfer and `hd-idle` puts it back to sleep once the
 job is done. Run the line by hand once and check `logread -e pull-backup`
