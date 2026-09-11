@@ -77,6 +77,15 @@ def extract_tree(archive, output):
         for name, member in names.items():
             if member.issym():
                 (output/name).symlink_to(member.linkname)
+        root = output.resolve()
+        for name, member in names.items():
+            if member.issym():
+                try:
+                    resolved = (output/name).resolve()
+                except (RuntimeError, OSError) as error:
+                    raise ValueError('unresolvable source symlink') from error
+                if not resolved.is_relative_to(root):
+                    raise ValueError('resolved symlink escapes source tree')
 
 
 def restore(archive, expected, output):

@@ -88,6 +88,17 @@ class SourceRestoreTests(unittest.TestCase):
                     MODULE.extract_tree(archive, self.output)
                 self.assertFalse(self.output.exists())
 
+    def test_symlink_chain_cannot_escape_using_parent_component(self):
+        archive = self.make_tar([('a', 'b/..'), ('b', '.')])
+        with self.assertRaisesRegex(ValueError, 'resolved symlink escapes'):
+            MODULE.extract_tree(archive, self.output)
+        self.assertFalse((self.output/'RESTORED.json').exists())
+
+    def test_cyclic_symlink_is_rejected(self):
+        archive = self.make_tar([('a', 'b'), ('b', 'a')])
+        with self.assertRaisesRegex(ValueError, 'unresolvable source symlink'):
+            MODULE.extract_tree(archive, self.output)
+
     def test_checksum_mismatch_fails_before_writes(self):
         corrupt = self.fixture.root/'corrupt.zip'
         with zipfile.ZipFile(self.archive) as original, zipfile.ZipFile(corrupt, 'w') as z:
