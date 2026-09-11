@@ -57,8 +57,14 @@ and a fan service using CPU, PHY and HDD temperatures. CPU cooling starts at
 also implements shutdown thresholds and a supervisor. These are shared board
 support, not site secrets.
 
-The controller takes ownership of fan-associated thermal zones; it must be
-validated together with the native DTS. The earlier pilot's success does not
+The controller takes ownership of fan-associated thermal zones by switching
+them to the kernel's `user_space` governor, which the LS420D kernel build
+enables. The zones stay enabled, so a kernel critical trip still powers the
+board off if the service itself has died; only where that governor is missing
+does the service fall back to disabling the zone. Disk temperatures are read
+only from drives that are awake: an ATA power-mode query, which never spins a
+drive up, precedes each read, and a sleeping drive counts as present and cool.
+The controller must be validated together with the native DTS. The earlier pilot's success does not
 prove identical behavior with this kernel/DTB. Wake-on-LAN enablement likewise
 does not guarantee successful warm boot or RTC wake on every bootloader state.
 
