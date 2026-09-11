@@ -40,7 +40,15 @@ class InitrdTests(unittest.TestCase):
         entries = self.entries(self.example, True)
         self.assertNotIn('etc/dropbear/authorized_keys', entries)
         self.assertIn(b"option enable '0'", entries['etc/config/dropbear'].data)
-        self.assertIn(b'example=1', entries['etc/ls420d-deployment'].data)
+        self.assertIn(b'format=2\nexample=1\n', entries['etc/ls420d-deployment'].data)
+
+    def test_hostname_is_merged_not_replaced(self):
+        entries = self.entries()
+        # A shipped etc/config/system would stop config_generate from creating
+        # the board's LED, button and logging defaults.
+        self.assertNotIn('etc/config/system', entries)
+        self.assertEqual(entries['etc/ls420d-site.uci'].data,
+                         b"set system.@system[0].hostname='ls420d-backup'\n")
 
     def test_private_key_only(self):
         entries = self.entries()
@@ -49,6 +57,13 @@ class InitrdTests(unittest.TestCase):
         self.assertNotIn(b'anonymous-comment', entries['etc/dropbear/authorized_keys'].data)
         self.assertEqual(stat.S_IMODE(entries['etc/dropbear'].mode), 0o700)
         self.assertEqual(stat.S_IMODE(entries['etc/dropbear/dropbear_ed25519_host_key'].mode), 0o600)
+        self.assertEqual(stat.S_IMODE(entries['etc/dropbear/authorized_keys'].mode), 0o600)
+
+    def test_configuration_files_are_world_readable(self):
+        entries = self.entries()
+        for name in ('etc/config/network', 'etc/config/dropbear', 'etc/ls420d-site.uci', 'etc/ls420d-deployment'):
+            self.assertEqual(stat.S_IMODE(entries[name].mode), 0o644, name)
+        self.assertEqual(stat.S_IMODE(entries['etc/config'].mode), 0o755)
 
     def test_no_executable_or_link_members(self):
         for e in self.entries().values():
@@ -98,6 +113,42 @@ class InitrdTests(unittest.TestCase):
         (self.root/'admin.pub').write_text('not a public key')
         with self.assertRaises(ValueError):
             image(self.config, self.root)
+        (self.root/'admin.pub').write_text('# only a comment\n\n')
+        with self.assertRaises(ValueError):
+            image(self.config, self.root)
+
+    def test_multiple_public_keys(self):
+        first = (self.root/'admin.pub').read_text()
+        second_blob = struct.pack('>I', 11) + b'ssh-ed25519' + struct.pack('>I', 32) + bytes(range(32, 64))
+        second = 'ssh-ed25519 ' + base64.b64encode(second_blob).decode() + ' second@workstation\n'
+        (self.root/'admin.pub').write_text('# admins\n' + first + '\n' + second)
+        data = self.entries()['etc/dropbear/authorized_keys'].data
+        self.assertEqual(data.count(b'ssh-ed25519 '), 2)
+        self.assertNotIn(b'workstation', data)
+        self.assertNotIn(b'#', data)
+        (self.root/'admin.pub').write_text(first + '\nssh-rsa AAAA garbage\n')
+        with self.assertRaises(ValueError):
+            image(self.config, self.root)
+
+    def test_multiple_public_keys_are_preserved(self):
+        first = (self.root/'admin.pub').read_text()
+        prefix = struct.pack('>I', 11)+b'ssh-ed25519'+struct.pack('>I', 32)
+        second = 'ssh-ed25519 '+base64.b64encode(prefix+bytes(reversed(range(32)))).decode()
+        (self.root/'admin.pub').write_text(first+'\n'+second+' second-comment\n'+first)
+        data = self.entries()['etc/dropbear/authorized_keys'].data.decode()
+        self.assertEqual(data.splitlines(), [' '.join(first.split()[:2]), second])
+        self.assertNotIn('comment', data)
+
+    def test_invalid_second_public_key_is_rejected(self):
+        key = self.root/'admin.pub'
+        key.write_text(key.read_text()+'not-a-key\n')
+        with self.assertRaises(ValueError):
+            self.entries()
+
+    def test_blank_public_key_file_is_rejected(self):
+        (self.root/'admin.pub').write_text('\n \n')
+        with self.assertRaises(ValueError):
+            self.entries()
 
     def test_crc_corruption(self):
         blob = bytearray(image(self.example, self.root, True))

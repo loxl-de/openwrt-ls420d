@@ -11,4 +11,5 @@ find "$OPENWRT_SOURCE_DIR/files" -type f -exec chmod 0644 {} +
 chmod 0755 "$OPENWRT_SOURCE_DIR/files/etc/init.d/ls420d-phy" \
     "$OPENWRT_SOURCE_DIR/files/etc/init.d/ls420d-fan" \
     "$OPENWRT_SOURCE_DIR/files/usr/sbin/ls420d-fan" \
+    "$OPENWRT_SOURCE_DIR/files/etc/uci-defaults/50-ls420d-site" \
     "$OPENWRT_SOURCE_DIR/files/etc/uci-defaults/99-ls420d-runtime"

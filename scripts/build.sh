@@ -21,6 +21,7 @@ JOBS=${JOBS:-1}
 case $JOBS in *[!0-9]*|'') fail 'JOBS must be a positive integer' ;; esac
 [ "$JOBS" -gt 0 ] || fail 'JOBS must be a positive integer'
 [ -f "$CONFIG" ] || fail "LS420D build configuration is not yet present: $CONFIG"
+check_fdtget
 [ -z "$(git -C "$REPO_ROOT" status --porcelain)" ] || fail 'repository must be clean before a release build'
 
 "$SCRIPT_DIR/prepare-openwrt.sh"

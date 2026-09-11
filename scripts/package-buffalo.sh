@@ -13,7 +13,7 @@ ARTIFACT_DIR=${ARTIFACT_DIR:-$REPO_ROOT/build/artifacts}
 
 TARGET_DIR=$SOURCE_DIR/bin/targets/mvebu/cortexa9
 MKIMAGE=${MKIMAGE:-$SOURCE_DIR/staging_dir/host/bin/mkimage}
-FDTGET=${FDTGET:-$SOURCE_DIR/staging_dir/host/bin/fdtget}
+check_fdtget
 
 kernel_count=$(find "$TARGET_DIR" -maxdepth 1 -type f \
     -name '*-buffalo_ls420d-initramfs-kernel.bin' -print | wc -l | tr -d ' ')
@@ -32,7 +32,6 @@ package_manifest=$(find "$TARGET_DIR" -maxdepth 1 -type f \
 [ -s "$package_manifest" ] || fail 'LS420D package manifest is empty'
 
 [ -x "$MKIMAGE" ] || fail "OpenWrt mkimage not found: $MKIMAGE"
-[ -x "$FDTGET" ] || fail "OpenWrt fdtget not found: $FDTGET"
 
 dtb_count=$(find "$SOURCE_DIR/build_dir" -type f \
     -name 'image-armada-370-buffalo-ls420d.dtb' -print | wc -l | tr -d ' ')
@@ -57,11 +56,35 @@ do
         fail "dangerous inherited node is not disabled: $node"
 done
 
+# RAM boot never writes the SPI NOR: every flash partition must be read-only
+# in the compiled DTB, so the kernel itself refuses writes.
+for partition in \
+    /soc/spi@10600/spi-flash@0/partitions/partition@0 \
+    /soc/spi@10600/spi-flash@0/partitions/partition@f0000
+do
+    "$FDTGET" -p "$dtb" "$partition" | grep -qx 'read-only' ||
+        fail "SPI NOR partition is writable in the compiled DTB: $partition"
+done
+
 kernel_size=$(wc -c < "$kernel" | tr -d ' ')
 # Buffalo loads the kernel at 0x01200000 and the companion initrd at
 # 0x02600000. Keep the embedded-initramfs uImage inside that 20 MiB gap.
 [ "$kernel_size" -lt 20971520 ] ||
     fail 'LS420D initramfs kernel overlaps the Buffalo initrd load address'
+
+# The decompressed kernel starts at 0x00008000 and must also stay below the
+# initrd load address, including .bss and the relocated decompressor.
+kernel_tree=$(find "$SOURCE_DIR/build_dir/target-"* -maxdepth 2 -type d -name 'linux-6.12.*' -print)
+[ "$(printf '%s\n' "$kernel_tree" | grep -c .)" -eq 1 ] || fail 'expected exactly one prepared Linux tree'
+[ -s "$kernel_tree/vmlinux" ] || fail 'uncompressed kernel ELF image missing'
+mkdir -p "$ARTIFACT_DIR"
+# The records go to the evidence file; show them in the log in both outcomes.
+if ! python3 "$SCRIPT_DIR/check-kernel-footprint.py" "$kernel_tree/vmlinux" "$kernel" \
+    > "$ARTIFACT_DIR/kernel-footprint.txt"; then
+    cat "$ARTIFACT_DIR/kernel-footprint.txt" >&2
+    fail 'kernel footprint check failed; records above'
+fi
+cat "$ARTIFACT_DIR/kernel-footprint.txt"
 
 mkdir -p "$ARTIFACT_DIR"
 install -m 0644 "$kernel" "$ARTIFACT_DIR/uImage.buffalo"

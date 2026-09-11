@@ -1,0 +1,9 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# Merge site settings that the companion delivers as UCI batch data. This runs
+# after config_generate has created the board defaults (LEDs, buttons, logging),
+# so only the listed options change and nothing generated is lost.
+[ -s /etc/ls420d-site.uci ] || exit 0
+uci -q batch < /etc/ls420d-site.uci || exit 1
+uci commit
+exit 0

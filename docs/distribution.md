@@ -18,6 +18,27 @@ It requires a reviewed workflow change implementing the source requirements
 below. This is a temporary **distribution** gate, not a claim that a kernel
 must be hardware-validated before its source can be public.
 
+## Source inputs available for review
+
+After a successful full build, CI also collects a source review candidate.
+It contains the exact committed project, OpenWrt and feed trees, including
+their build recipes, patches and license files. Separate archives contain the
+downloaded source inputs. The resolved OpenWrt and Linux configurations,
+package metadata, build manifest and runner information accompany them.
+
+The collector excludes Git metadata, untracked worktree files and built
+firmware. It refuses missing inputs, unexpected download entries and an
+existing output directory. The SHA-256 inventory identifies every collected
+download and every output file.
+
+This candidate is preparation for review, not a declaration of complete source
+availability or license compliance. In particular, an offline reconstruction
+and build from these archives has not yet passed. The explicit offline test
+below implements restoration and a clean, network-isolated rebuild.
+Its report explicitly records those checks as incomplete. The temporary
+14-day Actions artifact is not the long-term source offering required below.
+The firmware-upload gate remains closed.
+
 ## Acceptance criteria for downloadable firmware
 
 Before enabling any public kernel/rootfs download, including an experimental
@@ -57,3 +78,62 @@ remain possible, but anyone redistributing them must satisfy the same conditions
 Primary references: [OpenWrt licensing](https://openwrt.org/license),
 [GPLv2 text](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html),
 [GNU source distribution FAQ](https://www.gnu.org/licenses/gpl-faq.html#UnchangedJustBinary).
+
+## Offline source test
+
+The `Offline source rebuild` workflow accepts a source-review artifact ID from
+this repository and the independently checked SHA-256 digest of its ZIP. It
+verifies the ZIP and every member before restoring project, OpenWrt, feeds and
+downloads into a new directory. Existing output is never overwritten. Archive
+paths and symlinks must stay inside their source tree.
+
+The test installs host dependencies before entering an empty network namespace.
+Only loopback is activated inside that namespace: OpenWrt's fakeroot uses local
+TCP for inter-process communication. A preflight check rejects external
+interfaces or inactive loopback and tests a local TCP exchange before compiling.
+A failed parallel build is repeated serially with verbose output for diagnosis;
+the original failure remains a failure even if that diagnostic retry succeeds.
+
+It then builds as the ordinary runner user, with no restored toolchain, compiled
+objects or compiler cache. Feed indexing uses the archived feeds without fetching.
+Both resolved configurations are checked against the original build. For the
+Linux config, only the checkout-root prefixes in the two expected
+CONFIG_INITRAMFS_SOURCE paths are rebased after validation. The rebuilt paths
+must point into the actual offline checkout. Architecture suffixes, owner IDs
+and all other configuration lines must still match. The ATAG
+test and Buffalo packaging checks run again; the resulting kernel, example
+companion and package manifest are compared with the original product hashes.
+
+The archived OpenWrt `version` file supplies the revision string. A temporary
+Git baseline permits patch application and reporting; it is not presented as
+the original Git history. The result identifies the original source revision
+from the verified bundle. It does not authorize firmware distribution or replace
+the separate license review.
+
+To test a workflow change before it is merged, dispatch the existing `CI`
+workflow on that branch with `offline_source_artifact` and
+`offline_source_sha256`. It calls the reusable offline workflow and skips normal
+firmware compilation. A normal dispatch with `reproducibility=true` still runs
+two independent online-source builds.
+
+Only three explicitly named JSON diagnostics can be uploaded: the overall
+result, the kernel-configuration comparison and the audited rootfs file
+inventory. No file contents or rebuilt firmware are uploaded. A valid but
+different kernel configuration permits diagnostic packaging and hashing, but
+still makes the final result fail even if all product hashes happen to agree.
+Invalid initramfs input paths stop the test before that diagnostic packaging.
+
+[The first offline run](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34570805512)
+failed during package building. After loopback was enabled for fakeroot,
+[the replacement run](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34576303964)
+completed full offline compilation on September 11. Its subsequent Linux-config
+comparison failed first at CONFIG_RUSTC_VERSION, before Buffalo packaging.
+Thus offline compilation is demonstrated; matching configurations and final
+products are not.
+
+[The diagnostic follow-up](findings/offline-rebuild-20260911.md) completed offline
+compilation and packaging with matching kernel configurations. Its logs confirm
+that sudo's default PATH hid rustc; preserving the runner PATH restored it.
+The example companion and package manifest match, but the kernel-image hash
+does not. This test used the original, pre-BUILDBOT source bundle. A new test
+with the corrected build's sources is still required; the mismatch is not waived.
