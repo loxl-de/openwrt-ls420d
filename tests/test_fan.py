@@ -25,7 +25,7 @@ class FanTests(unittest.TestCase):
             self.assertEqual(self.curve(temp, old), state)
 
     def simulate(self, cpu='54000', phy='43000', disk='25000', cycles=16,
-                 alarm='0', missing_disk=False):
+                 alarm='0', missing_disk=False, governor=True, disk_state='active/idle'):
         with tempfile.TemporaryDirectory(prefix='fan-fixture-') as tmp:
             root = Path(tmp)
             def put(name, value):
@@ -37,6 +37,8 @@ class FanTests(unittest.TestCase):
             for name, val in [('type', 'gpio-fan'), ('max_state', '3'), ('cur_state', '0')]:
                 put('sys/class/thermal/cooling_device0/'+name, val)
             put('sys/class/thermal/thermal_zone0/mode', 'enabled')
+            if governor:
+                put('sys/class/thermal/thermal_zone0/policy', 'step_wise')
             (root/'sys/class/thermal/thermal_zone0/cdev0').symlink_to(fan)
             for i, (name, temp) in enumerate([
                 ('d0018300.thermal', cpu), ('d0072004mdiomii00', phy), ('drivetemp', disk)]):
@@ -45,6 +47,8 @@ class FanTests(unittest.TestCase):
                 put(f'sys/class/hwmon/hwmon{i}/name', name)
                 if temp is not None:
                     put(f'sys/class/hwmon/hwmon{i}/temp1_input', temp)
+                if name == 'drivetemp':
+                    (root/f'sys/class/hwmon/hwmon{i}/device/block/sda').mkdir(parents=True)
             put('sys/class/hwmon/hwmon4/name', 'gpio_fan')
             put('sys/class/hwmon/hwmon4/fan1_alarm', alarm)
             put('sys/block/sda/device/vendor', 'ATA')
@@ -60,6 +64,7 @@ class FanTests(unittest.TestCase):
 test_count=0
 logger() {{ :; }}
 test_poweroff() {{ echo requested >>{root}/shutdown; }}
+hdparm() {{ echo "$2:"; echo " drive state is:  {disk_state}"; echo "$2" >>{root}/hdparm-calls; }}
 sleep() {{
     test_count=$((test_count+1))
     [ "$test_count" -lt {cycles} ] || exit 0
@@ -72,6 +77,10 @@ sleep() {{
                                     capture_output=True, text=True, timeout=10)
             self.assertEqual(result.returncode, 0, result.stderr)
             status = dict(word.split('=', 1) for word in (root/'run/status').read_text().split())
+            zone = root/'sys/class/thermal/thermal_zone0'
+            status['zone_mode'] = (zone/'mode').read_text().strip()
+            status['zone_policy'] = (zone/'policy').read_text().strip() if governor else ''
+            status['hdparm_calls'] = (root/'hdparm-calls').read_text().count('/dev/sda') if (root/'hdparm-calls').exists() else 0
             return status, (root/'shutdown').exists(), (root/'sys/class/rtc/rtc0/wakealarm').read_text().strip()
 
     def test_cool_fan_off_after_hold(self):
@@ -123,6 +132,24 @@ sleep() {{
     def test_persistent_sensor_fault_shutdown(self):
         _, shutdown, _ = self.simulate(cpu=None, cycles=27)
         self.assertTrue(shutdown)
+
+    def test_zone_keeps_kernel_critical_trip_via_user_space_governor(self):
+        status, _, _ = self.simulate()
+        self.assertEqual((status['zone_policy'], status['zone_mode']), ('user_space', 'enabled'))
+
+    def test_zone_disabled_without_user_space_governor(self):
+        status, _, _ = self.simulate(governor=False)
+        self.assertEqual(status['zone_mode'], 'disabled')
+
+    def test_sleeping_disk_is_not_polled(self):
+        status, shutdown, _ = self.simulate(disk='49000', disk_state='standby')
+        self.assertEqual((status['state'], status['fault'], status['hdd_max_mC']), ('0', '0', '0'))
+        self.assertFalse(shutdown)
+        self.assertGreater(status['hdparm_calls'], 0)
+
+    def test_awake_disk_is_polled(self):
+        status, _, _ = self.simulate(disk='49000')
+        self.assertEqual((status['state'], status['hdd_max_mC']), ('3', '49000'))
 
 
 if __name__ == '__main__':

@@ -35,6 +35,8 @@ worker() {
                 drivetemp)
                     [ "$((now-disk_time))" -ge 20 ] || continue
                     disks="$((disks+1))"
+                    # Do not poll a sleeping disk; it counts as present and cool.
+                    ! fan_disk_asleep "$h" || continue
                     t="$(fan_temperature "$h/temp1_input")" || { disk_bad=1; continue; }
                     [ "$t" -le "$disk" ] || disk="$t";;
                 gpio_fan) fanhw="$h";;

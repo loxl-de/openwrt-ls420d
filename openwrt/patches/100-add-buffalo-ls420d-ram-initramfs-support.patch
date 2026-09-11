@@ -222,3 +222,15 @@ index 0000000000000000000000000000000000000000..92554bac12b447cd19406837a07d67ef
 + 	{ .compatible = "buffalo,ls421d",
 + 	  .data = &linkstation_power_off_cfg,
 + 	},
+diff --git a/target/linux/mvebu/config-6.12 b/target/linux/mvebu/config-6.12
+index ef1c628abc31638e061640face1e8b80822164cc..fd127ce8d4d58b50c288bbb29eae0d54b0f6a3ff 100644
+--- a/target/linux/mvebu/config-6.12
++++ b/target/linux/mvebu/config-6.12
+@@ -407,6 +407,7 @@ CONFIG_THERMAL=y
+ CONFIG_THERMAL_DEFAULT_GOV_STEP_WISE=y
+ CONFIG_THERMAL_EMERGENCY_POWEROFF_DELAY_MS=0
+ CONFIG_THERMAL_GOV_STEP_WISE=y
++CONFIG_THERMAL_GOV_USER_SPACE=y
+ CONFIG_THERMAL_HWMON=y
+ CONFIG_THERMAL_OF=y
+ CONFIG_TICK_CPU_ACCOUNTING=y

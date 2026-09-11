@@ -29,17 +29,47 @@ fan_find() {
 
 fan_take_control() {
     # Only this userspace owner drives the fan. Otherwise step_wise could undo
-    # a CPU request. Disabled zones remain readable. Critical HDD/PHY limits
-    # are explicitly reproduced below; the tripless CPU gains a limit too.
+    # a CPU request. Prefer the user_space governor: the zone stays enabled,
+    # so the kernel keeps its critical-trip shutdown as the last line of
+    # defence if this service dies. Fall back to disabling the zone on a
+    # kernel without that governor. Critical HDD/PHY limits are explicitly
+    # reproduced below; the tripless CPU gains a limit too.
     local c="$1" z link
     for z in /sys/class/thermal/thermal_zone*; do
         for link in "$z"/cdev[0-9]*; do
             [ -L "$link" ] || continue
             [ "$(readlink -f "$link")" = "$(readlink -f "$c")" ] || continue
-            [ "$(cat "$z/mode")" = disabled ] || echo disabled >"$z/mode" || return 1
+            fan_own_zone "$z" || return 1
             break
         done
     done
+}
+
+fan_own_zone() {
+    local z="$1"
+    if [ "$(cat "$z/policy" 2>/dev/null)" = user_space ]; then
+        return 0
+    fi
+    if [ -w "$z/policy" ] && echo user_space >"$z/policy" 2>/dev/null &&
+        [ "$(cat "$z/policy")" = user_space ]; then
+        return 0
+    fi
+    [ "$(cat "$z/mode")" = disabled ] || echo disabled >"$z/mode"
+}
+
+fan_disk_asleep() {
+    # ATA CHECK POWER MODE never wakes a drive; SMART temperature reads may.
+    # A drive in standby or sleep is cool by definition and must stay asleep.
+    local h="$1" b state
+    for b in "$h"/device/block/*; do
+        [ -e "$b" ] || return 1
+        state="$(hdparm -C "/dev/${b##*/}" 2>/dev/null)" || return 1
+        case "$state" in
+            *standby*|*sleeping*) return 0;;
+        esac
+        return 1
+    done
+    return 1
 }
 
 fan_full() {
