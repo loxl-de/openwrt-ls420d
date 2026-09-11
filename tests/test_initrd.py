@@ -13,7 +13,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'scripts'))
-from make_initrd import image, image_from_backup, MAX_MEMBER
+from make_initrd import image, image_from_backup, MAX_MEMBER, MAX_MEMBERS
 from cpio_newc import Entry, encode, decode, unwrap_ramdisk
 
 
@@ -270,6 +270,41 @@ class InitrdTests(unittest.TestCase):
             with self.subTest(name=name):
                 with self.assertRaises(ValueError):
                     image_from_backup(self.backup(members))
+
+    def test_backup_rejects_duplicate_paths_and_too_many_members(self):
+        buffer = io.BytesIO()
+        with tarfile.open(fileobj=buffer, mode='w:gz') as archive:
+            for name, content in self.typical_backup().items():
+                info = tarfile.TarInfo(name)
+                info.size = len(content)
+                archive.addfile(info, io.BytesIO(content))
+            # same path twice, the second with password login enabled
+            info = tarfile.TarInfo('./etc/config/dropbear')
+            payload = b"config dropbear 'main'\n\toption PasswordAuth 'on'\n\toption RootPasswordAuth 'on'\n"
+            info.size = len(payload)
+            archive.addfile(info, io.BytesIO(payload))
+        with self.assertRaises(ValueError):
+            image_from_backup(buffer.getvalue())
+        members = self.typical_backup()
+        for index in range(MAX_MEMBERS):
+            members['./etc/config/extra%d' % index] = b"config x\n"
+        with self.assertRaises(ValueError):
+            image_from_backup(self.backup(members))
+
+    def test_archive_modes_and_owners_are_ignored(self):
+        buffer = io.BytesIO()
+        with tarfile.open(fileobj=buffer, mode='w:gz') as archive:
+            for name, content in self.typical_backup().items():
+                info = tarfile.TarInfo(name)
+                info.size = len(content)
+                info.mode = 0o777
+                info.uid = info.gid = 1000
+                archive.addfile(info, io.BytesIO(content))
+        entries = {e.name: e for e in decode(unwrap_ramdisk(image_from_backup(buffer.getvalue())))[0]}
+        for e in entries.values():
+            self.assertEqual((e.uid, e.gid), (0, 0), e.name)
+            if stat.S_ISREG(e.mode):
+                self.assertIn(stat.S_IMODE(e.mode), (0o600, 0o644), e.name)
 
     def test_backup_rejects_links_and_garbage(self):
         link = tarfile.TarInfo('./etc/config/network')

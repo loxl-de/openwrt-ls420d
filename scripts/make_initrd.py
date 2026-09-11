@@ -16,6 +16,7 @@ from cpio_newc import Entry, encode, decode, wrap_ramdisk, unwrap_ramdisk
 
 MAX_PAYLOAD = 1024 * 1024
 MAX_MEMBER = 256 * 1024
+MAX_MEMBERS = 256
 FORMAT = 2
 MARKER = 'etc/ls420d-deployment'
 SITE_UCI = 'etc/ls420d-site.uci'
@@ -228,8 +229,11 @@ def backup_files(data):
         archive = tarfile.open(fileobj=io.BytesIO(data), mode='r:*')
     except tarfile.TarError as error:
         raise ValueError('backup is not a readable tar archive') from error
+    seen = set()
     with archive:
-        for info in archive:
+        for count, info in enumerate(archive, 1):
+            if count > MAX_MEMBERS:
+                raise ValueError('backup has more than %d members' % MAX_MEMBERS)
             if info.isdir():
                 continue
             name = backup_member_name(info)
@@ -237,6 +241,12 @@ def backup_files(data):
                 raise ValueError('backup member is not a regular file: %s' % name)
             if info.size > MAX_MEMBER:
                 raise ValueError('backup member too large: %s' % name)
+            # tar extraction would let a later duplicate silently win; refuse.
+            if name in seen:
+                raise ValueError('duplicate path in backup archive: %s' % name)
+            seen.add(name)
+            # Archive ownership and modes are discarded; the companion assigns
+            # root ownership and fixed modes by path (see file_mode).
             content = archive.extractfile(info).read()
             if name in BACKUP_IGNORED:
                 continue

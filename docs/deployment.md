@@ -138,8 +138,11 @@ value as `on`; the generic overlay's configuration already does. The file is
 parsed with UCI's rules: quoted names count, the last assignment wins, and
 syntax the parser does not model (backslash escapes, inline comments,
 `package` lines) is refused rather than guessed at. Comments are
-stripped from `authorized_keys`, key files get mode 0600 and configuration
-files 0644. Unlike the JSON route, this snapshot ships the whole
+stripped from `authorized_keys`. Ownership and modes stored in the archive
+are discarded: every file becomes root-owned, key files and `/etc/shadow`
+get mode 0600, configuration files 0644, and nothing is executable. A path
+that appears twice in the archive and an archive with more than 256 members
+are refused. Unlike the JSON route, this snapshot ships the whole
 `/etc/config/system` of the system it was taken from, which is correct because
 that system already contained the generated board defaults.
 
