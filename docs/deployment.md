@@ -125,14 +125,18 @@ scp root@ls420d-backup:/tmp/backup.tar.gz private/
 python3 scripts/make_initrd.py --backup private/backup.tar.gz --output private/initrd-2.buffalo
 ```
 
-The generator takes only data from the archive: files under `/etc/config/`,
+The generator adds no program files from the archive, only configuration: files under `/etc/config/`,
 `/etc/dropbear/`, `/etc/crontabs/` and `/root/.ssh/`, plus `/etc/hosts`,
 `/etc/passwd`, `/etc/group` and `/etc/shadow`. It refuses scripts and
 executables (`/etc/init.d/`, `/etc/uci-defaults/`, `/etc/hotplug.d/`, a
 non-trivial `/etc/rc.local`), symlinks, nested directories, and any other
 path. Every `dropbear` section must set `PasswordAuth` and
-`RootPasswordAuth` to `off` explicitly, because Dropbear treats an absent
-option as `on`; the generic overlay's configuration already does. Comments are
+`RootPasswordAuth` to an off value (`0`, `off`, `false`, `no`, `disabled`,
+exact case) explicitly, because Dropbear treats an absent or unrecognised
+value as `on`; the generic overlay's configuration already does. The file is
+parsed with UCI's rules: quoted names count, the last assignment wins, and
+syntax the parser does not model (backslash escapes, inline comments,
+`package` lines) is refused rather than guessed at. Comments are
 stripped from `authorized_keys`, key files get mode 0600 and configuration
 files 0644. Unlike the JSON route, this snapshot ships the whole
 `/etc/config/system` of the system it was taken from, which is correct because

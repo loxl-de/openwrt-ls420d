@@ -39,9 +39,11 @@ The generator accepts two kinds of input. A small JSON description covers
 hostname, network settings and SSH access credentials for a first boot. A
 configuration backup taken on the running NAS with `sysupgrade -b` covers
 everything you configured interactively afterwards: UCI files, SSH keys, the
-crontab, hosts and accounts. Both routes produce a data-only archive; scripts
-and executables are rejected, and settings that would otherwise be lost at
-reboot become the next companion instead.
+crontab, hosts and accounts. Both routes produce an archive without
+additional program files: scripts and executables are rejected, and settings
+that would otherwise be lost at reboot become the next companion instead.
+The companion is trusted private configuration, not a sandbox for foreign
+input; a crontab names commands that the image already contains.
 
 A kernel or package update needs a new shared image. A configuration change
 needs only a new companion, provided it remains compatible with the base system.

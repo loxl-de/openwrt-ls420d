@@ -60,34 +60,95 @@ def check_host_key(data, allowed=HOST_KEY_TYPES):
                          % ' or '.join(allowed))
 
 
-OFF_VALUES = ('off', '0', 'no', 'false')
+# Exactly the spellings config_get_bool maps to false; anything else falls
+# back to the default, which is ON for both Dropbear options. Case matters.
+OFF_VALUES = ('0', 'off', 'false', 'no', 'disabled')
+UCI_NAME = re.compile(r'[A-Za-z0-9_]+')
+
+
+def uci_tokens(line):
+    """Split one UCI line like libuci: single quotes verbatim, double quotes
+    verbatim, whitespace separates. Backslash escapes and inline comments are
+    refused rather than guessed at."""
+    tokens = []
+    i = 0
+    while i < len(line):
+        c = line[i]
+        if c in ' \t':
+            i += 1
+            continue
+        if c == '#':
+            if tokens:
+                raise ValueError('inline comments are not supported in companion UCI files')
+            return []
+        token = ''
+        while i < len(line) and line[i] not in ' \t':
+            c = line[i]
+            if c in '\'"':
+                j = line.find(c, i + 1)
+                if j < 0:
+                    raise ValueError('unterminated quote in UCI line')
+                token += line[i + 1:j]
+                i = j + 1
+            elif c == '\\':
+                raise ValueError('backslash escapes are not supported in companion UCI files')
+            else:
+                token += c
+                i += 1
+        if '\\' in token:
+            raise ValueError('backslash escapes are not supported in companion UCI files')
+        tokens.append(token)
+    return tokens
+
+
+def uci_sections(text, section_type):
+    """Parse a UCI file into [(name, {option: value})]; later options override
+    earlier ones as in libuci, list items accumulate space-separated as in the
+    shell config loader. Unknown keywords or shapes are refused."""
+    sections = []
+    for number, line in enumerate(text.split('\n'), 1):
+        if '\r' in line or '\0' in line:
+            raise ValueError('control characters in UCI line %d' % number)
+        tokens = uci_tokens(line)
+        if not tokens:
+            continue
+        keyword = tokens[0]
+        if keyword == 'config':
+            if len(tokens) not in (2, 3) or not UCI_NAME.fullmatch(tokens[1]):
+                raise ValueError('malformed section header in UCI line %d' % number)
+            if tokens[1] != section_type:
+                raise ValueError('only %s sections are allowed (UCI line %d)' % (section_type, number))
+            if len(tokens) == 3 and not UCI_NAME.fullmatch(tokens[2]):
+                raise ValueError('malformed section name in UCI line %d' % number)
+            sections.append((tokens[2] if len(tokens) == 3 else None, {}))
+        elif keyword in ('option', 'list'):
+            if len(tokens) != 3 or not UCI_NAME.fullmatch(tokens[1]) or not sections:
+                raise ValueError('malformed %s in UCI line %d' % (keyword, number))
+            name, value = tokens[1], tokens[2]
+            if keyword == 'list' and name in sections[-1][1]:
+                value = sections[-1][1][name] + ' ' + value
+            sections[-1][1][name] = value
+        else:
+            raise ValueError('unsupported UCI keyword %r in line %d' % (keyword, number))
+    return sections
 
 
 def check_dropbear_config(text):
     """Every dropbear section must switch password login off explicitly.
 
     Dropbear's init script defaults PasswordAuth and RootPasswordAuth to on
-    when the option is absent, so a check that only rejects 'on' is bypassed
-    by leaving the option out. Each section is a separate SSH instance.
+    when the option is absent or carries a value config_get_bool does not
+    recognise, so only an exact off spelling counts. Each section is a
+    separate SSH instance.
     """
-    sections = []
-    for line in text.splitlines():
-        words = line.split()
-        if not words or words[0].startswith('#'):
-            continue
-        if words[0] == 'config':
-            if len(words) < 2 or words[1] != 'dropbear':
-                raise ValueError('dropbear config may only contain dropbear sections')
-            sections.append({})
-        elif words[0] in ('option', 'list') and len(words) >= 3 and sections:
-            sections[-1][words[1]] = words[2].strip("'\"").lower()
+    sections = uci_sections(text, 'dropbear')
     if not sections:
         raise ValueError('dropbear config has no dropbear section')
-    for section in sections:
+    for _, options in sections:
         for key in ('PasswordAuth', 'RootPasswordAuth'):
-            if section.get(key) not in OFF_VALUES:
-                raise ValueError('every dropbear section must set %s to off; '
-                                 'Dropbear defaults it to on when absent' % key)
+            if options.get(key) not in OFF_VALUES:
+                raise ValueError('every dropbear section must set %s to one of %s; '
+                                 'Dropbear defaults it to on otherwise' % (key, ', '.join(OFF_VALUES)))
 
 
 def config_files(config, root, example=False):

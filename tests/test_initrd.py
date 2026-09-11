@@ -186,10 +186,22 @@ class InitrdTests(unittest.TestCase):
         self.assertEqual(stat.S_IMODE(entries['root/.ssh/authorized_keys'].mode), 0o600)
 
     def test_dropbear_off_spellings_accepted(self):
-        for value in ('off', '0', 'no', '"false"'):
+        for value in ('off', '0', 'no', '"false"', "'disabled'"):
             members = self.typical_backup()
             members['./etc/config/dropbear'] = ("config dropbear 'main'\n\toption PasswordAuth %s\n\toption RootPasswordAuth %s\n" % (value, value)).encode()
             with self.subTest(value=value):
+                image_from_backup(self.backup(members))
+
+    def test_dropbear_uci_shapes_accepted(self):
+        texts = [
+            # quoted names, comment lines, anonymous section, an override that ends off
+            b"# generated\nconfig dropbear\n\toption 'PasswordAuth' \"off\"\n\toption RootPasswordAuth 'on'\n\toption \"RootPasswordAuth\" 'off'\n",
+            b"config dropbear 'main'\n    option PasswordAuth off\n    option RootPasswordAuth off\n    option BannerFile '/etc/banner text'\n\nconfig dropbear 'second'\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n",
+        ]
+        for text in texts:
+            members = self.typical_backup()
+            members['./etc/config/dropbear'] = text
+            with self.subTest(text=text):
                 image_from_backup(self.backup(members))
 
     def test_backup_is_deterministic(self):
@@ -216,6 +228,21 @@ class InitrdTests(unittest.TestCase):
                 ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n\nconfig dropbear 'second'\n\toption Port '2222'\n"),
                 ('./etc/config/dropbear', b"config other\n\toption PasswordAuth 'off'\n"),
                 ('./etc/config/dropbear', b"# nothing\n"),
+                # UCI strips quotes from names and the last assignment wins.
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n\toption 'PasswordAuth' 'on'\n"),
+                ('./etc/config/dropbear', b'config dropbear \'main\'\n\toption PasswordAuth \'off\'\n\toption RootPasswordAuth \'off\'\n\toption "RootPasswordAuth" on\n'),
+                # config_get_bool is case-sensitive and falls back to ON for unknown values.
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'OFF'\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'nope'\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\tlist PasswordAuth 'off'\n\tlist PasswordAuth 'on'\n\toption RootPasswordAuth 'off'\n"),
+                # Syntax the parser does not model is refused instead of guessed.
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'off' # trailing\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth of\\f\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"package dropbear\nconfig dropbear 'main'\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'off' extra\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'off\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\r\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"option PasswordAuth 'off'\noption RootPasswordAuth 'off'\n"),
                 ('./root/.ssh/authorized_keys', b'ssh-dss AAAA garbage\n'),
                 ('./etc/config/bad.name', b"config x\n"),
                 ('./etc/dropbear/authorized_keys', b'ssh-dss AAAA garbage\n'),
