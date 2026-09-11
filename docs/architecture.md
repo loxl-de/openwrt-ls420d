@@ -69,9 +69,15 @@ matching modules. Do not mix modules from another kernel build. Package or
 kernel changes require a new generic build. Site-only changes require only a
 new companion, provided the deployment contract is still compatible.
 
-The marker `/etc/ls420d-deployment` identifies companion format 1; it is not a
-signature or a binding to a particular kernel hash. Verify downloaded hashes
-and hardware-test the intended pair. Preserve a known-good pair privately.
+The marker `/etc/ls420d-deployment` identifies companion format 2; it is not a
+signature or a binding to a particular kernel hash. Format 2 delivers the
+hostname as UCI batch data in `/etc/ls420d-site.uci`, which a uci-defaults
+hook in the generic image merges after `config_generate` has produced the
+board defaults. Shipping a whole `/etc/config/system` instead would stop that
+generation and silently drop the LED, button and logging entries. A format 2
+companion therefore needs a generic image that carries the hook; on an older
+image only the hostname stays at its default. Verify downloaded hashes and
+hardware-test the intended pair. Preserve a known-good pair privately.
 
 See [deployment](deployment.md), [build](build.md) and
 [ADR 0002](decisions/0002-generic-kernel-external-initramfs.md).
