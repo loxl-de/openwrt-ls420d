@@ -50,14 +50,15 @@ checks the native DTB, and enforces a kernel image below the 20 MiB gap between
 the stock load addresses. It also measures the decompressed kernel from the
 `vmlinux` load segments: starting at the platform text offset, the kernel plus
 `.bss`, the relocated decompressor and scratch space must end below the initrd
-load address, otherwise the companion would be overwritten during boot. The
-embedded initramfs is xz-compressed so that this footprint stays small; the
-check fails closed if a future package set grows past the limit, and its
-numbers (footprint, uImage size, scratch margin, worst-case end, initrd load
-address and remaining headroom) are recorded in `build.manifest` so the
-verdict can be reviewed against the hardware pilot. The companion generator
-limits output to 1 MiB. These checks do not replace a complete
-hardware memory-layout test.
+load address, otherwise the companion would be overwritten during boot. With
+an uncompressed embedded initramfs that footprint is roughly the size of the
+root filesystem; the check fails closed if the package set grows past the
+limit, and its numbers (footprint, uImage size, scratch margin, worst-case
+end, initrd load address and remaining headroom) are recorded in
+`build.manifest` so the verdict can be reviewed against the hardware pilot
+and so the decision whether to compress the embedded initramfs can rest on
+measured headroom. The companion generator limits output to 1 MiB. These
+checks do not replace a complete hardware memory-layout test.
 
 ## Local verification without a firmware compile
 
