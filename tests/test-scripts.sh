@@ -150,4 +150,32 @@ if grep -RIE 'BEGIN (OPENSSH|RSA|EC|DSA) PRIVATE KEY|([0-9A-Fa-f]{2}:){5}[0-9A-F
 fi
 ok 'public LS420D build inputs are RAM-only and deployment-neutral'
 
+printf '%s\trefs/tags/v25.12.4\n%s\trefs/tags/v25.12.4^{}\n%s\trefs/tags/v25.12.10-rc1\n%s\trefs/tags/v25.12.10\n%s\trefs/tags/v25.12.10^{}\n%s\trefs/tags/v25.12.5\n%s\trefs/tags/v25.12.5^{}\n%s\trefs/tags/v26.1.0\n' \
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
+    cccccccccccccccccccccccccccccccccccccccc dddddddddddddddddddddddddddddddddddddddd \
+    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ffffffffffffffffffffffffffffffffffffffff \
+    0000000000000000000000000000000000000000 1111111111111111111111111111111111111111 > "$TEST_TMP/tags"
+[ "$(newest_release_tag 25.12 < "$TEST_TMP/tags")" = '25.12.10 dddddddddddddddddddddddddddddddddddddddd' ]
+[ "$(peeled_tag_commit v25.12.10 < "$TEST_TMP/tags")" = eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ]
+expect_failure 'a lightweight tag without a peeled commit is rejected' peeled_tag_commit v26.1.0 < "$TEST_TMP/tags"
+expect_failure 'a series without release tags is rejected' newest_release_tag 24.10 < "$TEST_TMP/tags"
+ok 'newest point release is chosen numerically and release candidates are ignored'
+
+cat > "$TEST_TMP/feeds.conf.default" <<'EOF_FEEDS'
+src-git packages https://git.openwrt.org/feed/packages.git^1111111111111111111111111111111111111111
+src-git luci https://git.openwrt.org/project/luci.git^2222222222222222222222222222222222222222
+src-git-full routing https://git.openwrt.org/feed/routing.git^3333333333333333333333333333333333333333
+src-git telephony https://git.openwrt.org/feed/telephony.git^4444444444444444444444444444444444444444
+src-git video https://github.com/openwrt/video.git^5555555555555555555555555555555555555555
+#src-git extra https://example.invalid/extra.git
+EOF_FEEDS
+feeds_lock_from_conf "$TEST_TMP/feeds.conf.default" "$REPO_ROOT/feeds.lock" "$TEST_TMP/feeds.lock" 25.12.10
+grep -q '^packages|https://github.com/openwrt/packages.git|1111111111111111111111111111111111111111$' "$TEST_TMP/feeds.lock"
+grep -q '^routing|https://github.com/openwrt/routing.git|3333333333333333333333333333333333333333$' "$TEST_TMP/feeds.lock"
+grep -q 'OpenWrt v25.12.10 feeds.conf.default' "$TEST_TMP/feeds.lock"
+sed '/^src-git luci/d' "$TEST_TMP/feeds.conf.default" > "$TEST_TMP/feeds.short"
+expect_failure 'a feed missing from feeds.conf.default is rejected' \
+    feeds_lock_from_conf "$TEST_TMP/feeds.short" "$REPO_ROOT/feeds.lock" "$TEST_TMP/feeds.bad" 25.12.10
+ok 'feed lock is rewritten with upstream commits and the chosen mirror URLs'
+
 printf '1..%d\n' "$pass"
