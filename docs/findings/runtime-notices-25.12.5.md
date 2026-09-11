@@ -294,3 +294,43 @@ The review does not cover every source or UAPI header in its Makefile.
 
 These files were found and hashed in the same verified B source bundle.
 The complete GPL text in ethtool's COPYING was not read in this pass.
+
+## Runtime compression libraries
+
+The verified B manifest selects `zlib 1.3.1-r1` and `liblzo2 2.10-r5`.
+The rootfs inventory confirms `usr/lib/libz.so.1.3.1` and
+`usr/lib/liblzo2.so.2.0.0`. OpenWrt names the latter recipe `liblzo`;
+its ABI suffix accounts for the installed package name `liblzo2`.
+
+The full zlib `LICENSE` and the complete copyright/permission header in
+`zlib.h` were read. Both use the zlib permission terms, but the top-level
+file gives 1995–2022 while the header gives 1995–2024 for Jean-loup Gailly
+and Mark Adler. Preserve the actual notices rather than harmonizing the dates.
+
+OpenWrt also ships ARM optimization patches for zlib. The inspected headers
+in patches 002 and 003 name Mark Adler for the adapted inflate files and
+ARM, Inc. for `chunkcopy.h`; all refer to the notice in `zlib.h`.
+Patch 004 selects these sources conditionally through CMake's ARMv8 option.
+These patches must accompany the source offer even if a particular target
+does not compile that branch. This inspection did not establish the resolved
+per-package CMake cache value.
+
+The LZO recipe declares GPL-2.0-or-later and installs shared `liblzo2.so.*`.
+Complete headers in `src/lzo1x_1.c` and `include/lzo/lzoconf.h`
+confirm version 2 or later and name Markus Franz Xaver Johannes Oberhumer.
+The archive's `COPYING` was found and hashed; its full GPL text was not
+read in this pass.
+
+The source bundle also contains zstd, lz4, xz and bzip2 downloads. They are
+not evidence of corresponding standalone libraries in this rootfs.
+The resolved configuration explicitly disables `CONFIG_PACKAGE_libzstd`
+and `CONFIG_BTRFS_PROGS_ZSTD`. Host build tools and compression code within
+the Linux kernel must be reviewed separately from these two userspace packages.
+
+| Archive | File | SHA-256 |
+| --- | --- | --- |
+| zlib-1.3.1.tar.zst | LICENSE | 845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243 |
+| zlib-1.3.1.tar.zst | zlib.h | 8a5579af72ea4f427ff00a4150f0ccb3fc5c1e4379f726e101133b1ab9fc600c |
+| lzo-2.10.tar.gz | COPYING | 8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643 |
+
+The zlib.h hash identifies the complete header file, not just its license block.
