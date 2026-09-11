@@ -243,3 +243,54 @@ with the recipe. Other linked source notices remain part of the pending review.
 All four files were found and hashed. Only hdparm's complete license text and
 the source headers identified above were read in this pass; the GPL and LGPL
 texts were not read in full. These findings do not open the distribution gate.
+
+## BusyBox 1.37.0-r6
+
+The top-level `LICENSE` explicitly restricts distribution of this BusyBox
+version and derived versions to GPL version 2. Its version-selection preface
+was read; the following full GPL text was not read in this pass.
+
+The resolved configuration uses the default applet selection and enables ash.
+Both the opening header and the complete retained Berkeley notice at the end
+of `shell/ash.c` were read. The file names Kenneth Almquist, the Regents of
+the University of California and Herbert Xu. Its retained three-clause BSD
+notice requires attribution in materials accompanying binary distribution.
+Keep that notice as well as BusyBox's top-level license.
+
+The recipe also lists `archival/libarchive/bz/LICENSE`. That complete
+bzip2 1.0.4 notice was read; it names Julian R Seward and includes conditions
+on source attribution, altered sources and endorsement. Listing it in the
+recipe does not establish that the bzip2 applet is in this image.
+The resolved configuration disables BZIP2, BUNZIP2, BZCAT, seamless bzip2,
+bzip2 decompression, unzip-bzip2 and compressed usage. The inspected
+`archival/libarchive/Kbuild.src` selects the decompression helper through
+those feature switches. Preserve the notice in the source archive; do not
+report the applet as enabled merely because its license file exists.
+
+## ethtool 6.15-r1
+
+The selected package is `ethtool`, not `ethtool-full`. Its tiny variant
+disables Netlink and pretty register dumps and installs `/usr/sbin/ethtool`.
+No package selection or runtime behavior was changed during this review.
+
+The complete short `LICENSE` identifies GPL version 2 and refers to
+`COPYING`. The source Makefile includes JSON output helpers even without
+the full variant. Inspected headers show:
+
+- `json_writer.c` offers GPL-2.0 or BSD-2-Clause and names Stephen Hemminger.
+- `json_print.c` states GPL version 2 or later and names Julien Fortin.
+- `uapi/linux/ethtool.h` carries GPL-2.0 with Linux-syscall-note.
+
+These file-specific notices do not replace the top-level distribution terms.
+The complete initial attribution block of `ethtool.c` was also read.
+The review does not cover every source or UAPI header in its Makefile.
+
+| Archive | License file | SHA-256 |
+| --- | --- | --- |
+| busybox-1.37.0.tar.bz2 | LICENSE | bbfc9843646d483c334664f651c208b9839626891d8f17604db2146962f43548 |
+| busybox-1.37.0.tar.bz2 | archival/libarchive/bz/LICENSE | b5a136ed67798e51fe2e0ca0b2a21cb01b904ff0c9f7d563a6292e276607e58f |
+| ethtool-6.15.tar.xz | LICENSE | 5d632934396f90c82dfebe3c9512648bbb6333b406113d0cd331b0e0aa2d34a1 |
+| ethtool-6.15.tar.xz | COPYING | 8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643 |
+
+These files were found and hashed in the same verified B source bundle.
+The complete GPL text in ethtool's COPYING was not read in this pass.
