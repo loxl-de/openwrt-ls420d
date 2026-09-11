@@ -9,6 +9,7 @@ import tarfile
 
 LIMIT = 8 * 1024 * 1024
 NAME = re.compile(r'[A-Za-z0-9][A-Za-z0-9+_.-]{0,255}')
+SCRIPT_NAME = re.compile(r'[A-Za-z0-9][A-Za-z0-9+_.~-]{0,255}')
 
 
 def digest(data):
@@ -66,7 +67,7 @@ def scripts_evidence(data):
     with tarfile.open(fileobj=io.BytesIO(raw), mode='r:') as archive:
         for member in archive:
             if (not member.isfile() or member.pax_headers or
-                    not NAME.fullmatch(member.name) or member.name in members or
+                    not SCRIPT_NAME.fullmatch(member.name) or member.name in members or
                     member.size > LIMIT or len(members) >= 4096):
                 raise ValueError('unsupported or duplicate script member')
             with archive.extractfile(member) as stream:

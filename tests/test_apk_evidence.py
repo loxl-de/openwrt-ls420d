@@ -64,6 +64,12 @@ class ApkEvidenceTests(unittest.TestCase):
         self.assertEqual(result['members']['fixture-1.abc.post-install']['sha256'],
                          MODULE.digest(b'private-script-marker'))
 
+    def test_openwrt_snapshot_version_in_script_name(self):
+        name = 'base-files-1~f5dae5ece4.' + 'a'*40 + '.post-install'
+        result = MODULE.scripts_evidence(archive([(name, b'fixture')]))
+        self.assertIn(name, result['members'])
+        self.assertEqual(result['members'][name]['sha256'], MODULE.digest(b'fixture'))
+
     def test_script_timestamp_and_order_are_visible(self):
         items = [('a.post-install', b'a'), ('b.post-install', b'b')]
         a = MODULE.scripts_evidence(archive(items, 1))
