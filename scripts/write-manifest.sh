@@ -13,7 +13,7 @@ ARTIFACT_DIR=${ARTIFACT_DIR:-$REPO_ROOT/build/artifacts}
 require_command sha256sum
 load_openwrt_lock "$REPO_ROOT/openwrt.lock"
 
-for artifact_name in uImage.buffalo initrd.buffalo packages.manifest rootfs-inventory.json upstream-delta.patch public-files.sha256 kernel-patches.sha256; do
+for artifact_name in uImage.buffalo initrd.buffalo packages.manifest rootfs-inventory.json upstream-delta.patch public-files.sha256 kernel-patches.sha256 kernel-footprint.txt; do
     [ -s "$ARTIFACT_DIR/$artifact_name" ] ||
         fail "required packaged artifact is missing: $artifact_name"
 done
@@ -36,6 +36,9 @@ target_compiler=$("$target_gcc" --version | sed -n '1p')
     printf 'FEEDS_LOCK_SHA256=%s\n' "$(sha256sum "$REPO_ROOT/feeds.lock" | awk '{print $1}')"
     printf 'CONFIG_SHA256=%s\n' "$(sha256sum "$SOURCE_DIR/.config" | awk '{print $1}')"
     printf 'TARGET_COMPILER=%s\n' "$target_compiler"
+    # Memory-layout numbers behind the initrd overlap verdict, for review
+    # against the hardware pilot; every key exactly once, values fully checked.
+    validate_kernel_footprint "$ARTIFACT_DIR/kernel-footprint.txt"
     printf 'PATCH_SERIES_SHA256=%s\n' "$(sha256sum "$REPO_ROOT/openwrt/patches/series" | awk '{print $1}')"
     while IFS= read -r patch_name || [ -n "$patch_name" ]; do
         case $patch_name in ''|'#'*) continue ;; esac

@@ -136,3 +136,38 @@ apply_patch_series() {
         case $listed in *" $patch_name "*) ;; *) fail "unlisted patch file: $patch_name" ;; esac
     done
 }
+
+# Validate the kernel footprint record and print it. Every one of the seven
+# keys must appear exactly once with a complete decimal or 0x-hex value.
+validate_kernel_footprint() {
+    footprint_file=$1
+    [ -f "$footprint_file" ] || fail "kernel footprint record not found: $footprint_file"
+    footprint_seen=' '
+    while IFS= read -r footprint_line || [ -n "$footprint_line" ]; do
+        case $footprint_line in *=*) ;; *) fail "invalid kernel footprint record: $footprint_line" ;; esac
+        footprint_key=${footprint_line%%=*}
+        footprint_value=${footprint_line#*=}
+        case $footprint_key in
+            KERNEL_FOOTPRINT_BYTES|UIMAGE_BYTES|DECOMPRESSOR_SCRATCH_BYTES|INITRD_HEADROOM_BYTES)
+                case $footprint_value in
+                    ''|*[!0-9]*) fail "kernel footprint value is not a decimal number: $footprint_key" ;;
+                esac ;;
+            KERNEL_LOAD_ADDRESS|KERNEL_WORST_CASE_END|INITRD_LOAD_ADDRESS)
+                case $footprint_value in
+                    0x) fail "kernel footprint address is empty: $footprint_key" ;;
+                    0x*) case ${footprint_value#0x} in
+                             *[!0-9a-f]*) fail "kernel footprint address is not hexadecimal: $footprint_key" ;;
+                         esac ;;
+                    *) fail "kernel footprint address lacks the 0x prefix: $footprint_key" ;;
+                esac ;;
+            *) fail "unknown kernel footprint key: $footprint_key" ;;
+        esac
+        case $footprint_seen in *" $footprint_key "*) fail "duplicate kernel footprint key: $footprint_key" ;; esac
+        footprint_seen="$footprint_seen$footprint_key "
+        printf '%s=%s\n' "$footprint_key" "$footprint_value"
+    done < "$footprint_file"
+    for footprint_key in KERNEL_LOAD_ADDRESS KERNEL_FOOTPRINT_BYTES UIMAGE_BYTES DECOMPRESSOR_SCRATCH_BYTES \
+        KERNEL_WORST_CASE_END INITRD_LOAD_ADDRESS INITRD_HEADROOM_BYTES; do
+        case $footprint_seen in *" $footprint_key "*) ;; *) fail "missing kernel footprint key: $footprint_key" ;; esac
+    done
+}
