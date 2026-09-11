@@ -14,7 +14,7 @@ index 9833143d7537bf9e94e85cf57ad63a2faa4dacef..507409441a57fc7c3fd18d13b325a4fa
  		lan_mac=$(mtd_get_mac_ascii u-boot-env eth1addr)
  		;;
 diff --git a/target/linux/mvebu/cortexa9/base-files/lib/upgrade/platform.sh b/target/linux/mvebu/cortexa9/base-files/lib/upgrade/platform.sh
-index 45a54c1d22bb5e8b7e117be76526f4c362a8e010..5664c7e5d16973a0fda6c96a133436950193b5a5 100644
+index 45a54c1d22bb5e8b7e117be76526f4c362a8e010..5664c7e5d16973a0fda6c96a133436950193b5a5 100755
 --- a/target/linux/mvebu/cortexa9/base-files/lib/upgrade/platform.sh
 +++ b/target/linux/mvebu/cortexa9/base-files/lib/upgrade/platform.sh
 @@ -18,6 +18,10 @@ nas326_initial_setup()
