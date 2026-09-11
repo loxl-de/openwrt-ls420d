@@ -376,3 +376,60 @@ The archive includes a framework used by development and build tooling.
 Its license and remaining library-source notices still require separate review.
 This component check does not claim that every file in the archive has been
 classified or that the distribution gate is complete.
+
+## OpenWrt configuration and IPC libraries
+
+The verified B manifest maps these selected packages to three source archives:
+
+| Source revision | Selected packages |
+| --- | --- |
+| libubox 2026.06.19~7dd12784-r1 | libubox20260213, libblobmsg-json20260213, libjson-script20260213, jshn |
+| ubus 2026.06.28~24864e78-r2 | libubus20251202, ubus, ubusd |
+| uci 2025.12.02~66127cd7-r1 | libuci20250120, uci |
+
+Their recipes leave `PKG_LICENSE_FILES` empty. The inspected notices are
+in source files; an empty metadata field is not evidence of absent licensing.
+
+### libubox
+
+The recipe declares ISC. Complete notices in `uloop.c`, `blobmsg_json.c`,
+`json_script.c` and `jshn.c` grant ISC-style permission and name Felix
+Fietkau. CMake also includes `avl.c`, `base64.c` and `md5.c` in the
+shared ubox library. Their complete initial notices were read:
+
+- `avl.c` retains three-clause BSD terms naming Henning Rogge and crediting
+  the original OLSRd implementation by Hannes Gredler.
+- `base64.c` contains the Felix Fietkau and Internet Software Consortium
+  permission notices, followed by IBM's separate notice. Retain IBM's actual
+  wording, including its naming restriction and limited patent statement.
+- `md5.c` retains Alexander Peslyak's public-domain dedication and fallback
+  permission in addition to the ISC notice. It explicitly says no code from
+  Colin Plumb's implementation was reused.
+
+These notices must not be replaced by one generic ISC text. The shell helper
+`sh/jshn.sh` does not have a license header at its start; its attribution
+needs to be resolved alongside the remaining helper files.
+
+### ubus and UCI
+
+Complete headers in ubus's `libubus.c`, `ubusd.c` and `cli.c`
+state GNU Lesser General Public License version 2.1 and name Felix Fietkau,
+consistent with the recipe's LGPL-2.1 declaration. The examined grant does
+not say "or later"; do not silently add it.
+
+UCI's `libuci.c` also states LGPL version 2.1. Its `cli.c`, however,
+states GNU General Public License version 2. The inherited recipe declaration
+does not distinguish the selected command-line program from the library.
+
+| Archive-relative file | Complete file SHA-256 |
+| --- | --- |
+| libubox: avl.c | 9a71bb61d1c686d73bff7318c2df8b0213a5bac64d4ad4555bfb14a66e6baa17 |
+| libubox: base64.c | 3378f8210b5bd02d19e9c73caa658b5206e61efef8d2fdedf879b13f5f0ef966 |
+| libubox: md5.c | a9cb115e58a1f1a249fa13653223439e8add19f4a23d0e1bb701f233c87c98a6 |
+| ubus: libubus.c | ca425cb93b738f9701514c65fa646c99476032f81bccf0f79fa0579c2b795eea |
+| uci: libuci.c | bbc34ea5f391abc3b27416dc3c96b0f71f852c44210faf1cde0990218f68b13a |
+| uci: cli.c | 5bb12361838b588bb263ade8537f5ae1a5e62d54b0a8f0640489db8cc29831d8 |
+
+The archive versions are identified in the first table. These hashes identify
+whole source files, not only their notice blocks. Remaining objects and helper
+scripts are not claimed reviewed.
