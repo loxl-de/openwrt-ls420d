@@ -116,5 +116,9 @@ workflow on that branch with `offline_source_artifact` and
 firmware compilation. A normal dispatch with `reproducibility=true` still runs
 two independent online-source builds.
 
-Only the JSON test result is uploaded, never the rebuilt firmware. The first
-offline run is pending; this section describes the test, not a passed result.
+Only the JSON test result is uploaded, never the rebuilt firmware.
+[The first offline run](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34570805512)
+failed during package building. The corrected test enables loopback for
+fakeroot and retains verbose diagnostics on failure.
+[The replacement run](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34576303964)
+is in progress; no successful offline rebuild has yet been established.

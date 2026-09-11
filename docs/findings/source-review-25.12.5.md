@@ -27,8 +27,11 @@ and the Linux syscall exception, with additional per-file licensing rules.
 For 56 packages, metadata does not specify `LicenseFiles`. This does not prove
 that notices are absent from their sources. Those notices still need inspection
 and inclusion in the materials accompanying any binary distribution. The
-libusb archive's `COPYING` was checked separately. Toolchain runtime exceptions,
-mixed-license packages and the host build sources also remain in review.
+libusb archive's `COPYING` was checked separately. The follow-up
+[runtime notice review](runtime-notices-25.12.5.md) maps the common toolchain
+recipe to musl and GCC components and records inspected source notices.
+The complete notice collection, mixed-license packages and host build sources
+remain in review.
 
 Generate the declaration inventory from a restored source bundle with:
 
