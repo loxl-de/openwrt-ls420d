@@ -37,7 +37,9 @@ mkdir -p "$DOWNLOAD_DIR" "$CCACHE_STORAGE"
 ln -s "$CCACHE_STORAGE" "$SOURCE_DIR/.ccache"
 
 make -C "$SOURCE_DIR" -j"$JOBS" DL_DIR="$DOWNLOAD_DIR" download
-make -C "$SOURCE_DIR" -j"$JOBS" DL_DIR="$DOWNLOAD_DIR"
+# Keep compiler and sub-make errors in the CI log; a failed parallel build
+# otherwise may report only the top-level target. Do not retry over failures.
+make -C "$SOURCE_DIR" -j"$JOBS" V=s DL_DIR="$DOWNLOAD_DIR"
 
 kernel_tree=$(find "$SOURCE_DIR/build_dir/target-"* -maxdepth 2 -type d -name 'linux-6.12.*' -print)
 [ -n "$kernel_tree" ] || fail 'prepared Linux tree missing'
