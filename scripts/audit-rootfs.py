@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
-"""Audit built-in rootfs defaults and write a deterministic path/type inventory."""
+"""Audit built-in defaults and fingerprint rootfs contents without exporting them."""
+import hashlib
 import json
+import os
 from pathlib import Path
 import stat
 import sys
@@ -25,5 +27,15 @@ inventory = {}
 for path in sorted(root.rglob('*')):
     mode = path.lstat().st_mode
     kind = 'symlink' if stat.S_ISLNK(mode) else 'directory' if stat.S_ISDIR(mode) else 'file' if stat.S_ISREG(mode) else 'special'
-    inventory[path.relative_to(root).as_posix()] = {'type': kind}
+    entry = {'type': kind, 'mode': stat.S_IMODE(mode)}
+    if kind == 'file':
+        checksum = hashlib.sha256()
+        with path.open('rb') as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+                checksum.update(chunk)
+        entry['sha256'] = checksum.hexdigest()
+        entry['size'] = path.stat().st_size
+    elif kind == 'symlink':
+        entry['target'] = os.readlink(path)
+    inventory[path.relative_to(root).as_posix()] = entry
 output.write_text(json.dumps(inventory, sort_keys=True, indent=2)+'\n')
