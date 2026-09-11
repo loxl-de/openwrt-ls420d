@@ -92,6 +92,42 @@ class ApkEvidenceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             MODULE.scripts_evidence(gzip.compress(data.getvalue()))
 
+    def test_rejection_reports_reason_without_rejected_name(self):
+        for items, reason, index in (
+                ([('../private-marker', b'x')], 'name-format', 0),
+                ([('private-marker', b'x'), ('private-marker', b'y')], 'duplicate-name', 1)):
+            with self.subTest(reason=reason), self.assertRaises(ValueError) as raised:
+                MODULE.scripts_evidence(archive(items))
+            message = str(raised.exception)
+            self.assertNotIn('private-marker', message)
+            context = json.loads(message.split(': ', 1)[1])
+            self.assertIn(reason, context['reasons'])
+            self.assertEqual(context['index'], index)
+            self.assertEqual(len(context['name_sha256']), 64)
+
+    def test_pax_rejection_does_not_log_metadata(self):
+        data = io.BytesIO()
+        with tarfile.open(fileobj=data, mode='w', format=tarfile.PAX_FORMAT) as tar:
+            member = tarfile.TarInfo('fixture')
+            member.pax_headers = {'comment': 'private-pax-marker'}
+            tar.addfile(member)
+        with self.assertRaises(ValueError) as raised:
+            MODULE.scripts_evidence(gzip.compress(data.getvalue()))
+        message = str(raised.exception)
+        self.assertIn('pax-headers', message)
+        self.assertNotIn('private-pax-marker', message)
+        self.assertNotIn('comment', message)
+
+    def test_gnu_long_script_name_is_supported(self):
+        name = 'fixture-' + 'a' * 105 + '.post-install'
+        data = io.BytesIO()
+        with tarfile.open(fileobj=data, mode='w', format=tarfile.GNU_FORMAT) as tar:
+            member = tarfile.TarInfo(name)
+            member.size = 1
+            tar.addfile(member, io.BytesIO(b'x'))
+        result = MODULE.scripts_evidence(gzip.compress(data.getvalue(), mtime=0))
+        self.assertIn(name, result['members'])
+
     def test_expansion_is_bounded(self):
         with self.assertRaises(ValueError):
             MODULE.scripts_evidence(gzip.compress(b'\0'*(MODULE.LIMIT+1)))

@@ -3,6 +3,7 @@
 import gzip
 import hashlib
 import io
+import json
 from pathlib import Path
 import re
 import tarfile
@@ -66,10 +67,28 @@ def scripts_evidence(data):
     order = []
     with tarfile.open(fileobj=io.BytesIO(raw), mode='r:') as archive:
         for member in archive:
-            if (not member.isfile() or member.pax_headers or
-                    not SCRIPT_NAME.fullmatch(member.name) or member.name in members or
-                    member.size > LIMIT or len(members) >= 4096):
-                raise ValueError('unsupported or duplicate script member')
+            reasons = []
+            if not member.isfile():
+                reasons.append('non-regular')
+            if member.pax_headers:
+                reasons.append('pax-headers')
+            if not SCRIPT_NAME.fullmatch(member.name):
+                reasons.append('name-format')
+            if member.name in members:
+                reasons.append('duplicate-name')
+            if member.size > LIMIT:
+                reasons.append('size-limit')
+            if len(members) >= 4096:
+                reasons.append('member-count-limit')
+            if reasons:
+                # Do not leak a rejected name or PAX metadata into public CI logs.
+                context = {
+                    'reasons': reasons, 'index': len(order),
+                    'name_sha256': digest(member.name.encode('utf-8', 'surrogateescape')),
+                    'name_length': len(member.name), 'type_hex': member.type.hex(),
+                    'size': member.size, 'pax_count': len(member.pax_headers),
+                }
+                raise ValueError('unsupported script member: ' + json.dumps(context, sort_keys=True))
             with archive.extractfile(member) as stream:
                 content = stream.read(LIMIT + 1)
             if len(content) != member.size:
