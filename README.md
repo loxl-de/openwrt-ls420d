@@ -109,6 +109,14 @@ The GitHub Actions workflow can compile it, but downloads remain on hold until
 the accompanying source and license package is ready. The [build guide](docs/build.md)
 and [distribution policy](docs/distribution.md) describe that process.
 
+**Build it yourself.** Fork this repository as a public fork and run the CI
+workflow there: the firmware job runs on the free standard runners for public
+repositories, and the products stay on your own runner and in your own
+artifacts. Nothing is distributed, so the corresponding-source gate does not
+apply to you; you built it from the pinned sources yourself. The evidence
+job in your fork also tells you whether your fork reproduces the upstream
+hashes.
+
 ## Where to go next
 
 The [configuration guide](docs/deployment.md) shows how the example becomes

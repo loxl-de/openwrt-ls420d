@@ -49,6 +49,43 @@ backup schedules are not provisioned by the example. RAM root alone does not
 prove disk standby: drivetemp polling and any backup or monitoring program
 must be tested for interference with the intended sleep policy.
 
+### Where state lives
+
+RAM-only is a decision with consequences that need a home for each kind of
+state, otherwise a power loss resets a backup system to zero:
+
+- **Configuration** lives in the companion. Change it on the running system,
+  capture it, regenerate; see [deployment](deployment.md).
+- **Logs** are lost with the RAM root. Send them off the device: `logd`
+  forwards to a remote syslog host with `uci set system.@system[0].log_ip`
+  and `log_port`. The backup source host is a natural receiver, because it is
+  awake whenever the NAS does anything interesting. Do not log to the data
+  volume; that keeps a disk awake.
+- **Job state** such as rsync snapshots, restic or borg repositories and
+  their caches belongs on the data volume next to the data it describes.
+  It is the backup, not the operating system, and travels with the disks.
+- **SMART history** is not kept. Query it on demand or let the source host
+  collect it over SSH; a monitoring cron job on the NAS would wake the disks.
+
+### Boot source
+
+Buffalo's U-Boot loads both files from the same source, so the host key in
+the companion is exposed wherever `initrd.buffalo` lives. Use TFTP for
+development and bring-up, where the images change often and the boot network
+is a bench. Use a SATA boot partition for the deployed system: the files are
+read once at boot from a disk that then goes back to sleep, and the key never
+leaves the enclosure. Booting from the data disk does not keep it awake; the
+boot partition is not mounted after Linux starts.
+
+### Memory size comes from the device tree
+
+The kernel patch keeps OpenWrt's policy of discarding the bootloader's
+memory tags, so the RAM size is whatever the LS420D device tree declares:
+512 MB, inherited from the LS421DE description and confirmed by the
+community LS420D device tree. A board variant with less memory would not
+boot this image. The hardware protocol checks the reported size against the
+physical inventory for that reason.
+
 ## Common hardware services
 
 The public overlay includes a PHY service that reapplies Wake-on-LAN setup,
@@ -72,6 +109,28 @@ new companion, provided the deployment contract is still compatible.
 The marker `/etc/ls420d-deployment` identifies companion format 1; it is not a
 signature or a binding to a particular kernel hash. Verify downloaded hashes
 and hardware-test the intended pair. Preserve a known-good pair privately.
+
+## Alternatives considered
+
+**Debian** through Debian_on_Buffalo is the mature route for this exact board
+and has native packages for every backup tool. It was retired for this
+project because a Debian root in RAM is an order of magnitude larger and its
+kernel would still need the same device tree and boot work; see
+[the contribution guide](../CONTRIBUTING.md).
+
+**Alpine Linux** in diskless mode, with the `apkovl` overlay and `lbu`, is
+the closest existing implementation of this architecture: a generic image
+plus a small archive of local changes applied at boot. It was not chosen
+because Alpine has no support for the Armada 370 boards and no reproducible
+cross-build of a kernel with the required patches, so the kernel and device
+tree effort would be the same while the Buffalo-specific drivers, fan and
+power-off support that OpenWrt already carries would have to be ported.
+
+**OpenWrt** was chosen for the small RAM root, the existing LS421DE board
+support, the reproducible pinned source build and procd/UCI as a
+configuration layer. Its cost is that the backup application layer is not a
+first-class citizen and has to be assembled from packages, which
+[the reference job](pull-backup-example.md) does.
 
 See [deployment](deployment.md), [build](build.md) and
 [ADR 0002](decisions/0002-generic-kernel-external-initramfs.md).
