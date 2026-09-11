@@ -137,7 +137,7 @@ apply_patch_series() {
     done
 }
 
-# Validate the kernel footprint record and print it. Every one of the seven
+# Validate the kernel footprint record and print it. Every one of the nine
 # keys must appear exactly once with a complete decimal or 0x-hex value.
 validate_kernel_footprint() {
     footprint_file=$1
@@ -148,11 +148,11 @@ validate_kernel_footprint() {
         footprint_key=${footprint_line%%=*}
         footprint_value=${footprint_line#*=}
         case $footprint_key in
-            KERNEL_FOOTPRINT_BYTES|UIMAGE_BYTES|DECOMPRESSOR_SCRATCH_BYTES|INITRD_HEADROOM_BYTES)
+            KERNEL_IMAGE_BYTES|KERNEL_FOOTPRINT_BYTES|UIMAGE_BYTES|DECOMPRESSOR_SCRATCH_BYTES|INITRD_HEADROOM_BYTES)
                 case $footprint_value in
                     ''|*[!0-9]*) fail "kernel footprint value is not a decimal number: $footprint_key" ;;
                 esac ;;
-            KERNEL_LOAD_ADDRESS|KERNEL_WORST_CASE_END|INITRD_LOAD_ADDRESS)
+            KERNEL_LOAD_ADDRESS|DECOMPRESSOR_END|KERNEL_WORST_CASE_END|INITRD_LOAD_ADDRESS)
                 case $footprint_value in
                     0x) fail "kernel footprint address is empty: $footprint_key" ;;
                     0x*) case ${footprint_value#0x} in
@@ -166,8 +166,9 @@ validate_kernel_footprint() {
         footprint_seen="$footprint_seen$footprint_key "
         printf '%s=%s\n' "$footprint_key" "$footprint_value"
     done < "$footprint_file"
-    for footprint_key in KERNEL_LOAD_ADDRESS KERNEL_FOOTPRINT_BYTES UIMAGE_BYTES DECOMPRESSOR_SCRATCH_BYTES \
-        KERNEL_WORST_CASE_END INITRD_LOAD_ADDRESS INITRD_HEADROOM_BYTES; do
+    for footprint_key in KERNEL_LOAD_ADDRESS KERNEL_IMAGE_BYTES KERNEL_FOOTPRINT_BYTES UIMAGE_BYTES \
+        DECOMPRESSOR_SCRATCH_BYTES DECOMPRESSOR_END KERNEL_WORST_CASE_END INITRD_LOAD_ADDRESS \
+        INITRD_HEADROOM_BYTES; do
         case $footprint_seen in *" $footprint_key "*) ;; *) fail "missing kernel footprint key: $footprint_key" ;; esac
     done
 }

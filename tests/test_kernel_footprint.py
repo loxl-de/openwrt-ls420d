@@ -27,20 +27,41 @@ def elf(segments, machine=40, elf_class=1):
 
 
 class FootprintTests(unittest.TestCase):
-    def test_bss_counts_toward_footprint(self):
+    def test_bss_counts_toward_footprint_not_image(self):
         image = elf([(0x8000, 0x100000, 0x100000), (0x108000, 0x1000, 0x300000)])
-        self.assertEqual(MODULE.load_footprint(image), (0x8000, 0x408000))
+        self.assertEqual(MODULE.load_footprint(image), (0x8000, 0x408000, 0x109000))
+        img, footprint, _, _ = MODULE.check(image, 4096)
+        self.assertEqual((img, footprint), (0x101000, 0x400000))
 
     def test_small_kernel_passes(self):
-        footprint, end = MODULE.check(elf([(0x8000, 0x800000, 0x800000)]), 5 * 1024 * 1024)
-        self.assertEqual(footprint, 0x800000)
+        img, footprint, decompressor_end, end = MODULE.check(elf([(0x8000, 0x800000, 0x800000)]), 5 * 1024 * 1024)
+        self.assertEqual((img, footprint), (0x800000, 0x800000))
+        self.assertLess(decompressor_end, MODULE.INITRD_LOAD)
         self.assertLess(end, MODULE.INITRD_LOAD)
 
     def test_uncompressed_initramfs_near_limit_fails(self):
         # 36 MiB decompressed plus a 3 MiB uImage plus scratch crosses 38 MiB.
         big = elf([(0x8000, 36 * 1024 * 1024, 36 * 1024 * 1024)])
-        _, end = MODULE.check(big, 3 * 1024 * 1024)
+        _, _, decompressor_end, end = MODULE.check(big, 3 * 1024 * 1024)
+        self.assertGreaterEqual(decompressor_end, MODULE.INITRD_LOAD)
         self.assertGreaterEqual(end, MODULE.INITRD_LOAD)
+
+    def test_large_bss_alone_disables_initrd(self):
+        # 20 MiB image, 20 MiB more .bss: the decompressor is fine, the
+        # reservation is not, and the verdict says which.
+        big_bss = elf([(0x8000, 20 * 1024 * 1024, 40 * 1024 * 1024)])
+        _, _, decompressor_end, end = MODULE.check(big_bss, 3 * 1024 * 1024)
+        self.assertLess(decompressor_end, MODULE.INITRD_LOAD)
+        self.assertGreaterEqual(end, MODULE.INITRD_LOAD)
+        with tempfile.TemporaryDirectory() as tmp:
+            vmlinux, uimage = Path(tmp)/'vmlinux', Path(tmp)/'uImage.buffalo'
+            vmlinux.write_bytes(big_bss)
+            uimage.write_bytes(bytes(3 * 1024 * 1024))
+            result = subprocess.run([sys.executable, str(REPO/'scripts/check-kernel-footprint.py'),
+                                     str(vmlinux), str(uimage)], capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('disable it', result.stderr)
+            self.assertIn('KERNEL_FOOTPRINT_BYTES=', result.stderr)
 
     def test_rejects_non_arm_or_64bit(self):
         with self.assertRaises(ValueError):
@@ -59,13 +80,18 @@ class FootprintTests(unittest.TestCase):
             result = subprocess.run([sys.executable, str(REPO/'scripts/check-kernel-footprint.py'),
                                      str(vmlinux), str(uimage)], capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn('initrd load address', result.stderr)
+            self.assertIn('overwrite the Buffalo initrd', result.stderr)
+            # The numbers reach the log even though stdout is the evidence file.
+            self.assertIn('DECOMPRESSOR_END=', result.stderr)
+            self.assertIn('KERNEL_IMAGE_BYTES=', result.stdout)
             vmlinux.write_bytes(elf([(0x8000, 8 * 1024 * 1024, 8 * 1024 * 1024)]))
             result = subprocess.run([sys.executable, str(REPO/'scripts/check-kernel-footprint.py'),
                                      str(vmlinux), str(uimage)], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             values = dict(line.split('=', 1) for line in result.stdout.splitlines())
             self.assertEqual(values['KERNEL_FOOTPRINT_BYTES'], str(8 * 1024 * 1024))
+            self.assertEqual(values['KERNEL_IMAGE_BYTES'], str(8 * 1024 * 1024))
+            self.assertLessEqual(int(values['DECOMPRESSOR_END'], 16), int(values['KERNEL_WORST_CASE_END'], 16))
             self.assertEqual(values['INITRD_LOAD_ADDRESS'], '0x02600000')
             self.assertEqual(int(values['KERNEL_WORST_CASE_END'], 16) + int(values['INITRD_HEADROOM_BYTES']),
                              MODULE.INITRD_LOAD)

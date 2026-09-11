@@ -78,8 +78,12 @@ kernel_tree=$(find "$SOURCE_DIR/build_dir/target-"* -maxdepth 2 -type d -name 'l
 [ "$(printf '%s\n' "$kernel_tree" | grep -c .)" -eq 1 ] || fail 'expected exactly one prepared Linux tree'
 [ -s "$kernel_tree/vmlinux" ] || fail 'uncompressed kernel ELF image missing'
 mkdir -p "$ARTIFACT_DIR"
-python3 "$SCRIPT_DIR/check-kernel-footprint.py" "$kernel_tree/vmlinux" "$kernel" \
-    > "$ARTIFACT_DIR/kernel-footprint.txt"
+# The records go to the evidence file; show them in the log in both outcomes.
+if ! python3 "$SCRIPT_DIR/check-kernel-footprint.py" "$kernel_tree/vmlinux" "$kernel" \
+    > "$ARTIFACT_DIR/kernel-footprint.txt"; then
+    cat "$ARTIFACT_DIR/kernel-footprint.txt" >&2
+    fail 'kernel footprint check failed; records above'
+fi
 cat "$ARTIFACT_DIR/kernel-footprint.txt"
 
 mkdir -p "$ARTIFACT_DIR"

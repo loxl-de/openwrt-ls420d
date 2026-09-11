@@ -107,7 +107,7 @@ printf 'packages\n' > "$manifest_root/out/packages.manifest"
 for evidence in rootfs-inventory.json upstream-delta.patch public-files.sha256 kernel-patches.sha256; do
     printf 'fixture evidence\n' > "$manifest_root/out/$evidence"
 done
-printf 'KERNEL_LOAD_ADDRESS=0x00008000\nKERNEL_FOOTPRINT_BYTES=8388608\nUIMAGE_BYTES=4096\nDECOMPRESSOR_SCRATCH_BYTES=1048576\nKERNEL_WORST_CASE_END=0x00909000\nINITRD_LOAD_ADDRESS=0x02600000\nINITRD_HEADROOM_BYTES=30371840\n' > "$manifest_root/out/kernel-footprint.txt"
+printf 'KERNEL_LOAD_ADDRESS=0x00008000\nKERNEL_IMAGE_BYTES=8388608\nKERNEL_FOOTPRINT_BYTES=8388608\nUIMAGE_BYTES=4096\nDECOMPRESSOR_SCRATCH_BYTES=1048576\nDECOMPRESSOR_END=0x00909000\nKERNEL_WORST_CASE_END=0x00909000\nINITRD_LOAD_ADDRESS=0x02600000\nINITRD_HEADROOM_BYTES=30371840\n' > "$manifest_root/out/kernel-footprint.txt"
 cat > "$manifest_root/source/staging_dir/toolchain-test/bin/arm-openwrt-linux-gcc" <<'EOF'
 #!/bin/sh
 printf 'arm-openwrt-linux-muslgnueabi-gcc 14.3.0\n'
