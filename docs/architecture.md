@@ -70,12 +70,23 @@ state, otherwise a power loss resets a backup system to zero:
 ### Boot source
 
 Buffalo's U-Boot loads both files from the same source, so the host key in
-the companion is exposed wherever `initrd.buffalo` lives. Use TFTP for
-development and bring-up, where the images change often and the boot network
-is a bench. Use a SATA boot partition for the deployed system: the files are
-read once at boot from a disk that then goes back to sleep, and the key never
-leaves the enclosure. Booting from the data disk does not keep it awake; the
-boot partition is not mounted after Linux starts.
+the companion is exposed wherever `initrd.buffalo` lives. Two sources are
+valid and they trade different things:
+
+- **TFTP network boot** keeps the disks entirely free of operating-system
+  files, so a data disk can be moved or replaced without touching a boot
+  partition, and updates are staged on the server without opening the NAS.
+  This is the disk-free operation the project has reached. Its cost is the
+  plaintext companion on the boot network: keep the TFTP server on a boot
+  VLAN or a directly attached link, restrict it to the NAS's address, and
+  serve nothing else from it.
+- **A SATA boot partition** keeps the key inside the enclosure. The files
+  are read once at boot from a disk that then goes back to sleep; the boot
+  partition is not mounted after Linux starts and does not keep the disk
+  awake. Its cost is a small system partition on a data disk.
+
+Choose by which exposure matters more on your network. Neither source
+authenticates the images; see the boot contract above.
 
 ### Memory size comes from the device tree
 
