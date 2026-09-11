@@ -50,13 +50,30 @@ jobs:
           VERSION: ${{ steps.bump.outputs.version }}
         run: |
           branch="bump/openwrt-$VERSION"
-          git config user.name 'github-actions[bot]'
+          bot='github-actions[bot]'
+          git config user.name "$bot"
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          # Never overwrite a proposal branch that a person has touched: only
+          # commits authored by this bot may be replaced, and an unchanged
+          # proposal is left alone.
+          if git fetch -q origin "refs/heads/$branch:refs/remotes/origin/$branch" 2>/dev/null; then
+            if git log --format=%an "origin/$branch" --not "origin/${GITHUB_REF_NAME}" | grep -qvx "$bot"; then
+              echo "::notice::$branch carries commits by someone else; leaving it untouched"
+              exit 0
+            fi
+            if git diff --quiet "origin/$branch" -- openwrt.lock feeds.lock; then
+              echo "::notice::$branch already proposes these locks; nothing to push"
+              exit 0
+            fi
+            lease="--force-with-lease=refs/heads/$branch:$(git rev-parse "origin/$branch")"
+          else
+            lease="--force-with-lease=refs/heads/$branch:"
+          fi
           git checkout -B "$branch"
           git add openwrt.lock feeds.lock
           git commit -q -m "lock: propose OpenWrt $VERSION" -m 'Automated proposal. Verify against the official release announcement before merging.'
-          git push --force origin "$branch"
+          git push "$lease" origin "$branch"
           if [ -z "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]; then
             gh pr create --base main --head "$branch" \
               --title "lock: propose OpenWrt $VERSION" \
