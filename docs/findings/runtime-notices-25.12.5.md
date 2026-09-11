@@ -186,3 +186,60 @@ All three texts were found and hashed; the BSD text was read completely in this
 pass. This review resolves the selected package mapping and the listed notices.
 It does not claim an exhaustive review of shared helper sources or replace
 the remaining notice collection.
+
+## Storage tools
+
+The verified source bundle and rootfs inventory from comparison 34585193428,
+copy B, contain btrfs-progs 6.11-r3, hdparm 9.65-r2 and smartmontools 7.5-r1.
+The following findings cover their installation rules and the notices named
+below, not every compiled source file.
+
+### btrfs-progs
+
+The recipe declares GPL-2.0-only and lists only the top-level `COPYING`.
+Its installation rule also copies `libbtrfsutil.so*`. The rootfs inventory
+confirms both `libbtrfs.so.0.1.4` and `libbtrfsutil.so.1.3.2`, alongside
+the command-line tools.
+
+The complete copyright headers of `libbtrfsutil/filesystem.c` and
+`libbtrfsutil/btrfsutil.h` state LGPL version 2.1 or later and name Facebook.
+The library has its own `libbtrfsutil/COPYING`, whose heading identifies
+LGPL 2.1. A notice collection must retain that component's terms rather than
+apply the recipe's GPL-only label to everything it installs.
+
+### hdparm
+
+The recipe declares BSD-2-Clause and installs `/sbin/hdparm`.
+The complete `LICENSE.TXT` was read. It contains Mark Lord's short
+BSD-style permission notice, not the standard two-clause BSD text. Preserve
+its actual wording and attribution.
+
+The source Makefile links `apt.o` into hdparm. Both the top-level notice
+and the inspected `apt.c` header name Jan Friesse and offer GPL version 2
+or BSD-style terms for that file. Its notice cannot be omitted on the
+assumption that apt.c is an unbuilt extra.
+
+### smartmontools
+
+The selected package installs `/usr/sbin/smartctl`; the verified manifest
+does not select the separate smartd or smartmontools-drivedb packages.
+The rootfs inventory confirms smartctl and contains neither a smartd program
+nor a separate drivedb file. This does not imply that smartctl lacks a compiled-in
+drive database.
+
+The complete copyright header of `smartctl.cpp` names Bruce Allen,
+Christian Franke and Michael Cornwell and states GPL-2.0-or-later, consistent
+with the recipe. Other linked source notices remain part of the pending review.
+
+### Recorded license-file hashes
+
+| Archive | Archive-relative file | SHA-256 |
+| --- | --- | --- |
+| btrfs-progs-v6.11.tar.xz | COPYING | 0d5bf346df9e635a29dcdddf832dc5b002ca6cdc1c5c9c6c567d2a61bb0c5c15 |
+| btrfs-progs-v6.11.tar.xz | libbtrfsutil/COPYING | dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551 |
+| hdparm-9.65.tar.gz | LICENSE.TXT | eae572b06d2733f5c65fbe81680ce2b8a109afee2bdd1a161343c772af0e82e1 |
+| smartmontools-7.5.tar.gz | COPYING | 8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643 |
+
+All four files were found and hashed. Only hdparm's complete license text and
+the source headers identified above were read in this pass; the GPL and LGPL
+texts were not read in full. These findings do not open the distribution gate.
