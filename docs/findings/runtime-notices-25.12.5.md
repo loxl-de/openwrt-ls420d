@@ -142,3 +142,47 @@ included in the notice collection.
 These findings identify specific notices that a package-label-only report
 would miss. They do not change upstream license declarations, approve
 distribution, or claim that every compiled file has been reviewed.
+
+## util-linux 2.41.5
+
+The verified source bundle from comparison 34585193428, copy B, selects six
+packages from this recipe, all at version 2.41.5-r1. The source archive hash is
+`f586e35d320ff537aab3ffeca37e9ecd482ccbe013590db4429a414d8aa6a728`.
+
+| Installed package | Component and recipe declaration |
+| --- | --- |
+| libblkid1 | libblkid; LGPL-2.1-or-later |
+| libmount1 | libmount; LGPL-2.1-or-later |
+| libsmartcols1 | libsmartcols; LGPL-2.1-or-later |
+| libuuid1 | libuuid; BSD-3-Clause |
+| lsblk | misc-utils/lsblk.c; GPL-2.0-or-later |
+| partx-utils | partx, addpart and delpart; GPL-2.0-or-later |
+
+The four library `COPYING` notices were read completely. They point to the
+corresponding license texts under `Documentation/licenses`; the three LGPL
+notices explicitly select version 2.1 or later. The full copyright headers of
+`libblkid/src/cache.c`, `libmount/src/context.c`,
+`libsmartcols/src/table.c` and `libuuid/src/gen_uuid.c` were also read.
+The declarations and these component notices agree; the generic COPYING file
+at the archive root must not replace the library notices.
+
+The libuuid Meson recipe includes `lib/randutils.c`, `lib/md5.c` and
+`lib/sha1.c`. Their headers were inspected: randutils identifies BSD-3-Clause,
+while the MD5 and SHA-1 implementations carry public-domain statements naming
+Colin Plumb and Steve Reid. Preserve those statements with the component
+attribution rather than presenting all three files as solely BSD-licensed.
+
+The headers of lsblk, partx, addpart and delpart state GPL version 2 or later.
+Although the archive also contains resizepart, OpenWrt's selected partx-utils
+installation rule does not install it.
+
+| License text under Documentation/licenses | SHA-256 |
+| --- | --- |
+| COPYING.BSD-3-Clause | 9b718a9460fed5952466421235bc79eb49d4e9eacc920d7a9dd6285ab8fd6c6d |
+| COPYING.LGPL-2.1-or-later | dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551 |
+| COPYING.GPL-2.0-or-later | 8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643 |
+
+All three texts were found and hashed; the BSD text was read completely in this
+pass. This review resolves the selected package mapping and the listed notices.
+It does not claim an exhaustive review of shared helper sources or replace
+the remaining notice collection.
