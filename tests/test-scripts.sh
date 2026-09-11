@@ -107,6 +107,7 @@ printf 'packages\n' > "$manifest_root/out/packages.manifest"
 for evidence in rootfs-inventory.json upstream-delta.patch public-files.sha256 kernel-patches.sha256; do
     printf 'fixture evidence\n' > "$manifest_root/out/$evidence"
 done
+printf 'KERNEL_LOAD_ADDRESS=0x00008000\nKERNEL_FOOTPRINT_BYTES=8388608\nUIMAGE_BYTES=4096\nDECOMPRESSOR_SCRATCH_BYTES=1048576\nKERNEL_WORST_CASE_END=0x00909000\nINITRD_LOAD_ADDRESS=0x02600000\nINITRD_HEADROOM_BYTES=30371840\n' > "$manifest_root/out/kernel-footprint.txt"
 cat > "$manifest_root/source/staging_dir/toolchain-test/bin/arm-openwrt-linux-gcc" <<'EOF'
 #!/bin/sh
 printf 'arm-openwrt-linux-muslgnueabi-gcc 14.3.0\n'
@@ -128,11 +129,21 @@ grep -q '^CONFIG_SHA256=' "$manifest_root/out/build.manifest"
 grep -q '^TARGET_COMPILER=arm-openwrt-linux-muslgnueabi-gcc 14.3.0$' \
     "$manifest_root/out/build.manifest"
 grep -q '^PATCH_SERIES_SHA256=' "$manifest_root/out/build.manifest"
+grep -q '^KERNEL_WORST_CASE_END=0x00909000$' "$manifest_root/out/build.manifest"
+grep -q '^INITRD_LOAD_ADDRESS=0x02600000$' "$manifest_root/out/build.manifest"
 grep -q '^BUILDINFO_SHA256\[mvebu/cortexa9/config.buildinfo\]=' "$manifest_root/out/build.manifest"
 if grep -q "$TEST_TMP" "$manifest_root/out/build.manifest"; then
     fail 'manifest contains an absolute temporary path'
 fi
 ok 'manifest path is exercised and output is deterministic and path-independent'
+
+printf 'KERNEL_FOOTPRINT_BYTES=$(touch %s)\n' "$TEST_TMP/footprint-executed" > "$manifest_root/out/kernel-footprint.txt"
+expect_failure 'manifest rejects a malformed kernel footprint record' env \
+    REPO_ROOT="$manifest_root" OPENWRT_SOURCE_DIR="$manifest_root/source" \
+    ARTIFACT_DIR="$manifest_root/out" SOURCE_DATE_EPOCH=123456789 \
+    "$manifest_root/scripts/write-manifest.sh"
+[ ! -e "$TEST_TMP/footprint-executed" ] || fail 'footprint record was executed'
+printf 'KERNEL_LOAD_ADDRESS=0x00008000\n' > "$manifest_root/out/kernel-footprint.txt"
 
 mv "$manifest_root/out/initrd.buffalo" "$manifest_root/out/not-initrd.buffalo"
 expect_failure 'manifest fails when an exact Buffalo artifact is missing' env \

@@ -62,14 +62,24 @@ def check(vmlinux, uimage_size):
     return footprint, end
 
 
+def report(footprint, uimage_size, end):
+    """KEY=VALUE lines for the build manifest; the numbers behind the verdict."""
+    return (f'KERNEL_LOAD_ADDRESS=0x{KERNEL_PHYS:08x}\n'
+            f'KERNEL_FOOTPRINT_BYTES={footprint}\n'
+            f'UIMAGE_BYTES={uimage_size}\n'
+            f'DECOMPRESSOR_SCRATCH_BYTES={DECOMPRESSOR_SCRATCH}\n'
+            f'KERNEL_WORST_CASE_END=0x{end:08x}\n'
+            f'INITRD_LOAD_ADDRESS=0x{INITRD_LOAD:08x}\n'
+            f'INITRD_HEADROOM_BYTES={INITRD_LOAD - end}\n')
+
+
 def main(argv):
     if len(argv) != 3:
         raise SystemExit('usage: check-kernel-footprint.py VMLINUX UIMAGE')
     vmlinux_path, uimage_path = map(Path, argv[1:])
     uimage_size = uimage_path.stat().st_size
     footprint, end = check(vmlinux_path.read_bytes(), uimage_size)
-    print(f'kernel footprint {footprint} bytes, worst-case end 0x{end:08x}, '
-          f'initrd load address 0x{INITRD_LOAD:08x}')
+    print(report(footprint, uimage_size, end), end='')
     if end >= INITRD_LOAD:
         raise SystemExit('decompressed kernel would reach the Buffalo initrd load address; '
                          'shrink the package set or compress the embedded initramfs')

@@ -64,7 +64,11 @@ class FootprintTests(unittest.TestCase):
             result = subprocess.run([sys.executable, str(REPO/'scripts/check-kernel-footprint.py'),
                                      str(vmlinux), str(uimage)], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertIn('kernel footprint', result.stdout)
+            values = dict(line.split('=', 1) for line in result.stdout.splitlines())
+            self.assertEqual(values['KERNEL_FOOTPRINT_BYTES'], str(8 * 1024 * 1024))
+            self.assertEqual(values['INITRD_LOAD_ADDRESS'], '0x02600000')
+            self.assertEqual(int(values['KERNEL_WORST_CASE_END'], 16) + int(values['INITRD_HEADROOM_BYTES']),
+                             MODULE.INITRD_LOAD)
 
 
 if __name__ == '__main__':

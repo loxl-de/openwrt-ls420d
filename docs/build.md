@@ -52,8 +52,11 @@ the stock load addresses. It also measures the decompressed kernel from the
 `.bss`, the relocated decompressor and scratch space must end below the initrd
 load address, otherwise the companion would be overwritten during boot. The
 embedded initramfs is xz-compressed so that this footprint stays small; the
-check fails closed if a future package set grows past the limit. The companion
-generator limits output to 1 MiB. These checks do not replace a complete
+check fails closed if a future package set grows past the limit, and its
+numbers (footprint, uImage size, scratch margin, worst-case end, initrd load
+address and remaining headroom) are recorded in `build.manifest` so the
+verdict can be reviewed against the hardware pilot. The companion generator
+limits output to 1 MiB. These checks do not replace a complete
 hardware memory-layout test.
 
 ## Local verification without a firmware compile
