@@ -85,11 +85,14 @@ release announcement and merged it. The script tests read the expected
 values from the lock files instead of hard-coding a commit, so a proposal
 validates itself without a manual test edit.
 
-The proposal branch is replaced only while every commit on it was authored
-by the workflow's bot; as soon as a person pushes a correction to it, the
-workflow leaves the branch alone and says so in its log, and the push uses
-a lease against the branch head it inspected. An unchanged proposal is not
-pushed again.
+The proposal branch is replaced only while it differs from the base branch
+in nothing but the two lock files, which is all the workflow ever commits;
+as soon as a person pushes anything else to it, the workflow leaves the
+branch alone and says so in its log. The push uses a lease against the
+branch head it inspected, an unchanged proposal is not pushed again, and a
+proposal whose pull request was closed without merging is not reopened. A
+newer point release gets a new branch name, so proposals resume by
+themselves for the next version.
 
 Two owner settings apply. The workflow needs "Allow GitHub Actions to create
 and approve pull requests" under Actions permissions. A pull request opened
