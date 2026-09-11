@@ -47,8 +47,23 @@ does not disable public compilation or require an expensive local build.
 
 See [the delta map](upstream-delta.md). CI refuses an ambiguous target artifact,
 checks the native DTB, and enforces a kernel image below the 20 MiB gap between
-the stock load addresses. The companion generator limits output to 1 MiB.
-These checks do not replace a complete hardware memory-layout test.
+the stock load addresses. It also measures the decompressed kernel from the
+`vmlinux` load segments: starting at the platform text offset, the kernel plus
+`.bss`, the relocated decompressor and scratch space must end below the initrd
+load address, otherwise the companion would be overwritten during boot. With
+an uncompressed embedded initramfs that footprint is roughly the size of the
+root filesystem; the check fails closed if the package set grows past the
+limit, and its numbers are recorded in `build.manifest` and printed in the
+build log whether it passes or fails: the file-backed image size that the
+decompressor writes, the footprint including `.bss` that the kernel reserves,
+the uImage size, the scratch margin, the end the relocated decompressor
+reaches, the worst-case end, the initrd load address and the remaining
+headroom. Two distinct verdicts are possible: the decompressor would
+overwrite the initrd, or only the kernel reservation would cover it, in
+which case Linux disables the initrd instead. Either way the companion is
+lost, but the numbers let the decision whether to compress the embedded
+initramfs rest on measurement. The companion generator limits output to 1 MiB. These
+checks do not replace a complete hardware memory-layout test.
 
 ## Local verification without a firmware compile
 

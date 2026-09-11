@@ -63,6 +63,20 @@ kernel_size=$(wc -c < "$kernel" | tr -d ' ')
 [ "$kernel_size" -lt 20971520 ] ||
     fail 'LS420D initramfs kernel overlaps the Buffalo initrd load address'
 
+# The decompressed kernel starts at 0x00008000 and must also stay below the
+# initrd load address, including .bss and the relocated decompressor.
+kernel_tree=$(find "$SOURCE_DIR/build_dir/target-"* -maxdepth 2 -type d -name 'linux-6.12.*' -print)
+[ "$(printf '%s\n' "$kernel_tree" | grep -c .)" -eq 1 ] || fail 'expected exactly one prepared Linux tree'
+[ -s "$kernel_tree/vmlinux" ] || fail 'uncompressed kernel ELF image missing'
+mkdir -p "$ARTIFACT_DIR"
+# The records go to the evidence file; show them in the log in both outcomes.
+if ! python3 "$SCRIPT_DIR/check-kernel-footprint.py" "$kernel_tree/vmlinux" "$kernel" \
+    > "$ARTIFACT_DIR/kernel-footprint.txt"; then
+    cat "$ARTIFACT_DIR/kernel-footprint.txt" >&2
+    fail 'kernel footprint check failed; records above'
+fi
+cat "$ARTIFACT_DIR/kernel-footprint.txt"
+
 mkdir -p "$ARTIFACT_DIR"
 install -m 0644 "$kernel" "$ARTIFACT_DIR/uImage.buffalo"
 install -m 0644 "$package_manifest" "$ARTIFACT_DIR/packages.manifest"
