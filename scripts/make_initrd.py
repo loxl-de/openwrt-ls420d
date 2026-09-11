@@ -60,14 +60,23 @@ def config_files(config, root, example=False):
             if not 0 < path.stat().st_size <= 16384:
                 raise ValueError('key file size outside bounds')
             return path.read_bytes()
-        parts = input_file('ssh_public_key').decode('ascii').strip().split()
-        if len(parts) < 2 or parts[0] != 'ssh-ed25519':
-            raise ValueError('supply an Ed25519 OpenSSH PUBLIC key')
-        blob = base64.b64decode(parts[1], validate=True)
-        if len(blob) != 51 or blob[:19] != struct.pack('>I', 11)+b'ssh-ed25519'+struct.pack('>I', 32):
-            raise ValueError('invalid Ed25519 public key encoding')
-        # Strip the comment, which may contain a person's email or workstation.
-        files['etc/dropbear/authorized_keys'] = (parts[0]+' '+parts[1]+'\n').encode()
+        authorized = []
+        for line in input_file('ssh_public_key').decode('ascii').splitlines():
+            parts = line.strip().split()
+            if not parts:
+                continue
+            if len(parts) < 2 or parts[0] != 'ssh-ed25519':
+                raise ValueError('supply Ed25519 OpenSSH PUBLIC keys, one per line')
+            blob = base64.b64decode(parts[1], validate=True)
+            if len(blob) != 51 or blob[:19] != struct.pack('>I', 11)+b'ssh-ed25519'+struct.pack('>I', 32):
+                raise ValueError('invalid Ed25519 public key encoding')
+            # Keep every distinct key, but omit potentially personal comments.
+            normalized = parts[0]+' '+parts[1]
+            if normalized not in authorized:
+                authorized.append(normalized)
+        if not authorized:
+            raise ValueError('at least one Ed25519 public key is required')
+        files['etc/dropbear/authorized_keys'] = ('\n'.join(authorized)+'\n').encode()
         host_key = input_file('dropbear_host_key', private=True)
         if len(host_key) < 64 or not host_key.startswith(struct.pack('>I', 11)+b'ssh-ed25519'):
             raise ValueError('host key must be a Dropbear Ed25519 private key, not an OpenSSH key')

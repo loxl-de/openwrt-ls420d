@@ -99,6 +99,26 @@ class InitrdTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             image(self.config, self.root)
 
+    def test_multiple_public_keys_are_preserved(self):
+        first = (self.root/'admin.pub').read_text()
+        prefix = struct.pack('>I', 11)+b'ssh-ed25519'+struct.pack('>I', 32)
+        second = 'ssh-ed25519 '+base64.b64encode(prefix+bytes(reversed(range(32)))).decode()
+        (self.root/'admin.pub').write_text(first+'\n'+second+' second-comment\n'+first)
+        data = self.entries()['etc/dropbear/authorized_keys'].data.decode()
+        self.assertEqual(data.splitlines(), [' '.join(first.split()[:2]), second])
+        self.assertNotIn('comment', data)
+
+    def test_invalid_second_public_key_is_rejected(self):
+        key = self.root/'admin.pub'
+        key.write_text(key.read_text()+'not-a-key\n')
+        with self.assertRaises(ValueError):
+            self.entries()
+
+    def test_blank_public_key_file_is_rejected(self):
+        (self.root/'admin.pub').write_text('\n \n')
+        with self.assertRaises(ValueError):
+            self.entries()
+
     def test_crc_corruption(self):
         blob = bytearray(image(self.example, self.root, True))
         blob[-1] ^= 1

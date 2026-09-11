@@ -55,7 +55,10 @@ These are **two different key pairs**:
 
 - `private/admin` is the client private key. It stays on your workstation and is
   never put in the NAS image. Only `private/admin.pub` is authorized on the NAS.
-  You may instead copy an existing trusted Ed25519 public key to that path.
+  You may instead copy existing trusted Ed25519 public keys to that path,
+  one per line. All distinct keys are retained; comments are stripped and an
+  invalid line rejects the whole file. This lets an administrator and an
+  automation client keep separate keys.
 - `private/dropbear_ed25519_host_key` is the NAS's private server identity.
   It goes into the private companion. Generate it once and preserve it securely
   so the NAS keeps a stable SSH fingerprint across reboots.
