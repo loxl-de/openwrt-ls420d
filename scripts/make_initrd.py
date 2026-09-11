@@ -198,8 +198,13 @@ def config_files(config, root, example=False):
             if not 0 < path.stat().st_size <= 16384:
                 raise ValueError('key file size outside bounds')
             return path.read_bytes()
-        line = public_key_line(input_file('ssh_public_key').decode('ascii').strip(), ('ssh-ed25519',))
-        files['etc/dropbear/authorized_keys'] = (line + '\n').encode()
+        # One or more Ed25519 public keys, one per line; comments are stripped.
+        lines = [public_key_line(line, ('ssh-ed25519',))
+                 for line in input_file('ssh_public_key').decode('ascii').splitlines()
+                 if line.strip() and not line.lstrip().startswith('#')]
+        if not lines:
+            raise ValueError('ssh_public_key contains no public key')
+        files['etc/dropbear/authorized_keys'] = ''.join(line + '\n' for line in lines).encode()
         host_key = input_file('dropbear_host_key', private=True)
         check_host_key(host_key, ('ssh-ed25519',))
         files['etc/dropbear/dropbear_ed25519_host_key'] = host_key
