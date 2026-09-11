@@ -46,13 +46,14 @@ fan_take_control() {
 }
 
 fan_own_zone() {
+    # With the user_space governor the zone must be enabled, otherwise the
+    # kernel neither polls the sensor nor acts on its critical trip.
     local z="$1"
-    if [ "$(cat "$z/policy" 2>/dev/null)" = user_space ]; then
-        return 0
-    fi
-    if [ -w "$z/policy" ] && echo user_space >"$z/policy" 2>/dev/null &&
-        [ "$(cat "$z/policy")" = user_space ]; then
-        return 0
+    if [ "$(cat "$z/policy" 2>/dev/null)" = user_space ] ||
+        { [ -w "$z/policy" ] && echo user_space >"$z/policy" 2>/dev/null &&
+          [ "$(cat "$z/policy")" = user_space ]; }; then
+        [ "$(cat "$z/mode")" = enabled ] || echo enabled >"$z/mode"
+        return
     fi
     [ "$(cat "$z/mode")" = disabled ] || echo disabled >"$z/mode"
 }

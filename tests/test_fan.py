@@ -25,7 +25,8 @@ class FanTests(unittest.TestCase):
             self.assertEqual(self.curve(temp, old), state)
 
     def simulate(self, cpu='54000', phy='43000', disk='25000', cycles=16,
-                 alarm='0', missing_disk=False, governor=True, disk_state='active/idle'):
+                 alarm='0', missing_disk=False, governor=True, disk_state='active/idle',
+                 zone_mode='enabled'):
         with tempfile.TemporaryDirectory(prefix='fan-fixture-') as tmp:
             root = Path(tmp)
             def put(name, value):
@@ -36,7 +37,7 @@ class FanTests(unittest.TestCase):
             fan = root/'sys/class/thermal/cooling_device0'
             for name, val in [('type', 'gpio-fan'), ('max_state', '3'), ('cur_state', '0')]:
                 put('sys/class/thermal/cooling_device0/'+name, val)
-            put('sys/class/thermal/thermal_zone0/mode', 'enabled')
+            put('sys/class/thermal/thermal_zone0/mode', zone_mode)
             if governor:
                 put('sys/class/thermal/thermal_zone0/policy', 'step_wise')
             (root/'sys/class/thermal/thermal_zone0/cdev0').symlink_to(fan)
@@ -135,6 +136,10 @@ sleep() {{
 
     def test_zone_keeps_kernel_critical_trip_via_user_space_governor(self):
         status, _, _ = self.simulate()
+        self.assertEqual((status['zone_policy'], status['zone_mode']), ('user_space', 'enabled'))
+
+    def test_previously_disabled_zone_is_re_enabled_under_user_space(self):
+        status, _, _ = self.simulate(zone_mode='disabled')
         self.assertEqual((status['zone_policy'], status['zone_mode']), ('user_space', 'enabled'))
 
     def test_zone_disabled_without_user_space_governor(self):
