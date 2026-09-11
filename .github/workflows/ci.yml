@@ -27,7 +27,7 @@ on:
         type: string
 
 concurrency:
-  group: ls420d-${{ github.workflow }}-${{ github.ref }}
+  group: ls420d-${{ github.workflow }}-${{ github.ref }}-${{ inputs.offline_source_artifact && 'offline' || 'online' }}
   cancel-in-progress: true
 
 permissions:
