@@ -37,16 +37,8 @@ target_compiler=$("$target_gcc" --version | sed -n '1p')
     printf 'CONFIG_SHA256=%s\n' "$(sha256sum "$SOURCE_DIR/.config" | awk '{print $1}')"
     printf 'TARGET_COMPILER=%s\n' "$target_compiler"
     # Memory-layout numbers behind the initrd overlap verdict, for review
-    # against the hardware pilot; validated as plain KEY=VALUE lines.
-    while IFS= read -r footprint_line || [ -n "$footprint_line" ]; do
-        case $footprint_line in
-            KERNEL_LOAD_ADDRESS=0x[0-9a-f]*|KERNEL_FOOTPRINT_BYTES=[0-9]*|UIMAGE_BYTES=[0-9]*| \
-            DECOMPRESSOR_SCRATCH_BYTES=[0-9]*|KERNEL_WORST_CASE_END=0x[0-9a-f]*| \
-            INITRD_LOAD_ADDRESS=0x[0-9a-f]*|INITRD_HEADROOM_BYTES=[0-9]*)
-                printf '%s\n' "$footprint_line" ;;
-            *) fail "unexpected kernel footprint record: $footprint_line" ;;
-        esac
-    done < "$ARTIFACT_DIR/kernel-footprint.txt"
+    # against the hardware pilot; every key exactly once, values fully checked.
+    validate_kernel_footprint "$ARTIFACT_DIR/kernel-footprint.txt"
     printf 'PATCH_SERIES_SHA256=%s\n' "$(sha256sum "$REPO_ROOT/openwrt/patches/series" | awk '{print $1}')"
     while IFS= read -r patch_name || [ -n "$patch_name" ]; do
         case $patch_name in ''|'#'*) continue ;; esac

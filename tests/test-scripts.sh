@@ -137,13 +137,25 @@ if grep -q "$TEST_TMP" "$manifest_root/out/build.manifest"; then
 fi
 ok 'manifest path is exercised and output is deterministic and path-independent'
 
-printf 'KERNEL_FOOTPRINT_BYTES=$(touch %s)\n' "$TEST_TMP/footprint-executed" > "$manifest_root/out/kernel-footprint.txt"
-expect_failure 'manifest rejects a malformed kernel footprint record' env \
-    REPO_ROOT="$manifest_root" OPENWRT_SOURCE_DIR="$manifest_root/source" \
-    ARTIFACT_DIR="$manifest_root/out" SOURCE_DATE_EPOCH=123456789 \
-    "$manifest_root/scripts/write-manifest.sh"
-[ ! -e "$TEST_TMP/footprint-executed" ] || fail 'footprint record was executed'
-printf 'KERNEL_LOAD_ADDRESS=0x00008000\n' > "$manifest_root/out/kernel-footprint.txt"
+good_footprint=$(cat "$manifest_root/out/kernel-footprint.txt")
+[ "$(validate_kernel_footprint "$manifest_root/out/kernel-footprint.txt")" = "$good_footprint" ]
+ok 'complete kernel footprint record is accepted verbatim'
+for bad_footprint in \
+    's/^KERNEL_FOOTPRINT_BYTES=.*/KERNEL_FOOTPRINT_BYTES=123garbage/' \
+    's/^INITRD_LOAD_ADDRESS=.*/INITRD_LOAD_ADDRESS=0x2nothex/' \
+    's/^INITRD_LOAD_ADDRESS=.*/INITRD_LOAD_ADDRESS=0x/' \
+    's/^INITRD_LOAD_ADDRESS=.*/INITRD_LOAD_ADDRESS=2600000/' \
+    's/^UIMAGE_BYTES=.*/UIMAGE_BYTES=/' \
+    's/^KERNEL_FOOTPRINT_BYTES=.*/KERNEL_FOOTPRINT_BYTES=$(touch executed)/' \
+    's/^KERNEL_FOOTPRINT_BYTES=.*/EXTRA_KEY=1/' \
+    '/^INITRD_HEADROOM_BYTES=/d' \
+    's/^UIMAGE_BYTES=.*/&\nUIMAGE_BYTES=4096/'
+do
+    sed "$bad_footprint" "$manifest_root/out/kernel-footprint.txt" > "$TEST_TMP/bad-footprint.txt"
+    expect_failure "kernel footprint record is rejected: $bad_footprint" \
+        validate_kernel_footprint "$TEST_TMP/bad-footprint.txt"
+done
+[ ! -e "$TEST_TMP/executed" ] && [ ! -e "$manifest_root/executed" ] || fail 'footprint record was executed'
 
 mv "$manifest_root/out/initrd.buffalo" "$manifest_root/out/not-initrd.buffalo"
 expect_failure 'manifest fails when an exact Buffalo artifact is missing' env \
