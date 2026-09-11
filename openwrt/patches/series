@@ -2,3 +2,4 @@
 # The LS420D DTS must live in this series; do not maintain a second copy.
 100-add-buffalo-ls420d-ram-initramfs-support.patch
 110-serialize-toolchain-version-check.patch
+120-ignore-empty-package-version-date.patch

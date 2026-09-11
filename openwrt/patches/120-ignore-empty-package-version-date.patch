@@ -1,0 +1,10 @@
+--- a/include/package.mk
++++ b/include/package.mk
+@@ -18,5 +18,5 @@
+ PKG_SOURCE_DATE_EPOCH = $(if $(DUMP),,$(shell $(TOPDIR)/scripts/get_source_date_epoch.sh \
+-	$(if $(wildcard $(PKG_BUILD_DIR)/version.date),$(PKG_BUILD_DIR),$(CURDIR))))
+-
++	$(if $(shell test -s '$(PKG_BUILD_DIR)/version.date' && echo y),$(PKG_BUILD_DIR),$(CURDIR))))
++
+ ifeq ($(strip $(PKG_BUILD_PARALLEL)),0)
+ PKG_JOBS?=-j1
