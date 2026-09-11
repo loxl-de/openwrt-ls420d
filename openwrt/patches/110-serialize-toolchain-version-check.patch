@@ -1,0 +1,25 @@
+--- a/toolchain/Makefile
++++ b/toolchain/Makefile
+@@ -65,12 +65,15 @@
+ ifdef CONFIG_BUILDBOT
+ ifneq ($(wildcard $(TOPDIR)/.git),)
+   $(TOOLCHAIN_DIR)/stamp/.ver_check: $(TMP_DIR)/.build
+-	cd "$(TOPDIR)"; git log --no-show-signature --format=%h -1 toolchain > $(TMP_DIR)/.ver_check
+-	cmp -s $(TMP_DIR)/.ver_check $@ || { \
+-		rm -rf $(BUILD_DIR) $(STAGING_DIR) $(TOOLCHAIN_DIR) $(BUILD_DIR_TOOLCHAIN); \
+-		mkdir -p $(TOOLCHAIN_DIR)/stamp; \
+-		mv $(TMP_DIR)/.ver_check $@; \
+-	}
+-
++	( \
++	flock 9 || exit $$?; \
++	cd "$(TOPDIR)" && git log --no-show-signature --format=%h -1 toolchain > $(TMP_DIR)/.ver_check && \
++	{ cmp -s $(TMP_DIR)/.ver_check $@ || { \
++		rm -rf $(BUILD_DIR) $(STAGING_DIR) $(TOOLCHAIN_DIR) $(BUILD_DIR_TOOLCHAIN); \
++		mkdir -p $(TOOLCHAIN_DIR)/stamp; \
++		mv $(TMP_DIR)/.ver_check $@; \
++	}; }; \
++	) 9>$(TMP_DIR)/.ver_check.lock
++
+ $(TOOLCHAIN_DIR)/info.mk $(STAGING_DIR)/.prepared: $(TOOLCHAIN_DIR)/stamp/.ver_check
+ endif
