@@ -1,20 +1,6 @@
 SPDX-License-Identifier: GPL-2.0-only
 See NOTICE.md for the new DTS's dual-license alternative and upstream attribution.
 
-diff --git a/package/boot/uboot-tools/uboot-envtools/files/mvebu b/package/boot/uboot-tools/uboot-envtools/files/mvebu
-index 5cf8137b1045181f5d05c284a60cb34cc28679bb..8caaafdda5b2d7120b7a4654f1647dbd83956ff7 100644
---- a/package/boot/uboot-tools/uboot-envtools/files/mvebu
-+++ b/package/boot/uboot-tools/uboot-envtools/files/mvebu
-@@ -13,6 +13,9 @@ touch /etc/config/ubootenv
- board=$(board_name)
- 
- case "$board" in
-+buffalo,ls420d)
-+	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x10000" "0x10000"
-+	;;
- buffalo,ls220de|\
- buffalo,ls421de)
- 	ubootenv_add_uci_config "/dev/mtd3" "0x0" "0x10000"
 diff --git a/target/linux/mvebu/cortexa9/base-files/etc/board.d/02_network b/target/linux/mvebu/cortexa9/base-files/etc/board.d/02_network
 index 9833143d7537bf9e94e85cf57ad63a2faa4dacef..507409441a57fc7c3fd18d13b325a4fae139c81d 100644
 --- a/target/linux/mvebu/cortexa9/base-files/etc/board.d/02_network
@@ -55,10 +41,10 @@ index 45a54c1d22bb5e8b7e117be76526f4c362a8e010..5664c7e5d16973a0fda6c96a13343695
  		CI_KERNPART=boot
 diff --git a/target/linux/mvebu/files/arch/arm/boot/dts/marvell/armada-370-buffalo-ls420d.dts b/target/linux/mvebu/files/arch/arm/boot/dts/marvell/armada-370-buffalo-ls420d.dts
 new file mode 100644
-index 0000000000000000000000000000000000000000..ead9c12821ec1f05a20e22d8409f47a790fff7e1
+index 0000000000000000000000000000000000000000..eb7714ec04773f9cf75f1ece18e8f14b19cbe882
 --- /dev/null
 +++ b/target/linux/mvebu/files/arch/arm/boot/dts/marvell/armada-370-buffalo-ls420d.dts
-@@ -0,0 +1,122 @@
+@@ -0,0 +1,137 @@
 +// SPDX-License-Identifier: (GPL-2.0-or-later OR MIT)
 +/*
 + * Device Tree for the Buffalo LinkStation LS420D.
@@ -179,6 +165,21 @@ index 0000000000000000000000000000000000000000..ead9c12821ec1f05a20e22d8409f47a7
 +	pmx_hdd_present: pmx-hdd-present {
 +		marvell,pins = "mpp11", "mpp12";
 +		marvell,function = "gpio";
++	};
++};
++
++/*
++ * RAM boot never writes the SPI NOR. The bootloader partition is already
++ * read-only upstream; make the environment partition read-only too, so the
++ * kernel refuses every write path into the flash, not only fw_setenv.
++ */
++&spi0 {
++	spi-flash@0 {
++		partitions {
++			partition@f0000 {
++				read-only;
++			};
++		};
 +	};
 +};
 diff --git a/target/linux/mvebu/image/cortexa9.mk b/target/linux/mvebu/image/cortexa9.mk

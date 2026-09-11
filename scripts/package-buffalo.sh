@@ -56,6 +56,16 @@ do
         fail "dangerous inherited node is not disabled: $node"
 done
 
+# RAM boot never writes the SPI NOR: every flash partition must be read-only
+# in the compiled DTB, so the kernel itself refuses writes.
+for partition in \
+    /soc/internal-regs/spi@10600/spi-flash@0/partitions/partition@0 \
+    /soc/internal-regs/spi@10600/spi-flash@0/partitions/partition@f0000
+do
+    "$FDTGET" -p "$dtb" "$partition" | grep -qx 'read-only' ||
+        fail "SPI NOR partition is writable in the compiled DTB: $partition"
+done
+
 kernel_size=$(wc -c < "$kernel" | tr -d ' ')
 # Buffalo loads the kernel at 0x01200000 and the companion initrd at
 # 0x02600000. Keep the embedded-initramfs uImage inside that 20 MiB gap.
