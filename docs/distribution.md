@@ -96,7 +96,11 @@ the original failure remains a failure even if that diagnostic retry succeeds.
 
 It then builds as the ordinary runner user, with no restored toolchain, compiled
 objects or compiler cache. Feed indexing uses the archived feeds without fetching.
-Both resolved configurations are checked against the original build. The ATAG
+Both resolved configurations are checked against the original build. For the
+Linux config, only the checkout-root prefixes in the two expected
+CONFIG_INITRAMFS_SOURCE paths are rebased after validation. The rebuilt paths
+must point into the actual offline checkout. Architecture suffixes, owner IDs
+and all other configuration lines must still match. The ATAG
 test and Buffalo packaging checks run again; the resulting kernel, example
 companion and package manifest are compared with the original product hashes.
 

@@ -55,7 +55,8 @@ sh "$script_dir/make-with-diagnostics.sh" -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_
 sh "$script_dir/make-with-diagnostics.sh" -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_DIR="$work/downloads/dl"
 kernel_tree=$(find "$OPENWRT_SOURCE_DIR/build_dir/target-"* -maxdepth 2 -type d -name 'linux-6.12.*' -print)
 [ "$(printf '%s\n' "$kernel_tree" | wc -l)" -eq 1 ] && [ -d "$kernel_tree" ]
-cmp "$work/bundle/linux.config" "$kernel_tree/.config"
+python3 "$script_dir/compare-kernel-config.py" "$work/bundle/linux.config" "$kernel_tree/.config" \
+    --source-root "$OPENWRT_SOURCE_DIR"
 python3 "$project/tests/check-atags.py" "$kernel_tree"
 "$project/scripts/package-buffalo.sh"
 python3 - "$work" <<'PY'
