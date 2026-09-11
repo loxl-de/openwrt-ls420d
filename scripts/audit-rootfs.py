@@ -11,10 +11,13 @@ for name in ('etc', 'etc/config'):
     if (root/name).is_symlink() or not (root/name).is_dir():
         raise SystemExit('unsafe generic rootfs configuration parent')
 public = Path(__file__).resolve().parents[1]/'openwrt/files'
-for name in ('dropbear', 'network', 'dhcp', 'firewall'):
+for name in ('dropbear', 'network', 'firewall'):
     path = root/'etc/config'/name
     if path.is_symlink() or path.read_bytes() != (public/'etc/config'/name).read_bytes():
         raise SystemExit('generic rootfs defaults differ from the reviewed public overlay')
+for name in ('etc/init.d/dnsmasq', 'etc/init.d/odhcpd', 'usr/sbin/pppd'):
+    if (root/name).exists():
+        raise SystemExit('generic rootfs still contains a router service: ' + name)
 for name in ('etc/dropbear', 'root/.ssh'):
     path = root/name
     if path.is_symlink() or (path.exists() and not path.is_dir()):

@@ -150,4 +150,15 @@ if grep -RIE 'BEGIN (OPENSSH|RSA|EC|DSA) PRIVATE KEY|([0-9A-Fa-f]{2}:){5}[0-9A-F
 fi
 ok 'public LS420D build inputs are RAM-only and deployment-neutral'
 
+for router_package in dnsmasq odhcpd-ipv6only ppp ppp-mod-pppoe; do
+    grep -q "^# CONFIG_PACKAGE_$router_package is not set\$" "$REPO_ROOT/config/ls420d.config" ||
+        fail "router package not deselected: $router_package"
+done
+for nas_package in rsync hd-idle block-mount; do
+    grep -q "^CONFIG_PACKAGE_$nas_package=y\$" "$REPO_ROOT/config/ls420d.config" ||
+        fail "NAS package not selected: $nas_package"
+done
+[ ! -e "$REPO_ROOT/openwrt/files/etc/config/dhcp" ] || fail 'overlay still configures the removed DHCP/DNS server'
+ok 'package selection is a NAS host profile, not a router profile'
+
 printf '1..%d\n' "$pass"

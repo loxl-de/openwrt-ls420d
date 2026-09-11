@@ -59,7 +59,9 @@ server. Once Linux is running, it no longer needs that boot storage. Network
 boot also removes the need for a local boot partition and lets you prepare
 updates on the server without removing a disk from the NAS.
 
-You configure backup jobs, storage layout and disk standby separately.
+You configure backup jobs, storage layout and disk standby separately;
+[the reference pull-backup job](docs/pull-backup-example.md) shows one
+complete example using the `rsync`, `hd-idle` and cron that the image ships.
 Backup jobs and temperature monitoring must avoid unwanted disk access;
 running from RAM alone does not put the disks into standby. This repository
 provides the operating-system build and configuration tools, not a finished

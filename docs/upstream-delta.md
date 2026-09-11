@@ -25,7 +25,10 @@ preservation of memory/command-line policy.
 
 `config/ls420d.config` is the explicit seed configuration. Its resolved hash
 and the actual package manifest are recorded by the build. Storage diagnostics,
-ethtool and cooling dependencies are part of the generic product.
+ethtool and cooling dependencies are part of the generic product, as are
+`rsync` and `hd-idle` for the backup role. The router defaults of the mvebu
+target (dnsmasq, odhcpd, ppp) are deselected: this is a single-port host, and
+those services would only run idle. The host firewall stays.
 
 `openwrt/files/` supplies DHCP-client networking, firewall and disabled/key-only
 SSH defaults, plus PHY and fan services. These are additional runtime changes,
