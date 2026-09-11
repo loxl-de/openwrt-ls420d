@@ -10,7 +10,7 @@ it does not silently edit a downloaded DTB or patch a firmware binary.
 | --- | --- | --- |
 | `openwrt/patches/100-add-buffalo-ls420d-ram-initramfs-support.patch` | Native LS420D DTS derived from the official LS421DE hardware description | Disable absent NAND/PCIe/SD, describe USB power and board GPIOs, identify the actual board, preserve documented PHY settings |
 | Same patch: image profile | RAM-only LS420D kernel image and packages | No LS421DE NAND/sysupgrade layout |
-| Same patch: network and environment tools | Native identity handling and environment on mtd1 | Avoid reliance on a false LS421DE compatible identity |
+| Same patch: network identity | Native MAC selection from the U-Boot environment partition | Avoid reliance on a false LS421DE compatible identity; the MAC is read from the raw MTD partition, no environment tools are needed |
 | Same patch: linkstation-poweroff driver | Add LS420D match | Retain poweroff without the compatibility alias |
 | Same patch: upgrade guard | Refuse flash/sysupgrade | This is a RAM boot project, not an installer |
 | `kernel-patches/301-preserve-initrd2-with-mangle.patch` | Move ATAG_INITRD2 conversion outside the command-line-mangling exclusion; correct Kconfig help | Allow the external companion to reach Linux without accepting vendor memory tags or abandoning command-line filtering |

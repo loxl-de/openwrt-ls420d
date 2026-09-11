@@ -1,20 +1,6 @@
 SPDX-License-Identifier: GPL-2.0-only
 See NOTICE.md for the new DTS's dual-license alternative and upstream attribution.
 
-diff --git a/package/boot/uboot-tools/uboot-envtools/files/mvebu b/package/boot/uboot-tools/uboot-envtools/files/mvebu
-index 5cf8137b1045181f5d05c284a60cb34cc28679bb..8caaafdda5b2d7120b7a4654f1647dbd83956ff7 100644
---- a/package/boot/uboot-tools/uboot-envtools/files/mvebu
-+++ b/package/boot/uboot-tools/uboot-envtools/files/mvebu
-@@ -13,6 +13,9 @@ touch /etc/config/ubootenv
- board=$(board_name)
- 
- case "$board" in
-+buffalo,ls420d)
-+	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x10000" "0x10000"
-+	;;
- buffalo,ls220de|\
- buffalo,ls421de)
- 	ubootenv_add_uci_config "/dev/mtd3" "0x0" "0x10000"
 diff --git a/target/linux/mvebu/cortexa9/base-files/etc/board.d/02_network b/target/linux/mvebu/cortexa9/base-files/etc/board.d/02_network
 index 9833143d7537bf9e94e85cf57ad63a2faa4dacef..507409441a57fc7c3fd18d13b325a4fae139c81d 100644
 --- a/target/linux/mvebu/cortexa9/base-files/etc/board.d/02_network
