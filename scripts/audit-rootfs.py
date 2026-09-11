@@ -8,6 +8,8 @@ from pathlib import Path
 import stat
 import sys
 
+from apk_database_evidence import database_evidence
+
 root, output = map(Path, sys.argv[1:])
 for name in ('etc', 'etc/config'):
     if (root/name).is_symlink() or not (root/name).is_dir():
@@ -38,4 +40,7 @@ for path in sorted(root.rglob('*')):
     elif kind == 'symlink':
         entry['target'] = os.readlink(path)
     inventory[path.relative_to(root).as_posix()] = entry
+if (root/'lib/apk/db').exists() or (root/'lib/apk/db').is_symlink():
+    for name, details in database_evidence(root).items():
+        inventory[name]['apk_details'] = details
 output.write_text(json.dumps(inventory, sort_keys=True, indent=2)+'\n')

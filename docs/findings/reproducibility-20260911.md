@@ -81,3 +81,44 @@ package selections. It does not replace trusted keys with a shared private key.
 The next independent comparison must establish whether this removes all product
 differences. The failed comparisons remain evidence; none is reclassified as
 a successful reproducible build.
+
+## Release-mode comparison: two APK database files still vary
+
+[Run 34585193428](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34585193428)
+completed both builds from e8e30bb successfully, but the final comparison failed.
+Both evidence ZIP digests and every listed member hash were checked.
+
+| Copy | Evidence artifact | ZIP SHA-256 |
+| --- | --- | --- |
+| A | 10195845625 | d492057b3bb1ba84798f1776944c8defc1e1ca66424a914c48a1460c0a1df90a |
+| B | 10195283195 | ceea3551bb59fb8e1eae13e3fa9fb8aba921b2b1283fc50bcb114a1ff43737c2 |
+
+The rootfs inventories now contain 995 entries. The transient APK public key
+is absent in both, but these two files still differ:
+
+| Path | A size | B size |
+| --- | ---: | ---: |
+| lib/apk/db/installed | 101763 | 101763 |
+| lib/apk/db/scripts.tar.gz | 11033 | 11032 |
+
+All other 993 recorded entries agree. The example initrd, package manifest,
+overlay and patch hashes also agree. The uImage hashes are
+`7d3d2f1fafe875d0b1fc99ec302da989365f23da683e92f9aa018168cdb3e977` (A)
+and `f40002591743caad9239b87c214208fc003f7ab40f10ebcb91297541098a1e4c` (B).
+
+The remaining database differences are not explained by removing the transient
+key. APK's package identifier is computed from its metadata before package
+output; the inspected code does not justify blaming the package signature
+without further evidence.
+
+The rootfs audit now adds diagnostic details to these two existing inventory
+entries. For each installed package it records hashes of individual field
+values, the record and its sorted lines. For each script archive member it
+records the content hash and tar metadata, without exporting script contents.
+Order hashes, the gzip header and the uncompressed archive hash distinguish
+ordering or wrapper changes from payload changes. Invalid input, links and
+oversized archives fail the diagnostic instead of being silently omitted.
+
+This changes only compile evidence. No APK records, scripts, hashes or signature
+checks are rewritten. The next independent build comparison must identify
+which package fields or script members differ before a further fix is proposed.
