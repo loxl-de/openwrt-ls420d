@@ -56,21 +56,36 @@ echo /root/.ssh/ >> /etc/sysupgrade.conf                                # includ
 
 ## 4. The job
 
-One line in root's crontab, run by the BusyBox cron that the base image
-already starts. Two guards come first: the volume must be mounted, and the
-marker file must exist on it. Without them a failed mount would send the
-whole transfer into the RAM root until memory runs out, which on a RAM-only
-system also takes the operating system down.
+One entry in root's crontab, run by the BusyBox cron that the base image
+already starts. It is longer than a bare `rsync` call because four things
+must hold before an unattended job is safe to leave alone:
+
+- **The volume must be mounted and carry the marker file.** Without that
+  guard a failed mount sends the whole transfer into the RAM root until
+  memory runs out, which on a RAM-only system also takes the operating
+  system down.
+- **Only one instance may run.** A slow transfer that is still running when
+  the next one starts would compete for the disk and the link. BusyBox
+  `flock -n` refuses the second start instead of queueing it.
+- **The result must be evaluated.** `rsync` exit status 0 is success and 24
+  (files vanished on the source during the run) is benign; everything else
+  is a failure and is logged at error priority so it stands out in
+  `logread` and in a remote syslog receiver.
+- **The status must be visible without reading logs.** The job writes its
+  last outcome and time to a status file in RAM that a monitoring check on
+  the source host can read over SSH.
 
 ```sh
 mkdir -p /mnt/backup/data && touch /mnt/backup/.ls420d-volume
 cat >> /etc/crontabs/root <<'EOF'
-15 3 * * * grep -qs ' /mnt/backup ' /proc/mounts && [ -f /mnt/backup/.ls420d-volume ] && /usr/bin/rsync -aH --numeric-ids -e 'ssh -i /root/.ssh/id_ed25519' backup@source.example:/srv/data/ /mnt/backup/data/ 2>&1 | logger -t pull-backup
+15 3 * * * flock -n /var/lock/pull-backup.lock sh -c 'if ! grep -qs " /mnt/backup " /proc/mounts || [ ! -f /mnt/backup/.ls420d-volume ]; then logger -p daemon.err -t pull-backup "volume not mounted, skipped"; echo "$(date -Iseconds) skipped no-volume" > /var/run/pull-backup.status; exit 1; fi; /usr/bin/rsync -aH --numeric-ids -e "ssh -i /root/.ssh/id_ed25519" backup@source.example:/srv/data/ /mnt/backup/data/ > /var/run/pull-backup.log 2>&1; s=$?; logger -t pull-backup < /var/run/pull-backup.log; case $s in 0|24) logger -t pull-backup "finished status $s"; echo "$(date -Iseconds) ok $s" > /var/run/pull-backup.status;; *) logger -p daemon.err -t pull-backup "FAILED status $s"; echo "$(date -Iseconds) failed $s" > /var/run/pull-backup.status;; esac' || logger -p daemon.err -t pull-backup "previous run still active or volume missing, skipped"
 EOF
 /etc/init.d/cron restart
 ```
 
-The line deliberately does not pass `--delete`. A mirror that follows
+The transfer output goes to a file in RAM first and is logged afterwards,
+because the exit status of `rsync | logger` would be that of `logger`. The
+entry deliberately does not pass `--delete`. A mirror that follows
 deletions also follows an accidental `rm` or a ransomware run on the source,
 and then the backup is gone with the original. Keep deletions out of the
 mirror, or keep history instead: `--link-dest` against the previous run
@@ -78,8 +93,10 @@ gives hard-linked daily snapshots at the cost of one directory per day. Add
 `--delete` only after deciding that a mirror is what you want.
 
 The disk wakes for the transfer and `hd-idle` puts it back to sleep once the
-job is done. Run the line by hand once and check `logread -e pull-backup`
-before trusting the schedule.
+job is done. Run the entry by hand once, confirm `cat /var/run/pull-backup.status`
+says `ok`, and check `logread -e pull-backup` before trusting the schedule.
+A monitoring check on the source host can read that status file over SSH
+and alert when it is older than a day or does not say `ok`.
 
 ## 5. Make it permanent
 
