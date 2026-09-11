@@ -67,24 +67,31 @@ must hold before an unattended job is safe to leave alone:
 - **Only one instance may run.** A slow transfer that is still running when
   the next one starts would compete for the disk and the link. BusyBox
   `flock -n` refuses the second start instead of queueing it.
-- **The result must be evaluated.** `rsync` exit status 0 is success and 24
-  (files vanished on the source during the run) is benign; everything else
-  is a failure and is logged at error priority so it stands out in
+- **The result must be evaluated.** `rsync` exit status 0 is success; 23
+  (some files could not be transferred) and 24 (files vanished on the
+  source during the run) are partial results that deserve a look but not
+  an alarm; everything else is a failure. Failures are logged at error
+  priority, partial results at warning priority, so both stand out in
   `logread` and in a remote syslog receiver.
 - **The status must be visible without reading logs.** The job writes its
-  last outcome and time to a status file in RAM that a monitoring check on
-  the source host can read over SSH.
+  last outcome (`ok`, `warn` or `failed`), the status code and the time to
+  a status file in RAM that a monitoring check on the source host can read
+  over SSH.
+- **Logs must stay bounded.** `rsync` prints one line per problem file; a
+  bad night can produce thousands. Only the last 50 lines reach the log and
+  the capture file is removed afterwards, so RAM cannot fill up with output.
 
 ```sh
 mkdir -p /mnt/backup/data && touch /mnt/backup/.ls420d-volume
 cat >> /etc/crontabs/root <<'EOF'
-15 3 * * * flock -n /var/lock/pull-backup.lock sh -c 'if ! grep -qs " /mnt/backup " /proc/mounts || [ ! -f /mnt/backup/.ls420d-volume ]; then logger -p daemon.err -t pull-backup "volume not mounted, skipped"; echo "$(date -Iseconds) skipped no-volume" > /var/run/pull-backup.status; exit 1; fi; /usr/bin/rsync -aH --numeric-ids -e "ssh -i /root/.ssh/id_ed25519" backup@source.example:/srv/data/ /mnt/backup/data/ > /var/run/pull-backup.log 2>&1; s=$?; logger -t pull-backup < /var/run/pull-backup.log; case $s in 0|24) logger -t pull-backup "finished status $s"; echo "$(date -Iseconds) ok $s" > /var/run/pull-backup.status;; *) logger -p daemon.err -t pull-backup "FAILED status $s"; echo "$(date -Iseconds) failed $s" > /var/run/pull-backup.status;; esac' || logger -p daemon.err -t pull-backup "previous run still active or volume missing, skipped"
+15 3 * * * flock -n /var/lock/pull-backup.lock sh -c 'if ! grep -qs " /mnt/backup " /proc/mounts || [ ! -f /mnt/backup/.ls420d-volume ]; then logger -p daemon.err -t pull-backup "volume not mounted, skipped"; echo "$(date -Iseconds) failed no-volume" > /var/run/pull-backup.status; exit 1; fi; /usr/bin/rsync -aH --numeric-ids -e "ssh -i /root/.ssh/id_ed25519" backup@source.example:/srv/data/ /mnt/backup/data/ > /var/run/pull-backup.log 2>&1; s=$?; tail -n 50 /var/run/pull-backup.log | logger -t pull-backup; rm -f /var/run/pull-backup.log; case $s in 0) r=ok; p=daemon.info;; 23|24) r=warn; p=daemon.warning;; *) r=failed; p=daemon.err;; esac; logger -p $p -t pull-backup "$r status $s"; echo "$(date -Iseconds) $r $s" > /var/run/pull-backup.status' || logger -p daemon.err -t pull-backup "previous run still active or volume missing, skipped"
 EOF
 /etc/init.d/cron restart
 ```
 
 The transfer output goes to a file in RAM first and is logged afterwards,
-because the exit status of `rsync | logger` would be that of `logger`. The
+because the exit status of `rsync | logger` would be that of `logger`; only
+its tail is kept and the file is deleted. The
 entry deliberately does not pass `--delete`. A mirror that follows
 deletions also follows an accidental `rm` or a ransomware run on the source,
 and then the backup is gone with the original. Keep deletions out of the
@@ -96,7 +103,8 @@ The disk wakes for the transfer and `hd-idle` puts it back to sleep once the
 job is done. Run the entry by hand once, confirm `cat /var/run/pull-backup.status`
 says `ok`, and check `logread -e pull-backup` before trusting the schedule.
 A monitoring check on the source host can read that status file over SSH
-and alert when it is older than a day or does not say `ok`.
+and alert when it is older than a day, says `failed`, or says `warn` more
+than once in a row.
 
 ## 5. Make it permanent
 
