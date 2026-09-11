@@ -77,5 +77,5 @@ jobs:
           if [ -z "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]; then
             gh pr create --base main --head "$branch" \
               --title "lock: propose OpenWrt $VERSION" \
-              --body "$(printf 'Automated proposal from the lock-bump workflow.\n\nBefore merging:\n\n- compare the tag object and commit with the official OpenWrt %s release announcement;\n- check whether tests/test-scripts.sh pins the old commit and update it;\n- run the reproducibility dispatch on this branch;\n- a hardware acceptance run is still required before any release.\n' "$VERSION")"
+              --body "$(printf 'Automated proposal from the lock-bump workflow.\n\nBefore merging:\n\n- compare the tag object and commit with the official OpenWrt %s release announcement;\n- read the offline-source and reproducibility results on this branch;\n- run the reproducibility dispatch on this branch;\n- a hardware acceptance run is still required before any release.\n' "$VERSION")"
           fi
