@@ -7,7 +7,8 @@ This was a configuration-only test using the verified source bundle from
 [run 34539424333](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34539424333).
 The canonical LS420D patch was applied, archived feed recipes were indexed and
 installed, and `make defconfig` reproduced the archived configuration exactly.
-No firmware was compiled locally. The repository configuration is unchanged.
+No firmware was compiled locally. At this stage the repository configuration
+was unchanged; the follow-up below records its later adoption.
 
 Baseline resolved config SHA-256:
 `33e77ec2d3eb5470c595389cee3974e18d96ab376ab4d455f5ea4396e4e51eda`.
@@ -54,3 +55,17 @@ The source-backed random-key hypothesis still needs the file-level evidence
 from the [diagnostic comparison](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34577568680).
 The result above narrows a possible fix; it is not evidence that BUILDBOT alone
 makes the firmware reproducible. No package trust checks were relaxed.
+
+## Follow-up after the file-level evidence
+
+The comparison identified three varying files: the transient public key and
+two APK database files. The config has now adopted the settings reviewed here,
+with signing, verification, reproducible-debug settings and build identities
+stated explicitly rather than relying on their defaults.
+
+A fresh `make defconfig` using that canonical fragment exactly matched the
+earlier resolved candidate, including SHA-256
+`7ba76e7727cdf6ca31d7fc6c4e96632f545faf1fd49aea04959e24be0badc74d`.
+The additional source delta is configuration only; no new kernel patch or
+binary DTB modification was introduced. Full independent builds must still
+verify reproducibility.
