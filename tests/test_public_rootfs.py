@@ -88,6 +88,8 @@ class PublicRootfsTests(unittest.TestCase):
         self.assertEqual(subprocess.run(cmd, env=env, capture_output=True).returncode, 0)
         worker = source/'files/usr/sbin/ls420d-fan'
         self.assertEqual(worker.stat().st_mode & 0o777, 0o755)
+        hook = source/'files/etc/uci-defaults/50-ls420d-site'
+        self.assertEqual(hook.stat().st_mode & 0o777, 0o755)
         self.assertEqual(subprocess.run(cmd, env=env, capture_output=True).returncode, 1)
 
 if __name__ == '__main__':

@@ -13,6 +13,42 @@ import struct
 from cpio_newc import Entry, encode, decode, wrap_ramdisk, unwrap_ramdisk
 
 MAX_PAYLOAD = 1024 * 1024
+FORMAT = 2
+MARKER = 'etc/ls420d-deployment'
+SITE_UCI = 'etc/ls420d-site.uci'
+
+# Directories whose contents are credentials: 0700 for the directory and 0600
+# for every file. Everything else is ordinary world-readable configuration.
+SECRET_DIRS = ('etc/dropbear/', 'root/.ssh/')
+SECRET_FILES = {'etc/shadow'}
+
+PUBLIC_KEY_TYPES = ('ssh-ed25519',)
+HOST_KEY_TYPES = ('ssh-ed25519',)
+HOSTNAME = re.compile(r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?')
+
+
+def ssh_type_prefix(name):
+    return struct.pack('>I', len(name)) + name.encode()
+
+
+def public_key_line(line, allowed=PUBLIC_KEY_TYPES):
+    """Return 'type base64' for one authorized_keys line; strip the comment."""
+    parts = line.split()
+    if len(parts) < 2 or parts[0] not in allowed:
+        raise ValueError('authorized key must be one of: %s' % ', '.join(allowed))
+    blob = base64.b64decode(parts[1], validate=True)
+    if not blob.startswith(ssh_type_prefix(parts[0])):
+        raise ValueError('public key blob does not match its declared type')
+    if parts[0] == 'ssh-ed25519' and (len(blob) != 51 or blob[15:19] != struct.pack('>I', 32)):
+        raise ValueError('invalid Ed25519 public key encoding')
+    # Strip the comment, which may contain a person's email or workstation.
+    return parts[0] + ' ' + parts[1]
+
+
+def check_host_key(data, allowed=HOST_KEY_TYPES):
+    if len(data) < 64 or not any(data.startswith(ssh_type_prefix(t)) for t in allowed):
+        raise ValueError('host key must be a Dropbear private key of type %s, not an OpenSSH key'
+                         % ' or '.join(allowed))
 
 
 def config_files(config, root, example=False):
@@ -20,7 +56,7 @@ def config_files(config, root, example=False):
     if set(config) != allowed:
         raise ValueError('unexpected or missing configuration fields')
     hostname = config['hostname']
-    if not isinstance(hostname, str) or not re.fullmatch(r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?', hostname):
+    if not isinstance(hostname, str) or not HOSTNAME.fullmatch(hostname):
         raise ValueError('hostname must be a single DNS label')
     network = config['network']
     mode = network.get('mode')
@@ -43,9 +79,11 @@ def config_files(config, root, example=False):
         raise ValueError('invalid network mode or fields')
     files = {
         'etc/config/network': text.encode(),
-        'etc/config/system': ("config system\n\toption hostname '%s'\n\toption timezone 'UTC'\n\nconfig timeserver 'ntp'\n\toption enabled '1'\n\tlist server '0.openwrt.pool.ntp.org'\n\tlist server '1.openwrt.pool.ntp.org'\n" % hostname).encode(),
+        # Merged by the generic image's uci-defaults hook after config_generate,
+        # so the generated system defaults (LEDs, buttons, logging) survive.
+        SITE_UCI: ("set system.@system[0].hostname='%s'\n" % hostname).encode(),
         'etc/config/dropbear': ("config dropbear 'main'\n\toption enable '%s'\n\toption Interface 'lan'\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n\toption Port '22'\n" % ('0' if example else '1')).encode(),
-        'etc/ls420d-deployment': (f'format=1\nexample={int(example)}\nhostname={hostname}\n').encode(),
+        MARKER: (f'format={FORMAT}\nexample={int(example)}\nsource=json\nhostname={hostname}\n').encode(),
     }
     if not example:
         def input_file(name, private=False):
@@ -60,36 +98,44 @@ def config_files(config, root, example=False):
             if not 0 < path.stat().st_size <= 16384:
                 raise ValueError('key file size outside bounds')
             return path.read_bytes()
+        # One or more Ed25519 public keys, one per line; comment lines and key
+        # comments are dropped, every distinct key is kept.
         authorized = []
         for line in input_file('ssh_public_key').decode('ascii').splitlines():
-            parts = line.strip().split()
-            if not parts:
+            if not line.strip() or line.lstrip().startswith('#'):
                 continue
-            if len(parts) < 2 or parts[0] != 'ssh-ed25519':
-                raise ValueError('supply Ed25519 OpenSSH PUBLIC keys, one per line')
-            blob = base64.b64decode(parts[1], validate=True)
-            if len(blob) != 51 or blob[:19] != struct.pack('>I', 11)+b'ssh-ed25519'+struct.pack('>I', 32):
-                raise ValueError('invalid Ed25519 public key encoding')
-            # Keep every distinct key, but omit potentially personal comments.
-            normalized = parts[0]+' '+parts[1]
+            normalized = public_key_line(line, ('ssh-ed25519',))
             if normalized not in authorized:
                 authorized.append(normalized)
         if not authorized:
             raise ValueError('at least one Ed25519 public key is required')
-        files['etc/dropbear/authorized_keys'] = ('\n'.join(authorized)+'\n').encode()
+        files['etc/dropbear/authorized_keys'] = ''.join(line + '\n' for line in authorized).encode()
         host_key = input_file('dropbear_host_key', private=True)
-        if len(host_key) < 64 or not host_key.startswith(struct.pack('>I', 11)+b'ssh-ed25519'):
-            raise ValueError('host key must be a Dropbear Ed25519 private key, not an OpenSSH key')
+        check_host_key(host_key, ('ssh-ed25519',))
         files['etc/dropbear/dropbear_ed25519_host_key'] = host_key
     return files
 
 
-def image(config, root, example=False):
-    files = config_files(config, root, example)
-    entries = [Entry('etc', stat.S_IFDIR | 0o755), Entry('etc/config', stat.S_IFDIR | 0o755)]
-    if not example:
-        entries.append(Entry('etc/dropbear', stat.S_IFDIR | 0o700))
-    entries += [Entry(name, stat.S_IFREG | 0o600, data) for name, data in sorted(files.items())]
+def file_mode(name):
+    if name in SECRET_FILES or name.startswith(SECRET_DIRS):
+        return stat.S_IFREG | 0o600
+    return stat.S_IFREG | 0o644
+
+
+def entries_for(files):
+    directories = {}
+    for name in files:
+        parts = name.split('/')
+        for depth in range(1, len(parts)):
+            directory = '/'.join(parts[:depth]) + '/'
+            directories[directory.rstrip('/')] = stat.S_IFDIR | (0o700 if directory in SECRET_DIRS else 0o755)
+    entries = [Entry(name, mode) for name, mode in sorted(directories.items())]
+    entries += [Entry(name, file_mode(name), data) for name, data in sorted(files.items())]
+    return entries
+
+
+def build(files):
+    entries = entries_for(files)
     payload = encode(entries)
     if len(payload) > MAX_PAYLOAD:
         raise ValueError('companion exceeds pilot memory budget')
@@ -97,6 +143,10 @@ def image(config, root, example=False):
     if decode(unwrap_ramdisk(result))[0] != entries:
         raise ValueError('archive round-trip mismatch')
     return result
+
+
+def image(config, root, example=False):
+    return build(config_files(config, root, example))
 
 
 def main():

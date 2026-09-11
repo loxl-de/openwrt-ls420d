@@ -33,8 +33,8 @@ The generator creates parent directories but **refuses to overwrite an existing
 output**. Choose a new output path for another candidate.
 
 The example uses DHCP, hostname `ls420d-example`, no SSH keys and disabled SSH.
-It contains only configuration data and a format marker, not an init script or
-a loader. The public JSON description is `examples/example.json`.
+It contains only configuration data and a format 2 marker, not an init script
+or a loader. The public JSON description is `examples/example.json`.
 Do not expect to log in using a default root password.
 
 ## 3. Prepare private inputs locally
@@ -56,9 +56,9 @@ These are **two different key pairs**:
 - `private/admin` is the client private key. It stays on your workstation and is
   never put in the NAS image. Only `private/admin.pub` is authorized on the NAS.
   You may instead copy existing trusted Ed25519 public keys to that path,
-  one per line. All distinct keys are retained; comments are stripped and an
-  invalid line rejects the whole file. This lets an administrator and an
-  automation client keep separate keys.
+  one per line. All distinct keys are retained; comment lines and key
+  comments are dropped and an invalid line rejects the whole file. This lets
+  an administrator and an automation client keep separate keys.
 - `private/dropbear_ed25519_host_key` is the NAS's private server identity.
   It goes into the private companion. Generate it once and preserve it securely
   so the NAS keeps a stable SSH fingerprint across reboots.
