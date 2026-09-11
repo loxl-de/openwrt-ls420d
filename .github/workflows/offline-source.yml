@@ -67,8 +67,10 @@ jobs:
             --sha256 "$SOURCE_ARCHIVE_SHA256" --output "$RUNNER_TEMP/offline-source"
       - name: Rebuild with no network or compiler cache
         run: |
-          sudo unshare --net -- runuser -u "$(id -un)" -- \
-            sh "$GITHUB_WORKSPACE/scripts/rebuild-offline.sh" "$RUNNER_TEMP/offline-source"
+          sudo unshare --net -- sh -eu -c '
+            ip link set lo up
+            exec runuser -u "$1" -- sh "$2" "$3"
+          ' sh "$(id -un)" "$GITHUB_WORKSPACE/scripts/rebuild-offline.sh" "$RUNNER_TEMP/offline-source"
       - name: Upload offline verification report (no firmware)
         if: success() || failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

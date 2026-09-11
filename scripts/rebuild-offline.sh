@@ -2,17 +2,13 @@
 # SPDX-License-Identifier: MIT
 set -eu
 [ "$#" -eq 1 ] || { echo 'usage: rebuild-offline.sh RESTORED_DIRECTORY' >&2; exit 1; }
+script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 work=$(CDPATH='' cd -- "$1" && pwd)
 [ -f "$work/RESTORED.json" ] || { echo 'source restoration was not verified' >&2; exit 1; }
 
 # The workflow supplies an empty network namespace, then drops back to the
 # ordinary runner user. Fail rather than silently running this test online.
-python3 - <<'PY'
-import json, subprocess
-interfaces = json.loads(subprocess.check_output(['ip', '-j', 'link']))
-if {i['ifname'] for i in interfaces} != {'lo'}:
-    raise SystemExit('offline test requires an isolated network namespace')
-PY
+python3 "$script_dir/check-offline-network.py"
 [ "$(id -u)" -ne 0 ] || { echo 'do not compile as root' >&2; exit 1; }
 
 project=$work/project
@@ -55,8 +51,8 @@ cmp "$work/bundle/openwrt.config" "$OPENWRT_SOURCE_DIR/.config"
 
 # No restored toolchain, object files or compiler cache. Every build input must
 # already exist in the verified downloads or archived source trees.
-make -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_DIR="$work/downloads/dl" download
-make -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_DIR="$work/downloads/dl"
+sh "$script_dir/make-with-diagnostics.sh" -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_DIR="$work/downloads/dl" download
+sh "$script_dir/make-with-diagnostics.sh" -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_DIR="$work/downloads/dl"
 kernel_tree=$(find "$OPENWRT_SOURCE_DIR/build_dir/target-"* -maxdepth 2 -type d -name 'linux-6.12.*' -print)
 [ "$(printf '%s\n' "$kernel_tree" | wc -l)" -eq 1 ] && [ -d "$kernel_tree" ]
 cmp "$work/bundle/linux.config" "$kernel_tree/.config"

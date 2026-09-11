@@ -88,6 +88,12 @@ downloads into a new directory. Existing output is never overwritten. Archive
 paths and symlinks must stay inside their source tree.
 
 The test installs host dependencies before entering an empty network namespace.
+Only loopback is activated inside that namespace: OpenWrt's fakeroot uses local
+TCP for inter-process communication. A preflight check rejects external
+interfaces or inactive loopback and tests a local TCP exchange before compiling.
+A failed parallel build is repeated serially with verbose output for diagnosis;
+the original failure remains a failure even if that diagnostic retry succeeds.
+
 It then builds as the ordinary runner user, with no restored toolchain, compiled
 objects or compiler cache. Feed indexing uses the archived feeds without fetching.
 Both resolved configurations are checked against the original build. The ATAG
