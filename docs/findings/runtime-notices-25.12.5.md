@@ -334,3 +334,45 @@ the Linux kernel must be reviewed separately from these two userspace packages.
 | lzo-2.10.tar.gz | COPYING | 8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643 |
 
 The zlib.h hash identifies the complete header file, not just its license block.
+
+## libattr 2.5.2-r3
+
+The manifest selects `libattr`, not the separate `attr` utility package.
+The recipe in `feeds/packages/utils/attr/Makefile` distinguishes them:
+the library declares LGPL-2.1-or-later and the utilities GPL-2.0-or-later.
+The rootfs inventory confirms `usr/lib/libattr.so.1.1.2502`.
+The library's installation rule also copies the package's configuration
+directory; it is not only a shared-object copy.
+
+The complete copyright headers of `libattr/libattr.c` and
+`libattr/attr_copy_action.c` were read. Both state LGPL version 2.1 or
+later; the former names Silicon Graphics, Inc., and the latter Andreas
+Gruenbacher and SuSE Linux AG. `doc/COPYING.LGPL` was found and hashed
+but its full text was not read in this pass:
+
+`5decad7e58d90d44335bf2f45ce27563bd911065c6a1a02dfa7647c4efee75c8`.
+
+## Mbed TLS 3.6.6-r2
+
+The installed package is `libmbedtls21`. Its installation rule copies the
+shared libraries; the inventory confirms `libmbedcrypto.so.16`,
+`libmbedx509.so.7` and `libmbedtls.so.21`, each linked to its 3.6.6 file.
+The package's ABI suffix is not the ABI of every library it contains.
+The separate `mbedtls-util` package is not selected.
+
+The top-level `LICENSE` offers Apache-2.0 or GPL-2.0-or-later.
+OpenWrt's recipe declares the GPL-2.0-or-later option. The inspected complete
+copyright/license headers of `library/aes.c`, `library/x509_crt.c`
+and `library/ssl_tls.c` repeat the dual-license expression and name the
+Mbed TLS Contributors. Preserve that source notice; the recipe's selection
+does not erase the alternative grant.
+
+The dual-license preface was read, not the full Apache and GPL texts that
+follow it. The complete LICENSE file was hashed:
+
+`9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b`.
+
+The archive includes a framework used by development and build tooling.
+Its license and remaining library-source notices still require separate review.
+This component check does not claim that every file in the archive has been
+classified or that the distribution gate is complete.
