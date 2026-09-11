@@ -74,11 +74,9 @@ def scripts_evidence(data):
                 reasons.append('pax-headers')
             if not SCRIPT_NAME.fullmatch(member.name):
                 reasons.append('name-format')
-            if member.name in members:
-                reasons.append('duplicate-name')
             if member.size > LIMIT:
                 reasons.append('size-limit')
-            if len(members) >= 4096:
+            if len(order) >= 4096:
                 reasons.append('member-count-limit')
             if reasons:
                 # Do not leak a rejected name or PAX metadata into public CI logs.
@@ -93,15 +91,20 @@ def scripts_evidence(data):
                 content = stream.read(LIMIT + 1)
             if len(content) != member.size:
                 raise ValueError('truncated script member')
-            members[member.name] = {
+            # This is an inventory, not an extraction or a validity verdict.
+            # Preserve every occurrence: duplicate archive names must never
+            # overwrite earlier content/metadata or evade the member limit.
+            members.setdefault(member.name, []).append({
                 'sha256': digest(content), 'size': member.size,
                 'mode': member.mode, 'mtime': member.mtime,
                 'uid': member.uid, 'gid': member.gid,
                 'uname_sha256': digest(member.uname.encode()),
                 'gname_sha256': digest(member.gname.encode()),
-            }
+            })
             order.append(member.name)
     return {
+        'schema': 2, 'member_count': len(order),
+        'duplicate_names': {name: len(items) for name, items in members.items() if len(items) > 1},
         'members': members,
         'order_sha256': digest('\n'.join(order).encode()),
         'uncompressed_sha256': digest(raw),

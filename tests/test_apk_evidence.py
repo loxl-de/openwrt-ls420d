@@ -61,26 +61,59 @@ class ApkEvidenceTests(unittest.TestCase):
     def test_script_payload_is_hashed_not_exported(self):
         result = MODULE.scripts_evidence(archive([('fixture-1.abc.post-install', b'private-script-marker')]))
         self.assertNotIn('private-script-marker', json.dumps(result))
-        self.assertEqual(result['members']['fixture-1.abc.post-install']['sha256'],
+        self.assertEqual(result['members']['fixture-1.abc.post-install'][0]['sha256'],
                          MODULE.digest(b'private-script-marker'))
 
     def test_openwrt_snapshot_version_in_script_name(self):
         name = 'base-files-1~f5dae5ece4.' + 'a'*40 + '.post-install'
         result = MODULE.scripts_evidence(archive([(name, b'fixture')]))
         self.assertIn(name, result['members'])
-        self.assertEqual(result['members'][name]['sha256'], MODULE.digest(b'fixture'))
+        self.assertEqual(result['members'][name][0]['sha256'], MODULE.digest(b'fixture'))
 
     def test_script_timestamp_and_order_are_visible(self):
         items = [('a.post-install', b'a'), ('b.post-install', b'b')]
         a = MODULE.scripts_evidence(archive(items, 1))
         b = MODULE.scripts_evidence(archive(items, 2))
         c = MODULE.scripts_evidence(archive(list(reversed(items)), 1))
-        self.assertNotEqual(a['members']['a.post-install']['mtime'], b['members']['a.post-install']['mtime'])
-        self.assertEqual(a['members']['a.post-install']['sha256'], b['members']['a.post-install']['sha256'])
+        self.assertNotEqual(a['members']['a.post-install'][0]['mtime'], b['members']['a.post-install'][0]['mtime'])
+        self.assertEqual(a['members']['a.post-install'][0]['sha256'], b['members']['a.post-install'][0]['sha256'])
         self.assertNotEqual(a['order_sha256'], c['order_sha256'])
 
-    def test_duplicate_unsafe_and_link_members_fail(self):
-        for items in ([('../escape', b'x')], [('a', b'x'), ('a', b'y')]):
+    def test_duplicate_occurrences_are_preserved_without_payloads(self):
+        result = MODULE.scripts_evidence(archive([('a', b'private-first'), ('a', b'private-last')]))
+        self.assertEqual(result['schema'], 2)
+        self.assertEqual(result['member_count'], 2)
+        self.assertEqual(result['duplicate_names'], {'a': 2})
+        self.assertEqual([entry['sha256'] for entry in result['members']['a']],
+                         [MODULE.digest(b'private-first'), MODULE.digest(b'private-last')])
+        self.assertNotIn('private-first', json.dumps(result))
+        self.assertNotIn('private-last', json.dumps(result))
+
+    def test_identical_duplicates_are_not_collapsed(self):
+        a = MODULE.scripts_evidence(archive([('a', b'x')]))
+        b = MODULE.scripts_evidence(archive([('a', b'x'), ('a', b'x')]))
+        self.assertEqual(len(b['members']['a']), 2)
+        self.assertNotEqual(a['member_count'], b['member_count'])
+        self.assertNotEqual(a['order_sha256'], b['order_sha256'])
+        self.assertNotEqual(a['uncompressed_sha256'], b['uncompressed_sha256'])
+
+    def test_reordered_and_changed_duplicates_are_visible(self):
+        a = MODULE.scripts_evidence(archive([('a', b'x'), ('a', b'y')]))
+        b = MODULE.scripts_evidence(archive([('a', b'y'), ('a', b'x')]))
+        c = MODULE.scripts_evidence(archive([('a', b'z'), ('a', b'y')]))
+        self.assertNotEqual(a['members']['a'], b['members']['a'])
+        self.assertNotEqual(a['members']['a'], c['members']['a'])
+        self.assertNotEqual(a['uncompressed_sha256'], b['uncompressed_sha256'])
+        self.assertNotEqual(a['uncompressed_sha256'], c['uncompressed_sha256'])
+
+    def test_duplicate_limit_counts_occurrences_not_unique_names(self):
+        result = MODULE.scripts_evidence(archive([('a', b'')] * 4096))
+        self.assertEqual(result['member_count'], 4096)
+        with self.assertRaisesRegex(ValueError, 'member-count-limit'):
+            MODULE.scripts_evidence(archive([('a', b'')] * 4097))
+
+    def test_unsafe_and_link_members_fail(self):
+        for items in ([('../escape', b'x')], [('/absolute', b'y')]):
             with self.assertRaises(ValueError):
                 MODULE.scripts_evidence(archive(items))
         data = io.BytesIO()
@@ -95,7 +128,7 @@ class ApkEvidenceTests(unittest.TestCase):
     def test_rejection_reports_reason_without_rejected_name(self):
         for items, reason, index in (
                 ([('../private-marker', b'x')], 'name-format', 0),
-                ([('private-marker', b'x'), ('private-marker', b'y')], 'duplicate-name', 1)):
+                ([('safe', b'x'), ('../private-marker', b'y')], 'name-format', 1)):
             with self.subTest(reason=reason), self.assertRaises(ValueError) as raised:
                 MODULE.scripts_evidence(archive(items))
             message = str(raised.exception)
@@ -142,7 +175,9 @@ class ApkEvidenceTests(unittest.TestCase):
             db.mkdir(parents=True)
             data = b'P:fixture\nV:1\n\n'
             (db/'installed').write_bytes(data)
-            (db/'scripts.tar.gz').write_bytes(archive([('fixture-1.abc.post-install', b'marker')]))
+            scripts = archive([('fixture-1.abc.post-install', b'marker'),
+                               ('fixture-1.abc.post-install', b'earlier-or-later')])
+            (db/'scripts.tar.gz').write_bytes(scripts)
             output = base/'report.json'
             subprocess.run([sys.executable, str(repo/'scripts/audit-rootfs.py'),
                             str(root), str(output)], check=True, capture_output=True)
@@ -151,6 +186,9 @@ class ApkEvidenceTests(unittest.TestCase):
             self.assertEqual(entry['sha256'], MODULE.digest(data))
             self.assertIn('fixture', entry['apk_details']['packages'])
             self.assertNotIn('marker', output.read_text())
+            self.assertEqual(result['lib/apk/db/scripts.tar.gz']['sha256'], MODULE.digest(scripts))
+            self.assertEqual((db/'scripts.tar.gz').read_bytes(), scripts)
+            self.assertEqual(result['lib/apk/db/scripts.tar.gz']['apk_details']['member_count'], 2)
 
     def test_symlinked_database_parent_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
