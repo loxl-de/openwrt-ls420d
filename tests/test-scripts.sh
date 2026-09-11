@@ -154,6 +154,8 @@ grep -q '^# CONFIG_PACKAGE_uboot-envtools is not set$' "$REPO_ROOT/config/ls420d
 if grep -q 'uboot-envtools' "$REPO_ROOT/openwrt/patches/"*.patch; then
     fail 'patch series configures U-Boot environment access on a RAM-only device'
 fi
+grep -A2 'partition@f0000 {' "$REPO_ROOT/openwrt/patches/100-add-buffalo-ls420d-ram-initramfs-support.patch" |
+    grep -q 'read-only;' || fail 'LS420D DTS leaves the U-Boot environment partition writable'
 ok 'generic build carries no write path into the SPI NOR bootloader environment'
 
 printf '1..%d\n' "$pass"

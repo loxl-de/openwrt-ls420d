@@ -8,7 +8,7 @@ it does not silently edit a downloaded DTB or patch a firmware binary.
 
 | Input | Change | Reason |
 | --- | --- | --- |
-| `openwrt/patches/100-add-buffalo-ls420d-ram-initramfs-support.patch` | Native LS420D DTS derived from the official LS421DE hardware description | Disable absent NAND/PCIe/SD, describe USB power and board GPIOs, identify the actual board, preserve documented PHY settings |
+| `openwrt/patches/100-add-buffalo-ls420d-ram-initramfs-support.patch` | Native LS420D DTS derived from the official LS421DE hardware description | Disable absent NAND/PCIe/SD, describe USB power and board GPIOs, identify the actual board, preserve documented PHY settings, mark every SPI NOR partition read-only so the kernel refuses flash writes |
 | Same patch: image profile | RAM-only LS420D kernel image and packages | No LS421DE NAND/sysupgrade layout |
 | Same patch: network identity | Native MAC selection from the U-Boot environment partition | Avoid reliance on a false LS421DE compatible identity; the MAC is read from the raw MTD partition, no environment tools are needed |
 | Same patch: linkstation-poweroff driver | Add LS420D match | Retain poweroff without the compatibility alias |
