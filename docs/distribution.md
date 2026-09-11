@@ -131,7 +131,9 @@ comparison failed first at CONFIG_RUSTC_VERSION, before Buffalo packaging.
 Thus offline compilation is demonstrated; matching configurations and final
 products are not.
 
-The next test preserves the original runner PATH through sudo/runuser and logs
-Rust compiler detection before and after network isolation. This checks a
-possible environment-dependent cause without ignoring compiler-version
-differences. The configuration diff and product comparison remain required.
+[The diagnostic follow-up](findings/offline-rebuild-20260911.md) completed offline
+compilation and packaging with matching kernel configurations. Its logs confirm
+that sudo's default PATH hid rustc; preserving the runner PATH restored it.
+The example companion and package manifest match, but the kernel-image hash
+does not. This test used the original, pre-BUILDBOT source bundle. A new test
+with the corrected build's sources is still required; the mismatch is not waived.

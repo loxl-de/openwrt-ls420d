@@ -78,3 +78,67 @@ The source archives preserve the files in full. This inspection has not yet
 produced the complete binary-accompanying notice collection or reviewed every
 selected runtime source file. The [distribution gate](../distribution.md)
 remains closed.
+
+## Dropbear 2025.89
+
+The complete top-level `LICENSE`, `libtomcrypt/LICENSE` and
+`libtommath/LICENSE` were read. OpenWrt enables `--enable-bundled-libtom`,
+so the bundled libraries' notices belong in this review.
+
+The top-level license identifies the predominantly MIT-licensed implementation,
+OpenSSH-derived files, PuTTY-derived key import code and the modified TweetNaCl
+component. The full headers of `src/atomicio.c` and `src/loginrec.c` contain
+two-clause BSD terms. `src/sshpty.c` preserves Tatu Ylonen's permission notice
+and its conditions on marking derived versions and naming incompatible versions.
+
+LibTomCrypt offers public-domain or WTFPL version 2 terms. LibTomMath carries
+its public-domain dedication and disclaimer. The inherited OpenWrt `MIT`
+label must not replace these notices.
+
+| Archive-relative file | SHA-256 |
+| --- | --- |
+| LICENSE | a99ce657d790b761c132ee7e0de18edb437ae6361e536d991c6a12f36e770445 |
+| libtomcrypt/LICENSE | 8f196cb13afd271f5e267fd29543fc454596382ad580e7592709492843996ac8 |
+| libtommath/LICENSE | 2fa64b163659f41965c9815882a8296d3d03ff546b76153e11445f9bdecf955a |
+
+## e2fsprogs 1.47.3
+
+The component overview at the start of `NOTICE` distinguishes the tools from
+their libraries. The complete license texts later in that file were not
+reviewed in this pass.
+
+| Installed package | Source component and inspected notice |
+| --- | --- |
+| libe2p2 | lib/e2p; feature.c states GNU Library General Public License version 2 |
+| libext2fs2 | lib/ext2fs; openfs.c states GNU Library General Public License version 2 |
+| libcomerr0 | lib/et; com_err.c carries the MIT Student Information Processing Board permission notice |
+| libss2 | lib/ss; data.c carries the MIT Student Information Processing Board permission notice |
+
+The last two notices restrict use of the institution's names in advertising
+without written permission. Preserve their actual wording rather than
+substituting the standard MIT text. OpenWrt's common `GPL-2.0` recipe label
+does not capture these distinctions. The selected `libuuid1` comes from
+util-linux, not this archive; e2fsprogs' lib/uuid notice is not its source mapping.
+
+## PPP 2.5.2
+
+The complete `COPYING` and `LICENSE.BSD` were read. `COPYING` explicitly
+directs readers to individual file notices and distinguishes BSD-style daemon
+code from GPL plugins. `LICENSE.BSD` contains a three-clause Berkeley notice;
+it is not a replacement for every other source notice.
+
+The complete copyright header of `pppd/main.c` includes Carnegie Mellon
+University's four-clause notice and Paul Mackerras' two-clause notice. The former
+requires retaining its acknowledgment; a final notice collection must include
+the original text.
+
+OpenWrt installs `pppoe.so` in the selected `ppp-mod-pppoe` package.
+Its `pppd/plugins/pppoe/plugin.c` header states GPL version 2 or later and
+names Roaring Penguin Software Inc., Michal Ostrowski and Jamal Hadi Salim.
+The inherited `BSD-4-Clause` package metadata therefore does not describe
+this plugin's entire source. Other plugin source headers still need to be
+included in the notice collection.
+
+These findings identify specific notices that a package-label-only report
+would miss. They do not change upstream license declarations, approve
+distribution, or claim that every compiled file has been reviewed.

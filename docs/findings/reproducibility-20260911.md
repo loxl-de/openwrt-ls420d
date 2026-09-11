@@ -29,7 +29,8 @@ and trusted package keys have not been weakened or replaced.
 
 A [configuration-only Buildbot experiment](buildbot-config-20260911.md) records
 which unrelated defaults must be disabled and which other behaviors change.
-It has not changed the canonical firmware configuration.
+At that stage it had not changed the canonical firmware configuration; the
+later adoption is recorded below.
 
 The next comparison must still determine all differing files and whether there
 are additional kernel or container-header differences. Neither successful
