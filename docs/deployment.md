@@ -33,8 +33,8 @@ The generator creates parent directories but **refuses to overwrite an existing
 output**. Choose a new output path for another candidate.
 
 The example uses DHCP, hostname `ls420d-example`, no SSH keys and disabled SSH.
-It contains only configuration data and a format marker, not an init script or
-a loader. The public JSON description is `examples/example.json`.
+It contains only configuration data and a format 2 marker, not an init script
+or a loader. The public JSON description is `examples/example.json`.
 Do not expect to log in using a default root password.
 
 ## 3. Prepare private inputs locally
