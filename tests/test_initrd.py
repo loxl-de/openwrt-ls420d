@@ -113,6 +113,22 @@ class InitrdTests(unittest.TestCase):
         (self.root/'admin.pub').write_text('not a public key')
         with self.assertRaises(ValueError):
             image(self.config, self.root)
+        (self.root/'admin.pub').write_text('# only a comment\n\n')
+        with self.assertRaises(ValueError):
+            image(self.config, self.root)
+
+    def test_multiple_public_keys(self):
+        first = (self.root/'admin.pub').read_text()
+        second_blob = struct.pack('>I', 11) + b'ssh-ed25519' + struct.pack('>I', 32) + bytes(range(32, 64))
+        second = 'ssh-ed25519 ' + base64.b64encode(second_blob).decode() + ' second@workstation\n'
+        (self.root/'admin.pub').write_text('# admins\n' + first + '\n' + second)
+        data = self.entries()['etc/dropbear/authorized_keys'].data
+        self.assertEqual(data.count(b'ssh-ed25519 '), 2)
+        self.assertNotIn(b'workstation', data)
+        self.assertNotIn(b'#', data)
+        (self.root/'admin.pub').write_text(first + '\nssh-rsa AAAA garbage\n')
+        with self.assertRaises(ValueError):
+            image(self.config, self.root)
 
     def test_crc_corruption(self):
         blob = bytearray(image(self.example, self.root, True))
