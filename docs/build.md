@@ -47,8 +47,33 @@ does not disable public compilation or require an expensive local build.
 
 See [the delta map](upstream-delta.md). CI refuses an ambiguous target artifact,
 checks the native DTB, and enforces a kernel image below the 20 MiB gap between
-the stock load addresses. The companion generator limits output to 1 MiB.
-These checks do not replace a complete hardware memory-layout test.
+the stock load addresses. It also measures the decompressed kernel from the
+`vmlinux` load segments: starting at the platform text offset, the kernel plus
+`.bss`, the relocated decompressor and scratch space must end below the initrd
+load address, otherwise the companion would be overwritten during boot. With
+an uncompressed embedded initramfs that footprint is roughly the size of the
+root filesystem; the check fails closed if the package set grows past the
+limit, and its numbers are recorded in `build.manifest` and printed in the
+build log whether it passes or fails: the file-backed image size that the
+decompressor writes, the footprint including `.bss` that the kernel reserves,
+the uImage size, the scratch margin, the end the relocated decompressor
+reaches, the worst-case end, the initrd load address and the remaining
+headroom. Two distinct verdicts are possible: the decompressor would
+overwrite the initrd, or only the kernel reservation would cover it, in
+which case Linux disables the initrd instead. Either way the companion is
+lost. The embedded initramfs is XZ-compressed to reduce this footprint without
+removing packages. The companion generator limits output to 1 MiB. These checks
+do not replace a complete hardware memory-layout test.
+
+The candidate built from `6029330c20c1f09c028c614ee738f0bf6bff2a0c`
+compiled successfully but failed the pre-boot memory review. Its extracted
+kernel image is 33,139,840 bytes and its uImage is 9,260,254 bytes. Their sum,
+plus the 32,768-byte kernel load offset, already exceeds the companion address
+`0x02600000` by 2,586,974 bytes before adding scratch space. The ARM decompressor
+relocates itself behind the extracted image; the running pilot confirms that
+U-Boot passes the external CPIO at `0x02600040`. This candidate was not booted.
+XZ compression and the footprint guard must pass a new build before the next
+hardware test. The source/package selection and bootloader remain unchanged.
 
 ## Local verification without a firmware compile
 
