@@ -96,4 +96,3 @@ class CandidateTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 MOD.stage(self.artifacts, self.sources, self.output)
         self.assertFalse((self.output / 'SHA256SUMS').exists())
-
