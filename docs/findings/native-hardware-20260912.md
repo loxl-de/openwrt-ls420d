@@ -46,6 +46,19 @@ The rollback pair predates this native build and is retained privately. Its
 success demonstrates a recovery route for this test setup, not reproducibility
 of that older local pilot. The native pair was restored as the selected pair.
 
+## Configuration-only update
+
+With the generic image hash unchanged, a newly generated private companion
+changed only the configured hostname. The 2,624-byte companion transferred at
+22:03:53 UTC; SSH subsequently confirmed the new name in both UCI and the running
+kernel. The original 2,112-byte companion was then restored and transferred at
+22:05:47 UTC. SSH confirmed the original deployment name after that reboot.
+
+The temporary rsync installation and RAM restore directories were absent after
+reboot, as expected. The generic kernel did not need rebuilding for either
+configuration change. This is a positive companion test; it does not replace
+absent-companion or malformed-companion testing.
+
 ## RTC and Wake-on-LAN
 
 The NAS completed an NTP query through a temporary relay to a public time server.
@@ -104,8 +117,16 @@ a full Btrfs scrub, an ACL-specific fixture or a production backup/restore test.
 
 The supervisor saw the CPU, PHY and both disks with `fault=0`. At a later idle
 check the CPU read 51,573 m°C, the PHY 49,000 m°C and fan state was 1. Both disks
-were still asleep. CPU thresholds were 60/65/75 °C. No temperature fault was
-injected and no sustained thermal load or fan-failure test was performed.
+were still asleep. CPU thresholds were 60/65/75 °C.
+
+A separate 90-second CPU workload repeatedly hashed the BusyBox executable. A
+supervising loop checked the sensor each second and would stop at 70 °C or a
+reported fan-control fault. Ten-second samples rose from 53,743 to 64,593 m°C.
+The fan changed from state 0 to state 1 after crossing 60 °C; subsequent samples
+reported fault 0. The workload exited normally and was stopped by its cleanup
+handler. This establishes a short-load response at the first CPU threshold,
+not thermal equilibrium, response at every threshold or physical fan RPM.
+No sensor or fan fault was injected.
 
 Still unverified here: mains-loss/cold-start reliability, magic-packet wake,
 the full LED/button/USB matrix, sustained memory and storage load, injected
