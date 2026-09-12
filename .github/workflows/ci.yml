@@ -163,6 +163,8 @@ jobs:
         env:
           ARTIFACT_DIR: ${{ github.workspace }}/build/artifacts-${{ matrix.copy }}
           JOBS: '4'
+          # Diagnostic: match the offline compiler invocation, including path handling.
+          CCACHE_DISABLE: '1'
           OPENWRT_CCACHE_DIR: ${{ github.workspace }}/build/ccache-${{ matrix.copy }}
           OPENWRT_DOWNLOAD_DIR: ${{ github.workspace }}/build/dl
         run: ./scripts/build.sh
