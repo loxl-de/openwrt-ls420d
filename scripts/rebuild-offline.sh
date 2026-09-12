@@ -54,7 +54,7 @@ cmp "$work/bundle/openwrt.config" "$OPENWRT_SOURCE_DIR/.config"
 # No restored toolchain, object files or compiler cache. Every build input must
 # already exist in the verified downloads or archived source trees.
 sh "$script_dir/make-with-diagnostics.sh" -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_DIR="$work/downloads/dl" download
-sh "$script_dir/make-with-diagnostics.sh" -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_DIR="$work/downloads/dl"
+sh "$script_dir/make-with-diagnostics.sh" -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" V=s DL_DIR="$work/downloads/dl"
 kernel_tree=$(find "$OPENWRT_SOURCE_DIR/build_dir/target-"* -maxdepth 2 -type d -name 'linux-6.12.*' -print)
 [ "$(printf '%s\n' "$kernel_tree" | wc -l)" -eq 1 ] && [ -d "$kernel_tree" ]
 config_status=0
