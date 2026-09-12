@@ -23,6 +23,13 @@ class SourceRestoreTests(unittest.TestCase):
         self.fixture.setUp()
         self.addCleanup(self.fixture.doCleanups)
         self.fixture.collect()
+        notice = self.fixture.output/'THIRD-PARTY-NOTICES.tar'
+        notice.write_bytes(b'Fixture notice archive')
+        sums = []
+        for path in sorted(self.fixture.output.iterdir()):
+            if path.name != 'SHA256SUMS':
+                sums.append(f'{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}')
+        (self.fixture.output/'SHA256SUMS').write_text('\n'.join(sums) + '\n')
         self.archive = self.fixture.root/'source.zip'
         self.output = self.fixture.root/'restored'
         with zipfile.ZipFile(self.archive, 'w') as z:

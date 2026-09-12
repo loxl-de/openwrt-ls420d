@@ -19,9 +19,11 @@ MEMBERS = {
     'downloads.tar', 'linux.config', 'openwrt.config', 'package-metadata.txt',
     'packages.manifest', 'project.tar', 'source-review.json', 'runner.txt',
     'target-metadata.txt', 'upstream-delta.patch', 'openwrt-upstream.tar',
+    'THIRD-PARTY-NOTICES.tar',
     *(f'feed-{name}.tar' for name in FEEDS),
 }
 LIMIT = 2 * 1024**3
+OPTIONAL_MEMBERS = {'THIRD-PARTY-NOTICES.tar'}
 
 
 def sha256(stream):
@@ -100,7 +102,10 @@ def restore(archive, expected, output):
             raise ValueError('source ZIP differs from pinned digest')
     with zipfile.ZipFile(archive) as z:
         entries = z.infolist()
-        if len(entries) != len(MEMBERS) or set(z.namelist()) != MEMBERS:
+        names = set(z.namelist())
+        required_names = MEMBERS - OPTIONAL_MEMBERS
+        if (len(entries) != len(names) or names - MEMBERS
+                or not required_names <= names):
             raise ValueError('unexpected or duplicate ZIP members')
         if sum(i.file_size for i in entries) > LIMIT:
             raise ValueError('ZIP exceeds limits')
@@ -110,7 +115,7 @@ def restore(archive, expected, output):
             if name in checksums or not re.fullmatch('[0-9a-f]{64}', digest):
                 raise ValueError('invalid checksum inventory')
             checksums[name] = digest
-        if set(checksums) != MEMBERS - {'SHA256SUMS'}:
+        if set(checksums) != names - {'SHA256SUMS'}:
             raise ValueError('incomplete checksum inventory')
         for name, digest in checksums.items():
             with z.open(name) as stream:
