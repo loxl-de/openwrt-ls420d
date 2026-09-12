@@ -98,10 +98,17 @@ ran from RAM and provided SSH access. Configuration from the second boot file
 appeared in the running system. See the
 [hardware bring-up record](docs/findings/local-bringup.md).
 
-The current repository targets OpenWrt 25.12.5 / Linux 6.12.94. Tests that run
-without the NAS, checks of the upstream sources and generation of the example
-have passed in GitHub Actions. This newer version still needs a complete build
-and testing on the NAS before it can be released as supported firmware.
+The current repository targets OpenWrt 25.12.5 / Linux 6.12.94. Full firmware
+builds have succeeded on GitHub Actions. Two independent builds also produced
+matching product hashes in [this comparison](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34652481060).
+The newer version still needs testing on the NAS before it can be called
+supported firmware.
+
+An offline rebuild from the supplied source archive has also compiled and
+packaged successfully. Its kernel-image hash differs from the online build;
+that reproducibility investigation is separate from image creation and hardware
+testing. The immediate goal is to provide the generic image and example companion
+with their corresponding sources and notices, without adding optional features.
 
 You can download the example `initrd.buffalo`, which contains neutral settings,
 no keys and disabled SSH. There is currently no downloadable generic kernel.
