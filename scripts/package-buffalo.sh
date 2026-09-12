@@ -13,7 +13,7 @@ ARTIFACT_DIR=${ARTIFACT_DIR:-$REPO_ROOT/build/artifacts}
 
 TARGET_DIR=$SOURCE_DIR/bin/targets/mvebu/cortexa9
 MKIMAGE=${MKIMAGE:-$SOURCE_DIR/staging_dir/host/bin/mkimage}
-FDTGET=${FDTGET:-$SOURCE_DIR/staging_dir/host/bin/fdtget}
+check_fdtget
 
 kernel_count=$(find "$TARGET_DIR" -maxdepth 1 -type f \
     -name '*-buffalo_ls420d-initramfs-kernel.bin' -print | wc -l | tr -d ' ')
@@ -32,7 +32,6 @@ package_manifest=$(find "$TARGET_DIR" -maxdepth 1 -type f \
 [ -s "$package_manifest" ] || fail 'LS420D package manifest is empty'
 
 [ -x "$MKIMAGE" ] || fail "OpenWrt mkimage not found: $MKIMAGE"
-[ -x "$FDTGET" ] || fail "OpenWrt fdtget not found: $FDTGET"
 
 dtb_count=$(find "$SOURCE_DIR/build_dir" -type f \
     -name 'image-armada-370-buffalo-ls420d.dtb' -print | wc -l | tr -d ' ')

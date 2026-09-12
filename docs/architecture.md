@@ -69,9 +69,16 @@ matching modules. Do not mix modules from another kernel build. Package or
 kernel changes require a new generic build. Site-only changes require only a
 new companion, provided the deployment contract is still compatible.
 
-The marker `/etc/ls420d-deployment` identifies companion format 1; it is not a
+The marker `/etc/ls420d-deployment` identifies companion format 2; it is not a
 signature or a binding to a particular kernel hash. Verify downloaded hashes
 and hardware-test the intended pair. Preserve a known-good pair privately.
+
+Format 2 supplies the hostname in `/etc/ls420d-site.uci`. The generic image's
+`50-ls420d-site` UCI-defaults hook applies it after OpenWrt creates the board
+settings. The companion no longer replaces `/etc/config/system`, which prevented
+those defaults from being generated. Format 2 needs an image containing this
+hook; an older image will ignore the hostname setting. The archive is still
+configuration data, not a new post-boot loader.
 
 See [deployment](deployment.md), [build](build.md) and
 [ADR 0002](decisions/0002-generic-kernel-external-initramfs.md).

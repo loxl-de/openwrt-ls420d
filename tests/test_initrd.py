@@ -99,6 +99,26 @@ class InitrdTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             image(self.config, self.root)
 
+    def test_multiple_public_keys_are_preserved(self):
+        first = (self.root/'admin.pub').read_text()
+        prefix = struct.pack('>I', 11)+b'ssh-ed25519'+struct.pack('>I', 32)
+        second = 'ssh-ed25519 '+base64.b64encode(prefix+bytes(reversed(range(32)))).decode()
+        (self.root/'admin.pub').write_text(first+'\n'+second+' second-comment\n'+first)
+        data = self.entries()['etc/dropbear/authorized_keys'].data.decode()
+        self.assertEqual(data.splitlines(), [' '.join(first.split()[:2]), second])
+        self.assertNotIn('comment', data)
+
+    def test_invalid_second_public_key_is_rejected(self):
+        key = self.root/'admin.pub'
+        key.write_text(key.read_text()+'not-a-key\n')
+        with self.assertRaises(ValueError):
+            self.entries()
+
+    def test_blank_public_key_file_is_rejected(self):
+        (self.root/'admin.pub').write_text('\n \n')
+        with self.assertRaises(ValueError):
+            self.entries()
+
     def test_crc_corruption(self):
         blob = bytearray(image(self.example, self.root, True))
         blob[-1] ^= 1
@@ -119,6 +139,22 @@ class InitrdTests(unittest.TestCase):
         before = output.read_bytes()
         self.assertNotEqual(subprocess.run(command, capture_output=True).returncode, 0)
         self.assertEqual(before, output.read_bytes())
+
+    def test_hostname_merges_without_replacing_board_defaults(self):
+        entries = self.entries()
+        self.assertNotIn('etc/config/system', entries)
+        expected = ("set system.@system[0].hostname='%s'\n" % self.config['hostname']).encode()
+        self.assertEqual(entries['etc/ls420d-site.uci'].data, expected)
+        self.assertIn(b'format=2\n', entries['etc/ls420d-deployment'].data)
+
+    def test_public_key_comment_lines_are_ignored(self):
+        key = self.root/'admin.pub'
+        before = self.entries()['etc/dropbear/authorized_keys'].data
+        key.write_text('# administrator keys\n' + key.read_text())
+        self.assertEqual(self.entries()['etc/dropbear/authorized_keys'].data, before)
+        key.write_text('# no key\n')
+        with self.assertRaises(ValueError):
+            self.entries()
 
 
 if __name__ == '__main__':

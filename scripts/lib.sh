@@ -12,6 +12,14 @@ require_command() {
     command -v "$1" >/dev/null 2>&1 || fail "required command not found: $1"
 }
 
+check_fdtget() {
+    # Use the host package; this OpenWrt build does not stage fdtget.
+    FDTGET=${FDTGET:-fdtget}
+    require_command "$FDTGET"
+    "$FDTGET" --version || fail "fdtget is not runnable: $FDTGET"
+    export FDTGET
+}
+
 is_sha1() {
     case $1 in
         *[!0-9a-f]*|'') return 1 ;;

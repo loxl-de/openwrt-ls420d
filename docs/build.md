@@ -79,6 +79,12 @@ checkout, sufficient disk space and:
 JOBS=4 ./scripts/build.sh
 ```
 
+Install the host's `device-tree-compiler` package for `fdtget`. Packaging uses
+it only to read and validate the compiled DTB; OpenWrt still compiles the DTB
+with its own toolchain. The build checks `fdtget` before preparing sources and
+prints its version in the build log. Set `FDTGET=/path/to/fdtget` to override
+the command found on `PATH`.
+
 Prefer GitHub infrastructure for this expensive step. The build creates its
 own marked OpenWrt checkout and cleans only that owned checkout on subsequent
 runs. Do not point it at a working tree containing work you want to preserve.

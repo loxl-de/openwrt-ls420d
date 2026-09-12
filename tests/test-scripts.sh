@@ -150,4 +150,15 @@ if grep -RIE 'BEGIN (OPENSSH|RSA|EC|DSA) PRIVATE KEY|([0-9A-Fa-f]{2}:){5}[0-9A-F
 fi
 ok 'public LS420D build inputs are RAM-only and deployment-neutral'
 
+for option in BUILDBOT SIGNED_PACKAGES SIGNATURE_CHECK REPRODUCIBLE_DEBUG_INFO; do
+    grep -qx "CONFIG_$option=y" "$REPO_ROOT/config/ls420d.config"
+done
+for option in ALL ALL_NONSHARED ALL_KMODS SDK SDK_LLVM_BPF IB MAKE_TOOLCHAIN \
+    COLLECT_KERNEL_DEBUG JSON_CYCLONEDX_SBOM PACKAGE_owut; do
+    grep -qx "# CONFIG_$option is not set" "$REPO_ROOT/config/ls420d.config"
+done
+grep -qx 'CONFIG_KERNEL_BUILD_USER="builder"' "$REPO_ROOT/config/ls420d.config"
+grep -qx 'CONFIG_KERNEL_BUILD_DOMAIN="buildhost"' "$REPO_ROOT/config/ls420d.config"
+ok 'release mode keeps package verification without extra build products or sysupgrade client'
+
 printf '1..%d\n' "$pass"
