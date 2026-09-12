@@ -32,12 +32,34 @@ existing output directory. The SHA-256 inventory identifies every collected
 download and every output file.
 
 This candidate is preparation for review, not a declaration of complete source
-availability or license compliance. In particular, an offline reconstruction
-and build from these archives has not yet passed. The explicit offline test
-below implements restoration and a clean, network-isolated rebuild.
-Its report explicitly records those checks as incomplete. The temporary
+availability or license compliance. A [clean offline rebuild](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34671908071)
+has completed compilation and packaging with matching normalized kernel
+configuration. Its kernel-image hash differs, so the reproducibility comparison
+fails. That is not evidence of a missing source input. The temporary
 14-day Actions artifact is not the long-term source offering required below.
 The firmware-upload gate remains closed.
+
+## Pair the artifacts with their sources
+
+After collection, CI runs `scripts/stage-candidate.py` on the runner. It verifies
+the source inventory, matches the build manifest and checks each product hash
+before copying the two boot files and their sources into one candidate directory.
+It checks the copies again before writing the outer `SHA256SUMS`.
+
+For an existing local build and its collected sources:
+
+```sh
+python3 scripts/stage-candidate.py \
+  --artifacts build/artifacts-a \
+  --sources build/source-review-a \
+  --output build/candidate-a
+```
+
+The output must not already exist. This step does not rebuild or upload anything,
+change the source-review flags, or certify license compliance. A failed copy
+may leave a partial directory without its final checksum inventory; do not use
+that directory as a completed candidate. The current CI upload allowlists still
+exclude the candidate's firmware files.
 
 ## Acceptance criteria for downloadable firmware
 
@@ -57,8 +79,9 @@ Actions artifact, maintainers must validate the exact package set and provide:
    required by their licenses; do not rely on a short-lived CI artifact or
    someone else's mutable download URL as the sole source offering.
 6. An independent offline-source rebuild check, using the supplied sources,
-   with failures treated as missing-source findings. Build reproducibility is
-   checked separately; a matching hash alone does not validate license compliance.
+   distinguishing missing inputs and build failures from product-hash differences.
+   Build reproducibility is checked separately; a matching hash alone does not
+   validate license compliance.
 
 This process should run on public standard GitHub runners. A sources bundle
 may be larger than the firmware; budget storage and retention explicitly.

@@ -229,6 +229,12 @@ jobs:
           compression-level: 1
           if-no-files-found: error
           path: build/source-review-${{ matrix.copy }}/
+      - name: Pair firmware with verified sources (runner-local only)
+        run: |
+          python3 scripts/stage-candidate.py \
+            --artifacts "build/artifacts-${{ matrix.copy }}" \
+            --sources "build/source-review-${{ matrix.copy }}" \
+            --output "build/candidate-${{ matrix.copy }}"
       - name: Report final disk usage
         if: always()
         run: df -h .
