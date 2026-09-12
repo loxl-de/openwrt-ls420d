@@ -140,6 +140,22 @@ class InitrdTests(unittest.TestCase):
         self.assertNotEqual(subprocess.run(command, capture_output=True).returncode, 0)
         self.assertEqual(before, output.read_bytes())
 
+    def test_hostname_merges_without_replacing_board_defaults(self):
+        entries = self.entries()
+        self.assertNotIn('etc/config/system', entries)
+        expected = ("set system.@system[0].hostname='%s'\n" % self.config['hostname']).encode()
+        self.assertEqual(entries['etc/ls420d-site.uci'].data, expected)
+        self.assertIn(b'format=2\n', entries['etc/ls420d-deployment'].data)
+
+    def test_public_key_comment_lines_are_ignored(self):
+        key = self.root/'admin.pub'
+        before = self.entries()['etc/dropbear/authorized_keys'].data
+        key.write_text('# administrator keys\n' + key.read_text())
+        self.assertEqual(self.entries()['etc/dropbear/authorized_keys'].data, before)
+        key.write_text('# no key\n')
+        with self.assertRaises(ValueError):
+            self.entries()
+
 
 if __name__ == '__main__':
     unittest.main()

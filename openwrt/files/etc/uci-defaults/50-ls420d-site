@@ -1,0 +1,6 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# Apply companion hostname data after config_generate creates board defaults.
+[ -s /etc/ls420d-site.uci ] || exit 0
+uci -q batch < /etc/ls420d-site.uci || exit 1
+uci commit system

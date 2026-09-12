@@ -43,9 +43,9 @@ def config_files(config, root, example=False):
         raise ValueError('invalid network mode or fields')
     files = {
         'etc/config/network': text.encode(),
-        'etc/config/system': ("config system\n\toption hostname '%s'\n\toption timezone 'UTC'\n\nconfig timeserver 'ntp'\n\toption enabled '1'\n\tlist server '0.openwrt.pool.ntp.org'\n\tlist server '1.openwrt.pool.ntp.org'\n" % hostname).encode(),
+        'etc/ls420d-site.uci': ("set system.@system[0].hostname='%s'\n" % hostname).encode(),
         'etc/config/dropbear': ("config dropbear 'main'\n\toption enable '%s'\n\toption Interface 'lan'\n\toption PasswordAuth 'off'\n\toption RootPasswordAuth 'off'\n\toption Port '22'\n" % ('0' if example else '1')).encode(),
-        'etc/ls420d-deployment': (f'format=1\nexample={int(example)}\nhostname={hostname}\n').encode(),
+        'etc/ls420d-deployment': (f'format=2\nexample={int(example)}\nhostname={hostname}\n').encode(),
     }
     if not example:
         def input_file(name, private=False):
@@ -63,7 +63,7 @@ def config_files(config, root, example=False):
         authorized = []
         for line in input_file('ssh_public_key').decode('ascii').splitlines():
             parts = line.strip().split()
-            if not parts:
+            if not parts or parts[0].startswith('#'):
                 continue
             if len(parts) < 2 or parts[0] != 'ssh-ed25519':
                 raise ValueError('supply Ed25519 OpenSSH PUBLIC keys, one per line')
