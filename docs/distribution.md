@@ -61,6 +61,17 @@ may leave a partial directory without its final checksum inventory; do not use
 that directory as a completed candidate. The current CI upload allowlists still
 exclude the candidate's firmware files.
 
+## Retain an unpublished candidate
+
+The separate [candidate workflow](candidate-build.md) keeps the firmware,
+matching sources and original notices in a release draft. It runs only when
+started manually from the reviewed `main` branch. The draft is not published,
+and a failed run can leave it empty or incomplete.
+
+This retention path does not enable public firmware downloads. The ordinary
+pull-request CI remains read-only and keeps its existing upload allowlist.
+Public release still requires the checks below.
+
 ## Acceptance criteria for downloadable firmware
 
 Before enabling any public kernel/rootfs download, including an experimental
