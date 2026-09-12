@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
 import hashlib
+import io
 import importlib.util
 import json
 from pathlib import Path
@@ -157,6 +158,35 @@ class SourceReviewTests(unittest.TestCase):
         MODULE.archive_git(self.repo, self.project_commit, first)
         MODULE.archive_git(self.repo, self.project_commit, second)
         self.assertEqual(first.read_bytes(), second.read_bytes())
+
+    def test_notices_are_collected_and_checksums_cover_them(self):
+        archive_path = self.downloads/'source.tar.gz'
+        with tarfile.open(archive_path, 'w:gz') as archive:
+            blob = b'Original fixture notice\\n'
+            info = tarfile.TarInfo('source/LICENSE')
+            info.size = len(blob)
+            archive.addfile(info, io.BytesIO(blob))
+        selection = self.root/'notice-selection.json'
+        selection.write_text('{"files": []}')
+        MODULE.collect(self.repo, self.source, self.downloads, self.artifacts,
+                       self.output, selection)
+        with tarfile.open(self.output/'THIRD-PARTY-NOTICES.tar') as archive:
+            self.assertEqual(
+                archive.extractfile('notices/source.tar.gz/source/LICENSE').read(), blob)
+        sums = (self.output/'SHA256SUMS').read_text()
+        self.assertIn(MODULE.digest(self.output/'THIRD-PARTY-NOTICES.tar')
+                      + '  THIRD-PARTY-NOTICES.tar', sums)
+        self.assertFalse(json.loads((self.output/'source-review.json').read_text())
+                         ['firmware_distribution_authorized'])
+
+    def test_notice_failure_leaves_no_completion_inventory(self):
+        selection = self.root/'notice-selection.json'
+        selection.write_text('{"files": []}')
+        # The default fixture is deliberately not a valid compressed tar.
+        with self.assertRaises(subprocess.CalledProcessError):
+            MODULE.collect(self.repo, self.source, self.downloads, self.artifacts,
+                           self.output, selection)
+        self.assertFalse((self.output/'SHA256SUMS').exists())
 
 
 if __name__ == '__main__':

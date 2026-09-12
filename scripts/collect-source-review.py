@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 
 
@@ -107,7 +108,7 @@ def archive_downloads(paths, destination, epoch):
     return inventory
 
 
-def collect(repo, source, downloads, artifacts, output):
+def collect(repo, source, downloads, artifacts, output, notice_selection=None):
     if any(p.is_symlink() for p in (output, *output.parents)) or output.exists():
         raise ValueError('existing or symlinked output')
     if output.resolve().is_relative_to(source.resolve()) or output.resolve().is_relative_to(downloads.resolve()):
@@ -116,6 +117,8 @@ def collect(repo, source, downloads, artifacts, output):
         raise ValueError('project checkout must be clean')
     if not (source/'.git/ls420d-managed').is_file():
         raise ValueError('source checkout is not managed by this project')
+    if notice_selection is not None:
+        regular(notice_selection)
     commit, feeds = read_locks(repo)
     project_commit = git(repo, 'rev-parse', 'HEAD')
     epoch = int(git(source, 'show', '-s', '--format=%ct', commit))
@@ -164,6 +167,13 @@ def collect(repo, source, downloads, artifacts, output):
         'firmware_distribution_authorized': False,
     }
     (output/'source-review.json').write_text(json.dumps(report, indent=2, sort_keys=True)+'\n')
+    if notice_selection is not None:
+        subprocess.run([
+            sys.executable, str(Path(__file__).with_name('collect-notices.py')),
+            '--downloads', str(downloads), '--selection', str(notice_selection),
+            '--inventory', str(output/'source-review.json'),
+            '--output', str(output/'THIRD-PARTY-NOTICES.tar'),
+        ], check=True)
     (output/'README.txt').write_text(
         'Source review candidate; no built firmware is included.\n'
         'project.tar contains the build scripts, patches and public overlay.\n'
@@ -185,8 +195,9 @@ if __name__ == '__main__':
     parser.add_argument('--downloads', type=Path, required=True)
     parser.add_argument('--artifacts', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--notice-selection', type=Path)
     args = parser.parse_args()
     try:
-        collect(args.repo, args.source, args.downloads, args.artifacts, args.output)
+        collect(args.repo, args.source, args.downloads, args.artifacts, args.output, args.notice_selection)
     except (OSError, ValueError, KeyError, subprocess.SubprocessError):
         raise SystemExit('Source collection failed; inspect inputs privately. Do not distribute partial output.')
