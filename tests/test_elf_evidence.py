@@ -69,3 +69,19 @@ class ElfEvidenceTests(unittest.TestCase):
             result = subprocess.run([sys.executable, str(repo / 'scripts/audit-rootfs.py'),
                                      str(root), str(report)], capture_output=True)
             self.assertNotEqual(result.returncode, 0)
+
+    def test_sectionless_elf(self):
+        data = bytearray(fixture())
+        struct.pack_into('<I', data, 32, 0)
+        struct.pack_into('<HHH', data, 46, 0, 0, 0)
+        result = elf_evidence(bytes(data))
+        self.assertEqual(result['sections'], [])
+        self.assertEqual(result['blocks'], [hashlib.sha256(data).hexdigest()])
+        data[-1] ^= 1
+        self.assertNotEqual(result['blocks'], elf_evidence(bytes(data))['blocks'])
+
+    def test_extended_section_count_not_silently_ignored(self):
+        data = bytearray(fixture())
+        struct.pack_into('<H', data, 48, 0)
+        with self.assertRaises(ValueError):
+            elf_evidence(bytes(data))

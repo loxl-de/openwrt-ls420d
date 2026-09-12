@@ -16,6 +16,13 @@ def elf_evidence(data):
     if header[2] != 40 or header[3] != 1 or header[8] != 52:
         raise ValueError('expected ARM ELF header')
     offset, stride, count = header[6], header[11], header[12]
+    if offset == 0 and count == 0:
+        # sstrip removes the section table. Preserve every file byte in
+        # bounded block fingerprints; do not reconstruct stripped padding.
+        return {'format': 1, 'sections': [], 'block_size': 4096,
+                'header_sha256': hashlib.sha256(data[:52]).hexdigest(),
+                'blocks': [hashlib.sha256(data[pos:pos + 4096]).hexdigest()
+                           for pos in range(0, len(data), 4096)]}
     if stride != 40 or not 1 <= count <= 4096:
         raise ValueError('unsupported ELF section table')
     if offset < 52 or offset + count * stride > len(data):
