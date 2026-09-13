@@ -35,11 +35,17 @@ cd "$TARGET" || fail no-volume
 device=$(awk -v target="$TARGET" '$2 == target && $3 == "btrfs" && $4 ~ /(^|,)rw(,|$)/ {print $1}' /proc/mounts)
 [ -n "$device" ] || fail no-writable-btrfs-mount
 case "$device" in /dev/*) ;; *) fail unexpected-mount-source;; esac
-block info "$device" | grep -Fq " UUID=\"$uuid\" " || fail wrong-volume
+# Extract the UUID field and compare it exactly; do not depend on which
+# field block(1) prints after it.
+actual=$(block info "$device" | sed -n 's/^[^:]*://; s/.*[[:space:]]UUID="\([^"]*\)".*$/\1/p')
+[ "$actual" = "$uuid" ] || fail wrong-volume
 if [ ! -f .ls420d-volume ] || [ -L .ls420d-volume ]; then
     fail missing-volume-marker
 fi
-IFS= read -r marker <.ls420d-volume || fail invalid-volume-marker
+# Accept a marker without a trailing newline; read(1) returns non-zero at
+# end of file even when it filled the variable.
+marker=''
+IFS= read -r marker <.ls420d-volume || [ -n "$marker" ] || fail invalid-volume-marker
 [ "$marker" = "$uuid" ] || fail wrong-volume-marker
 [ ! -L pull ] || fail symlink-destination
 mkdir -p pull || fail cannot-create-destination

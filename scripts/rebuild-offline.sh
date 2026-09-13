@@ -38,6 +38,7 @@ export OPENWRT_SOURCE_DIR="$source_root"
 export ARTIFACT_DIR="$work/artifacts"
 export SOURCE_DATE_EPOCH
 SOURCE_DATE_EPOCH=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["source_date_epoch"])' "$work/bundle/source-review.json")
+# ccache is deselected in the configuration; keep the environment explicit too.
 export CCACHE_DISABLE=1
 export GIT_CONFIG_NOSYSTEM=1
 export GIT_CONFIG_GLOBAL=/dev/null
