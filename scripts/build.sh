@@ -12,7 +12,6 @@ CONFIG=$REPO_ROOT/config/ls420d.config
 [ -z "${OPENWRT_CONFIG:-}" ] || fail 'generic build uses only the versioned public configuration'
 ARTIFACT_DIR=${ARTIFACT_DIR:-$REPO_ROOT/build/artifacts}
 DOWNLOAD_DIR=${OPENWRT_DOWNLOAD_DIR:-$REPO_ROOT/build/dl}
-CCACHE_STORAGE=${OPENWRT_CCACHE_DIR:-$REPO_ROOT/build/ccache}
 JOBS=${JOBS:-1}
 
 [ "$#" -eq 0 ] || fail 'public build accepts no private deployment arguments'
@@ -32,9 +31,10 @@ SOURCE_DATE_EPOCH=$(git -C "$SOURCE_DIR" show -s --format=%ct "$OPENWRT_COMMIT")
 export SOURCE_DATE_EPOCH
 make -C "$SOURCE_DIR" defconfig
 
-mkdir -p "$DOWNLOAD_DIR" "$CCACHE_STORAGE"
+mkdir -p "$DOWNLOAD_DIR"
 [ ! -e "$SOURCE_DIR/.ccache" ] || fail 'unexpected ccache path in clean source tree'
-ln -s "$CCACHE_STORAGE" "$SOURCE_DIR/.ccache"
+grep -qx '# CONFIG_CCACHE is not set' "$SOURCE_DIR/.config" ||
+    fail 'the generic build compiles without ccache'
 
 make -C "$SOURCE_DIR" -j"$JOBS" DL_DIR="$DOWNLOAD_DIR" download
 # Keep compiler and sub-make errors in the CI log; a failed parallel build
