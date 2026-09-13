@@ -74,13 +74,14 @@ class BackupCompanionTests(unittest.TestCase):
 
 class BackupRuntimeTests(unittest.TestCase):
     def run_job(self, status=0, mounted=True, marker=VOLUME, actual_uuid=VOLUME,
-                locked=False, huge=False, symlink=False):
+                locked=False, huge=False, symlink=False, marker_newline=True,
+                block_line=None):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             volume = root/'volume'
             volume.mkdir()
             if marker is not None:
-                (volume/'.ls420d-volume').write_text(marker+'\n')
+                (volume/'.ls420d-volume').write_text(marker + ('\n' if marker_newline else ''))
             if symlink:
                 (volume/'pull').symlink_to(root)
             mounts = root/'mounts'
@@ -96,7 +97,7 @@ class BackupRuntimeTests(unittest.TestCase):
   *) return 1;;
  esac
 }}
-block() {{ echo '/dev/sda1: UUID="{actual_uuid}" TYPE="btrfs"'; }}
+block() {{ echo '{block_line or f'/dev/sda1: UUID="{actual_uuid}" TYPE="btrfs"'}'; }}
 flock() {{ return {75 if locked else 0}; }}
 logger() {{ if [ "$#" = 2 ]; then cat >>{root}/logged; fi; }}
 rsync() {{
@@ -125,6 +126,33 @@ rsync() {{
                 self.assertNotIn('--delete', args)
                 self.assertTrue(cwd.strip().endswith('/volume'))
                 self.assertFalse(leftover)
+
+    def test_marker_without_trailing_newline_is_accepted(self):
+        code, status, args, _, _, _ = self.run_job(marker_newline=False)
+        self.assertEqual(code, 0)
+        self.assertIn(' ok 0', status)
+        self.assertNotEqual(args, '')
+
+    def test_empty_marker_is_rejected(self):
+        code, status, args, _, _, _ = self.run_job(marker='', marker_newline=False)
+        self.assertNotEqual(code, 0)
+        self.assertIn('invalid-volume-marker', status)
+        self.assertEqual(args, '')
+
+    def test_uuid_match_is_exact_regardless_of_field_order(self):
+        last_field = f'/dev/sda1: TYPE="btrfs" UUID="{VOLUME}"'
+        code, status, args, _, _, _ = self.run_job(block_line=last_field)
+        self.assertEqual(code, 0, status)
+        self.assertNotEqual(args, '')
+        for line in (f'/dev/sda1: UUID="{VOLUME}0" TYPE="btrfs"',
+                     f'/dev/sda1: UUID="{VOLUME[1:]}" TYPE="btrfs"',
+                     f'/dev/sda1: LABEL="{VOLUME}" TYPE="btrfs"',
+                     '/dev/sda1: TYPE="btrfs"'):
+            with self.subTest(line=line):
+                code, status, args, _, _, _ = self.run_job(block_line=line)
+                self.assertNotEqual(code, 0)
+                self.assertIn('wrong-volume', status)
+                self.assertEqual(args, '')
 
     def test_destination_and_lock_fail_before_transfer(self):
         for kwargs in (dict(mounted=False), dict(marker=None), dict(marker='wrong'),

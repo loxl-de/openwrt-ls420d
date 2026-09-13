@@ -144,7 +144,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends \
-            build-essential ccache clang flex bison g++ gawk gcc-multilib \
+            build-essential clang flex bison g++ gawk gcc-multilib \
             g++-multilib device-tree-compiler \
             gettext git libelf-dev libncurses-dev libssl-dev libzstd-dev \
             python3 python3-pyelftools python3-setuptools rsync swig unzip \
@@ -161,9 +161,6 @@ jobs:
         env:
           ARTIFACT_DIR: ${{ github.workspace }}/build/artifacts-${{ matrix.copy }}
           JOBS: '4'
-          # Match the verified cache-free compiler invocation.
-          CCACHE_DISABLE: '1'
-          OPENWRT_CCACHE_DIR: ${{ github.workspace }}/build/ccache-${{ matrix.copy }}
           OPENWRT_DOWNLOAD_DIR: ${{ github.workspace }}/build/dl
         run: ./scripts/build.sh
       - name: Record runner provenance

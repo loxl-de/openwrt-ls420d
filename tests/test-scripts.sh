@@ -186,6 +186,7 @@ for option in ALL ALL_NONSHARED ALL_KMODS SDK SDK_LLVM_BPF IB MAKE_TOOLCHAIN \
     grep -qx "# CONFIG_$option is not set" "$REPO_ROOT/config/ls420d.config"
 done
 grep -qx 'CONFIG_KERNEL_BUILD_USER="builder"' "$REPO_ROOT/config/ls420d.config"
+grep -qx '# CONFIG_CCACHE is not set' "$REPO_ROOT/config/ls420d.config"
 grep -qx 'CONFIG_KERNEL_BUILD_DOMAIN="buildhost"' "$REPO_ROOT/config/ls420d.config"
 ok 'release mode keeps package verification without extra build products or sysupgrade client'
 
