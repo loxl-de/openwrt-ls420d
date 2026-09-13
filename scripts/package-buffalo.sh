@@ -86,7 +86,9 @@ python3 "$SCRIPT_DIR/make_initrd.py" --example --output "$ARTIFACT_DIR/initrd.bu
 root_count=$(find "$SOURCE_DIR/build_dir" -maxdepth 2 -type d -name root-mvebu | wc -l | tr -d ' ')
 [ "$root_count" -eq 1 ] || fail 'expected exactly one built-in rootfs'
 rootfs=$(find "$SOURCE_DIR/build_dir" -maxdepth 2 -type d -name root-mvebu)
-require_rsync "$package_manifest" "$rootfs"
+require_package_binary "$package_manifest" "$rootfs" rsync usr/bin/rsync
+require_package_binary "$package_manifest" "$rootfs" ethtool usr/sbin/ethtool
+require_package_binary "$package_manifest" "$rootfs" hdparm sbin/hdparm
 python3 "$SCRIPT_DIR/audit-rootfs.py" "$rootfs" "$ARTIFACT_DIR/rootfs-inventory.json"
 git -C "$SOURCE_DIR" diff --binary HEAD > "$ARTIFACT_DIR/upstream-delta.patch"
 (cd "$REPO_ROOT/openwrt/files"; find . -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum) > "$ARTIFACT_DIR/public-files.sha256"

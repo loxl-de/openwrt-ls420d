@@ -173,11 +173,12 @@ validate_kernel_footprint() {
     done
 }
 
-# rsync is part of the pull-backup base, not a transient post-boot install.
-require_rsync() {
-    grep -Eq '^rsync - [^[:space:]]+$' "$1" || fail 'rsync is missing from the image package manifest'
-    if [ ! -f "$2/usr/bin/rsync" ] || [ -L "$2/usr/bin/rsync" ] || \
-        [ ! -x "$2/usr/bin/rsync" ] || [ ! -s "$2/usr/bin/rsync" ]; then
-        fail 'rsync executable is missing from the built rootfs'
+# Arguments: package manifest, rootfs, exact package name, relative binary path.
+require_package_binary() {
+    awk -v name="$3" '$1 == name && $2 == "-" && NF == 3 { found = 1 }
+        END { exit !found }' "$1" || fail "$3 is missing from the image package manifest"
+    if [ ! -f "$2/$4" ] || [ -L "$2/$4" ] || \
+        [ ! -x "$2/$4" ] || [ ! -s "$2/$4" ]; then
+        fail "$3 executable is missing from the built rootfs: $4"
     fi
 }

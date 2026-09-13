@@ -195,24 +195,34 @@ done
 grep -qx '# CONFIG_PACKAGE_rsyncd is not set' "$REPO_ROOT/config/ls420d.config"
 ok 'pull-backup image selects rsync with ACL/xattr and SSH but no rsync daemon'
 
-rsync_root=$TEST_TMP/rsync-root
-mkdir -p "$rsync_root/usr/bin"
-printf 'rsync - 3.4.3-r1\n' > "$TEST_TMP/rsync.manifest"
-printf '#!/bin/sh\nexit 0\n' > "$rsync_root/usr/bin/rsync"
-chmod 0755 "$rsync_root/usr/bin/rsync"
-require_rsync "$TEST_TMP/rsync.manifest" "$rsync_root"
-ok 'rsync packaging accepts a listed package and installed executable'
-printf 'rsyncd - 3.4.3-r1\n' > "$TEST_TMP/not-rsync.manifest"
-expect_failure 'rsync daemon does not substitute for the rsync package' \
-    require_rsync "$TEST_TMP/not-rsync.manifest" "$rsync_root"
-chmod 0644 "$rsync_root/usr/bin/rsync"
-expect_failure 'rsync packaging rejects a non-executable file' \
-    require_rsync "$TEST_TMP/rsync.manifest" "$rsync_root"
-mv "$rsync_root/usr/bin/rsync" "$rsync_root/usr/bin/fixture"
-expect_failure 'rsync packaging rejects a missing executable' \
-    require_rsync "$TEST_TMP/rsync.manifest" "$rsync_root"
-ln -s fixture "$rsync_root/usr/bin/rsync"
-expect_failure 'rsync packaging rejects a substituted symlink' \
-    require_rsync "$TEST_TMP/rsync.manifest" "$rsync_root"
+for pair in rsync:usr/bin/rsync ethtool:usr/sbin/ethtool hdparm:sbin/hdparm; do
+    package_name=${pair%%:*}
+    binary_path=${pair#*:}
+    package_root=$TEST_TMP/$package_name-root
+    mkdir -p "$package_root/${binary_path%/*}"
+    printf '%s - 1.0-r1\n' "$package_name" > "$TEST_TMP/package.manifest"
+    printf '#!/bin/sh\nexit 0\n' > "$package_root/$binary_path"
+    chmod 0755 "$package_root/$binary_path"
+    require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
+    ok "$package_name packaging accepts a listed package and installed executable"
+    printf '%s-extra - 1.0-r1\n' "$package_name" > "$TEST_TMP/not-package.manifest"
+    expect_failure "$package_name packaging rejects a different package with the same prefix" \
+        require_package_binary "$TEST_TMP/not-package.manifest" "$package_root" "$package_name" "$binary_path"
+    chmod 0644 "$package_root/$binary_path"
+    expect_failure "$package_name packaging rejects a non-executable file" \
+        require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
+    chmod 0755 "$package_root/$binary_path"
+    : > "$package_root/$binary_path"
+    expect_failure "$package_name packaging rejects an empty executable" \
+        require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
+    mv "$package_root/$binary_path" "$package_root/$binary_path.fixture"
+    expect_failure "$package_name packaging rejects a missing executable" \
+        require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
+    printf '#!/bin/sh\nexit 0\n' > "$package_root/$binary_path.fixture"
+    chmod 0755 "$package_root/$binary_path.fixture"
+    ln -s "${binary_path##*/}.fixture" "$package_root/$binary_path"
+    expect_failure "$package_name packaging rejects a substituted symlink" \
+        require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
+done
 
 printf '1..%d\n' "$pass"
