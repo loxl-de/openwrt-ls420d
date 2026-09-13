@@ -131,6 +131,7 @@ No sensor or fan fault was injected.
 Still unverified here: mains-loss/cold-start reliability, magic-packet wake,
 the full LED/button/USB matrix, sustained memory and storage load, injected
 fan/sensor faults, and the absent/malformed companion cases on this exact image.
-Repeated cached GitHub builds matched, but the independent cache-free offline
-rebuild investigation remains separate. These limits must not be described as
+Repeated GitHub builds and the independent cache-free offline rebuild now
+match; see [the reproduction evidence](offline-source-path.md). Reproduction
+does not extend the hardware coverage. These limits must not be described as
 passing merely because normal boot and the small storage fixture succeeded.

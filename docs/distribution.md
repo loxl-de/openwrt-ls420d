@@ -31,13 +31,17 @@ firmware. It refuses missing inputs, unexpected download entries and an
 existing output directory. The SHA-256 inventory identifies every collected
 download and every output file.
 
-This candidate is preparation for review, not a declaration of complete source
-availability or license compliance. A [clean offline rebuild](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34671908071)
-has completed compilation and packaging with matching normalized kernel
-configuration. Its kernel-image hash differs, so the reproducibility comparison
-fails. That is not evidence of a missing source input. The temporary
-14-day Actions artifact is not the long-term source offering required below.
-The firmware-upload gate remains closed.
+The retained candidate is still unpublished. An independent cache-free,
+network-isolated [offline rebuild](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34731496493)
+now reproduces its boot files using the archived sources and original build
+path. The [main-branch comparison](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34739045121)
+also passed. See [the offline evidence](findings/offline-source-path.md) for
+hashes and the build-path limitation. Earlier differing hashes are historical
+findings, not the current result.
+
+This closes the source-rebuild check, not the license or hardware review.
+A release draft retains the paired sources and binaries; temporary Actions
+artifacts alone are not the intended public source offering.
 
 ## Pair the artifacts with their sources
 
