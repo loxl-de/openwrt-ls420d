@@ -40,7 +40,10 @@ Generate a separate Dropbear Ed25519 client key with `dropbearkey -t ed25519 -f
 backup-client.dropbear` in the private directory. Restrict it to mode 0600 and
 install its public key on the source account. Restrict that account to the
 required read-only source; it must have rsync installed and permission to read
-the requested data and metadata. Do not reuse the NAS server host key.
+the requested data and metadata. The job passes `-A -X`, so the source's rsync
+must be built with ACL and extended-attribute support as well; otherwise the
+first run fails with status 1 and "remote rsync does not support --acls".
+Do not reuse the NAS server host key.
 
 `source-host.pub` is the source server's Ed25519 public host key, obtained and
 verified through an independent trusted channel. It is one OpenSSH public-key
@@ -58,7 +61,8 @@ the archive contains no additional program files.
 
 The example does not format or repartition a disk. Before its first run, identify
 the intended disk and filesystem, verify the mounted Btrfs UUID against the JSON,
-then create `/mnt/backup/.ls420d-volume` containing that exact UUID and a newline.
+then create `/mnt/backup/.ls420d-volume` containing that exact UUID on its
+first line, for example with `echo "$uuid" > /mnt/backup/.ls420d-volume`.
 Do this only after confirming `/mnt/backup` is the intended mounted volume;
 do not create a marker on the unmounted RAM-root directory. Do not copy a marker
 onto an unrelated volume to make a failed check pass.
