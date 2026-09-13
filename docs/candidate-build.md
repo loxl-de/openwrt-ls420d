@@ -37,7 +37,8 @@ the ordinary pull-request CI remains read-only.
 Keeping a draft is not hardware acceptance or public distribution approval.
 The [public distribution requirements](distribution.md) still apply before
 publishing it. A successful build also does not establish bit-for-bit
-reproducibility; that comparison is a separate test.
+reproducibility; that comparison is a separate test. The archived candidate from
+`9b2ebca` passed an [offline rebuild at the original source path](findings/offline-source-path.md).
 
 For an existing local build and its collected sources, prepare the same assets
 without uploading anything:

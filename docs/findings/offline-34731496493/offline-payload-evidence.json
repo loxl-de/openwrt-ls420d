@@ -1,0 +1,399 @@
+{
+  "format": 1,
+  "payloads": {
+    "usr/bin/iperf3": {
+      "gnu_build_ids": [],
+      "header_sha256": "569c8c678be2e883954f1b8ffcab7c4f5a675cbe2987e7f6c5feff10bef2ebd4",
+      "segments": [
+        {
+          "alignment": 4,
+          "file_size": 224,
+          "flags": 4,
+          "index": 0,
+          "memory_size": 224,
+          "offset": 52,
+          "physical_address": 65588,
+          "sha256": "48365f17ef3013e5e7fba3025d7f73fdde45ec1ccbd89038f3fd72ceea80244e",
+          "type": 6,
+          "virtual_address": 65588
+        },
+        {
+          "alignment": 1,
+          "file_size": 24,
+          "flags": 4,
+          "index": 1,
+          "memory_size": 24,
+          "offset": 276,
+          "physical_address": 65812,
+          "sha256": "e3cd93464ea280c4058c8bbe92c6200ece86fec7d421d122e1bb3201234728e2",
+          "type": 3,
+          "virtual_address": 65812
+        },
+        {
+          "alignment": 4096,
+          "file_size": 3692,
+          "flags": 5,
+          "index": 2,
+          "memory_size": 3692,
+          "offset": 0,
+          "physical_address": 65536,
+          "sha256": "818bf12e3a3e4e5546d8797c6ee143b7639ee959bcfe566a5b67fd483af0e50f",
+          "type": 1,
+          "virtual_address": 65536
+        },
+        {
+          "alignment": 4096,
+          "file_size": 395,
+          "flags": 6,
+          "index": 3,
+          "memory_size": 832,
+          "offset": 3700,
+          "physical_address": 73332,
+          "sha256": "6ed176ddbf34b3fa0ecdcddd411b0fcbf0b748c78acc8bc9349e5cc62f8202c2",
+          "type": 1,
+          "virtual_address": 73332
+        },
+        {
+          "alignment": 4,
+          "file_size": 264,
+          "flags": 6,
+          "index": 4,
+          "memory_size": 264,
+          "offset": 3712,
+          "physical_address": 73344,
+          "sha256": "1efb0c7d3c4d30a921ea47982aea0a686329eeb6105dfc2f1baf2f55b1760a2b",
+          "type": 2,
+          "virtual_address": 73344
+        },
+        {
+          "alignment": 16,
+          "file_size": 0,
+          "flags": 6,
+          "index": 5,
+          "memory_size": 0,
+          "offset": 0,
+          "physical_address": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "type": 1685382481,
+          "virtual_address": 0
+        },
+        {
+          "alignment": 1,
+          "file_size": 395,
+          "flags": 4,
+          "index": 6,
+          "memory_size": 396,
+          "offset": 3700,
+          "physical_address": 73332,
+          "sha256": "6ed176ddbf34b3fa0ecdcddd411b0fcbf0b748c78acc8bc9349e5cc62f8202c2",
+          "type": 1685382482,
+          "virtual_address": 73332
+        }
+      ],
+      "sha256": "2035cdb09f17f8d0fb20fe00bea082a2bc4419afd1f482274c951bd85de0991f",
+      "size": 4095,
+      "source_path_strings": []
+    },
+    "usr/lib/libelf-0.192.so": {
+      "gnu_build_ids": [
+        "03aeb860334980e2ed2f63549355d1ebab6268a1"
+      ],
+      "header_sha256": "7e3b2e71e7fccc4d87524f2ef1f00271be790f8a29a1d4d6691770653089a028",
+      "segments": [
+        {
+          "alignment": 4096,
+          "file_size": 76884,
+          "flags": 5,
+          "index": 0,
+          "memory_size": 76884,
+          "offset": 0,
+          "physical_address": 0,
+          "sha256": "2899f29ed5880c465fc59002f77bc68c9ca0e42b0895b4495d9516a3b357dd12",
+          "type": 1,
+          "virtual_address": 0
+        },
+        {
+          "alignment": 4096,
+          "file_size": 811,
+          "flags": 6,
+          "index": 1,
+          "memory_size": 848,
+          "offset": 77016,
+          "physical_address": 81112,
+          "sha256": "6367b6b1f0c643bba2a1d9d8545af4d18bcc8a44335b38736a1216041603e2ea",
+          "type": 1,
+          "virtual_address": 81112
+        },
+        {
+          "alignment": 4,
+          "file_size": 288,
+          "flags": 6,
+          "index": 2,
+          "memory_size": 288,
+          "offset": 77248,
+          "physical_address": 81344,
+          "sha256": "1fb2556fd8bac82d64ad1e56636eab362e698e7fcb998d85c3350dcbc109a550",
+          "type": 2,
+          "virtual_address": 81344
+        },
+        {
+          "alignment": 4,
+          "file_size": 36,
+          "flags": 4,
+          "index": 3,
+          "memory_size": 36,
+          "offset": 276,
+          "physical_address": 276,
+          "sha256": "7bd0d4f96b5caa380c56ba26e5458159d2f038865784dfb1c16029d27ac34c2c",
+          "type": 4,
+          "virtual_address": 276
+        },
+        {
+          "alignment": 4,
+          "file_size": 0,
+          "flags": 4,
+          "index": 4,
+          "memory_size": 4,
+          "offset": 77016,
+          "physical_address": 81112,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "type": 7,
+          "virtual_address": 81112
+        },
+        {
+          "alignment": 16,
+          "file_size": 0,
+          "flags": 6,
+          "index": 5,
+          "memory_size": 0,
+          "offset": 0,
+          "physical_address": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "type": 1685382481,
+          "virtual_address": 0
+        },
+        {
+          "alignment": 1,
+          "file_size": 808,
+          "flags": 4,
+          "index": 6,
+          "memory_size": 808,
+          "offset": 77016,
+          "physical_address": 81112,
+          "sha256": "2423705f674cd6f0fbcca2f559db1a075dc04bf40ba022c4e55827edaf434c44",
+          "type": 1685382482,
+          "virtual_address": 81112
+        }
+      ],
+      "sha256": "c2d41085daf912b7428e2ccd0382018be473f19ed39bbe7289d2a0b920755b72",
+      "size": 77827,
+      "source_path_strings": []
+    },
+    "usr/lib/libiperf.so.0.0.0": {
+      "gnu_build_ids": [],
+      "header_sha256": "c7171f4d461e293a9e49ddcf5f8382fca8b6bb4e5faf27a872af947184b88b1e",
+      "segments": [
+        {
+          "alignment": 4096,
+          "file_size": 148332,
+          "flags": 5,
+          "index": 0,
+          "memory_size": 148332,
+          "offset": 0,
+          "physical_address": 0,
+          "sha256": "f42a5baea7ef7fdebc8ae5b0a3528c7a707f6864b43c56b88a59f262b8caddf2",
+          "type": 1,
+          "virtual_address": 0
+        },
+        {
+          "alignment": 4096,
+          "file_size": 3059,
+          "flags": 6,
+          "index": 1,
+          "memory_size": 6864,
+          "offset": 149572,
+          "physical_address": 153668,
+          "sha256": "d701b6dc07dd48e420b37b3ec6cc49e3ff09493cbfc6dd5d671298e6dbde2c17",
+          "type": 1,
+          "virtual_address": 153668
+        },
+        {
+          "alignment": 4,
+          "file_size": 280,
+          "flags": 6,
+          "index": 2,
+          "memory_size": 280,
+          "offset": 149788,
+          "physical_address": 153884,
+          "sha256": "283e4e5dfddb0b733f89f6e2ffa93b28dbd26a1cf195e424271d184f415da325",
+          "type": 2,
+          "virtual_address": 153884
+        },
+        {
+          "alignment": 16,
+          "file_size": 0,
+          "flags": 6,
+          "index": 3,
+          "memory_size": 0,
+          "offset": 0,
+          "physical_address": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "type": 1685382481,
+          "virtual_address": 0
+        },
+        {
+          "alignment": 1,
+          "file_size": 1980,
+          "flags": 4,
+          "index": 4,
+          "memory_size": 1980,
+          "offset": 149572,
+          "physical_address": 153668,
+          "sha256": "1264bd250a8e3d1a08e1690286df86c9bf326c6ae598b2189602739ba21fe4c1",
+          "type": 1685382482,
+          "virtual_address": 153668
+        }
+      ],
+      "sha256": "80f6995a9f95a61bfe6b02a48b005d72e4803110d2b9b7fd43f1bcf0577f4d05",
+      "size": 152631,
+      "source_path_strings": []
+    },
+    "usr/lib/libstdc++.so.6.0.33": {
+      "gnu_build_ids": [],
+      "header_sha256": "7e3b2e71e7fccc4d87524f2ef1f00271be790f8a29a1d4d6691770653089a028",
+      "segments": [
+        {
+          "alignment": 4,
+          "file_size": 23080,
+          "flags": 4,
+          "index": 0,
+          "memory_size": 23080,
+          "offset": 1581024,
+          "physical_address": 1581024,
+          "sha256": "85de255a241675d148c5ac490fcaa602034183ab4969ded7675c91c885bf4373",
+          "type": 1879048193,
+          "virtual_address": 1581024
+        },
+        {
+          "alignment": 4096,
+          "file_size": 1604108,
+          "flags": 5,
+          "index": 1,
+          "memory_size": 1604108,
+          "offset": 0,
+          "physical_address": 0,
+          "sha256": "3ea5b0aac01052f290d6487b38489d762e8f0f6c496d2264054b3b7ed6836196",
+          "type": 1,
+          "virtual_address": 0
+        },
+        {
+          "alignment": 4096,
+          "file_size": 29199,
+          "flags": 6,
+          "index": 2,
+          "memory_size": 39372,
+          "offset": 1606004,
+          "physical_address": 1606004,
+          "sha256": "c3dde61a446a4bab822af8e6c5905674136c979830978dcb2f7d6352815fd2ad",
+          "type": 1,
+          "virtual_address": 1606004
+        },
+        {
+          "alignment": 4,
+          "file_size": 264,
+          "flags": 6,
+          "index": 3,
+          "memory_size": 264,
+          "offset": 1625848,
+          "physical_address": 1625848,
+          "sha256": "0193276f137dead636ac3a1ae9e192c0aa93e5e0488821dd1538ffa992c19fd3",
+          "type": 2,
+          "virtual_address": 1625848
+        },
+        {
+          "alignment": 4,
+          "file_size": 0,
+          "flags": 4,
+          "index": 4,
+          "memory_size": 20,
+          "offset": 1606004,
+          "physical_address": 1606004,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "type": 7,
+          "virtual_address": 1606004
+        },
+        {
+          "alignment": 16,
+          "file_size": 0,
+          "flags": 6,
+          "index": 5,
+          "memory_size": 0,
+          "offset": 0,
+          "physical_address": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "type": 1685382481,
+          "virtual_address": 0
+        },
+        {
+          "alignment": 1,
+          "file_size": 20108,
+          "flags": 4,
+          "index": 6,
+          "memory_size": 20108,
+          "offset": 1606004,
+          "physical_address": 1606004,
+          "sha256": "4ab5965d3c35588815dfad68a991cafd3288db9865288b747277af35e0d3959a",
+          "type": 1685382482,
+          "virtual_address": 1606004
+        }
+      ],
+      "sha256": "caf4d05876288c176121f4f3a3334a0a65ccf464d5ffaaef11bc5d721316dd08",
+      "size": 1635203,
+      "source_path_strings": [
+        {
+          "normalized_sha256": "ff62d884eec81bfb3ae0b3808b7eeb6fb549f8e8813cbdf18f25d055f14090f8",
+          "offset": 1272394,
+          "sha256": "5572ceadc465722c8512a5c90183d6af28347ac6070a2aa06983439b51f7edaf",
+          "size": 167
+        },
+        {
+          "normalized_sha256": "2ad7171ed0075549a3f1c5e83d1ff5ef9dcf9d0e59386a1b7a68515a06712522",
+          "offset": 1279209,
+          "sha256": "10f15c39f4fc56b8347b133d6bbca9d5a3d6116c543b28372f09db6a790283c0",
+          "size": 179
+        },
+        {
+          "normalized_sha256": "007969db9aa3c1ced78b76d191fade9f3d4672fdc410eccea07b5c5da121134b",
+          "offset": 1279416,
+          "sha256": "b054bbe9db18f19820c8131ce9220e1100c3d05aeeef992d32cf3c6c15eb0e0c",
+          "size": 172
+        },
+        {
+          "normalized_sha256": "da833a3677388bc3b08df58f956d50e4441179622c24dd839b36f19ac894934a",
+          "offset": 1279618,
+          "sha256": "5a44a3a6dfc7df3cdd3e5b26ec73d31ec73ec7f54b2ec54d36b071c59432a7ce",
+          "size": 179
+        },
+        {
+          "normalized_sha256": "94696659d0d3278b30ebe7bcb1f2cc9ecaacd6c366667238cd7050ebea82a8cd",
+          "offset": 1279808,
+          "sha256": "9eabf99e7fc285c436db83eba2f2cdb8ad6fa599b2660983108d2b8067afc913",
+          "size": 171
+        },
+        {
+          "normalized_sha256": "d522005dda267ebf6ee6830c352e1dd1b13b2c1b710eb8f791555107b97717d6",
+          "offset": 1280181,
+          "sha256": "f536c7e845f19a4a5b0227591824d4c2afd3472fcc94827703a67062bcf7addf",
+          "size": 168
+        },
+        {
+          "normalized_sha256": "ddcee31f03ac573d511ee789f7920178bb3cd0dd9b3b0a46a1a53ad243fb65b4",
+          "offset": 1280374,
+          "sha256": "a84a733cb11e9dd5758739edd3c3b3b3c53c8f9a4b737eb0658e97ae5d07280b",
+          "size": 176
+        }
+      ]
+    }
+  },
+  "source_root_sha256": "a2431bf7e0cdc32e9f9d3ea7a584282959a228f25c398d5c50b66c708cc0cef5"
+}

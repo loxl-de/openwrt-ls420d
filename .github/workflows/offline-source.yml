@@ -10,7 +10,7 @@ on:
         required: true
         type: string
       same_workspace_path:
-        default: false
+        default: true
         required: false
         type: boolean
   workflow_dispatch:
@@ -24,7 +24,7 @@ on:
         required: true
         type: string
       same_workspace_path:
-        default: false
+        default: true
         description: Relocate the verified source tree to the normal online openwrt-src path
         required: false
         type: boolean
