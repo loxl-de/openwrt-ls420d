@@ -10,8 +10,10 @@ After the workflow is merged into `main`, open its page under Actions and choose
 the job condition. There are no private configuration inputs.
 
 The job checks release access before compiling and creates a uniquely named
-draft. If the build fails, that draft may be empty or incomplete. Do not publish
-it. A completed run uploads these seven assets:
+draft. If the run fails, its final step deletes that draft again, so only
+completed candidates remain; a draft that is still present after a failed run
+is incomplete and must not be published. A completed run uploads these seven
+assets:
 
 - `uImage.buffalo`: generic kernel and RAM root filesystem;
 - `initrd.buffalo`: anonymous example companion;

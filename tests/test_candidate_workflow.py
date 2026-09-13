@@ -22,7 +22,11 @@ class CandidateWorkflowPolicyTests(unittest.TestCase):
         self.assertNotIn('--draft=false', self.text)
         self.assertNotIn('actions/upload-artifact', self.text)
         self.assertNotIn('--clobber', self.text)
-        self.assertEqual(self.text.count('--json isDraft --jq .isDraft'), 3)
+        # Three guards around the uploads plus one before the failure cleanup
+        # deletes anything: only a draft is ever touched.
+        self.assertEqual(self.text.count('--json isDraft --jq .isDraft'), 4)
+        self.assertLess(self.text.index('if: failure()'), self.text.index('gh release delete'))
+        self.assertEqual(self.text.count('gh release delete'), 1)
 
     def test_sources_and_notices_are_uploaded_with_firmware(self):
         for name in ('uImage.buffalo', 'initrd.buffalo', 'sources.tar',

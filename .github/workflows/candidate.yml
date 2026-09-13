@@ -105,3 +105,16 @@ jobs:
             build/release/uImage.buffalo build/release/initrd.buffalo \
             build/release/SHA256SUMS
           test "$(gh release view "$CANDIDATE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+      - name: Remove the draft of a failed run
+        # A draft created before a build that then failed holds no complete
+        # asset set; keeping it would leave incomplete candidates in the list.
+        # Only a draft is ever deleted, and only when this run failed.
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          if gh release view "$CANDIDATE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null | grep -qx true; then
+            gh release delete "$CANDIDATE_TAG" --repo "$GITHUB_REPOSITORY" --yes
+            echo "deleted the incomplete draft $CANDIDATE_TAG" >> "$GITHUB_STEP_SUMMARY"
+          fi
