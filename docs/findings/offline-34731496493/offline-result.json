@@ -1,0 +1,29 @@
+{
+  "all_checks_passed": true,
+  "all_products_match": true,
+  "compiler_cache_used": false,
+  "firmware_distribution_authorized": false,
+  "kernel_config_match": true,
+  "license_review_complete": false,
+  "network_isolated": true,
+  "offline_compile_and_packaging_passed": true,
+  "products": {
+    "initrd.buffalo": {
+      "expected_sha256": "3d89a914514042cb57e92f5e76b855b61fddba1dcb75dc3b61bce3fd57272354",
+      "match": true,
+      "sha256": "3d89a914514042cb57e92f5e76b855b61fddba1dcb75dc3b61bce3fd57272354"
+    },
+    "packages.manifest": {
+      "expected_sha256": "ddc19fc2c2fe663ad78df18dbfc158b90aef4d68eab63c9bfdeeacca6868ba8f",
+      "match": true,
+      "sha256": "ddc19fc2c2fe663ad78df18dbfc158b90aef4d68eab63c9bfdeeacca6868ba8f"
+    },
+    "uImage.buffalo": {
+      "expected_sha256": "5a64639273741c984cf08d8e243360c30c7b6d8240826e1a68a14bd7a7d2e54d",
+      "match": true,
+      "sha256": "5a64639273741c984cf08d8e243360c30c7b6d8240826e1a68a14bd7a7d2e54d"
+    }
+  },
+  "source_project_commit": "9b2ebcaaa95bcaa8a3714987fc5d475479b10226",
+  "source_zip_sha256": "b3e41df02067ec9d4ae1ca0f1fde4b9cff4ca3c6baf30e3c3a4d0a5e0108ba0b"
+}

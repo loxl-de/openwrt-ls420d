@@ -271,3 +271,4 @@ jobs:
     with:
       artifact_id: ${{ inputs.offline_source_artifact }}
       archive_sha256: ${{ inputs.offline_source_sha256 }}
+      same_workspace_path: true

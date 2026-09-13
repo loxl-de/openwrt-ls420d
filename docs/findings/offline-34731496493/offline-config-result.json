@@ -1,0 +1,8 @@
+{
+  "actual_sha256": "b3a05f2403ed44b9ee936244e2d19c53496942b3aadbb1e662ef1e73a1eafa64",
+  "differences": [],
+  "expected_sha256": "b3a05f2403ed44b9ee936244e2d19c53496942b3aadbb1e662ef1e73a1eafa64",
+  "format": 1,
+  "match": true,
+  "valid_inputs": true
+}

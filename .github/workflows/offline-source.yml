@@ -9,6 +9,10 @@ on:
       archive_sha256:
         required: true
         type: string
+      same_workspace_path:
+        default: true
+        required: false
+        type: boolean
   workflow_dispatch:
     inputs:
       artifact_id:
@@ -19,6 +23,11 @@ on:
         description: Independently verified SHA-256 of that source ZIP
         required: true
         type: string
+      same_workspace_path:
+        default: true
+        description: Relocate the verified source tree to the normal online openwrt-src path
+        required: false
+        type: boolean
 
 permissions:
   contents: read
@@ -65,6 +74,20 @@ jobs:
         run: |
           python3 scripts/restore-source-review.py "$RUNNER_TEMP/source-review.zip" \
             --sha256 "$SOURCE_ARCHIVE_SHA256" --output "$RUNNER_TEMP/offline-source"
+      - name: Select the controlled source location
+        env:
+          SAME_WORKSPACE_PATH: ${{ inputs.same_workspace_path }}
+        run: |
+          source_dir="$RUNNER_TEMP/offline-source/openwrt"
+          test -d "$source_dir"
+          test ! -L "$source_dir"
+          if [ "$SAME_WORKSPACE_PATH" = true ]; then
+            destination="$GITHUB_WORKSPACE/openwrt-src"
+            test ! -e "$destination"
+            test ! -L "$destination"
+            mv -T -- "$source_dir" "$destination"
+            printf 'OFFLINE_SOURCE_OVERRIDE=%s\n' "$destination" >> "$GITHUB_ENV"
+          fi
       - name: Rebuild with no network or compiler cache
         run: |
           printf 'Rust before isolation: '
@@ -73,8 +96,11 @@ jobs:
             ip link set lo up
             printf "Rust under sudo PATH: "
             runuser -u "$1" -- sh -c "rustc --version 2>/dev/null || echo unavailable"
-            exec runuser -u "$1" -- env PATH="$4" sh "$2" "$3"
-          ' sh "$(id -un)" "$GITHUB_WORKSPACE/scripts/rebuild-offline.sh" "$RUNNER_TEMP/offline-source" "$PATH"
+            exec runuser -u "$1" -- env PATH="$4" GITHUB_WORKSPACE="$5" \
+              OPENWRT_SOURCE_DIR="$6" OFFLINE_RESTORED_SOURCE_DIR="$3/openwrt" JOBS=4 \
+              sh "$2" "$3"
+          ' sh "$(id -un)" "$GITHUB_WORKSPACE/scripts/rebuild-offline.sh" "$RUNNER_TEMP/offline-source" "$PATH" \
+            "$GITHUB_WORKSPACE" "${OFFLINE_SOURCE_OVERRIDE:-}"
       - name: Upload offline verification report (no firmware)
         if: success() || failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -84,6 +110,8 @@ jobs:
             ${{ runner.temp }}/offline-source/offline-result.json
             ${{ runner.temp }}/offline-source/offline-config-result.json
             ${{ runner.temp }}/offline-source/offline-rootfs-inventory.json
+            ${{ runner.temp }}/offline-source/offline-payload-evidence.json
+            ${{ runner.temp }}/offline-source/offline-build-inputs.json
           if-no-files-found: warn
           retention-days: 14
       - name: Report final disk usage

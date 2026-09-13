@@ -14,7 +14,29 @@ printf 'Rust inside isolation with runner PATH: '
 rustc --version 2>/dev/null || echo unavailable
 
 project=$work/project
-export OPENWRT_SOURCE_DIR="$work/openwrt"
+default_source_dir=$work/openwrt
+if [ -n "${OPENWRT_SOURCE_DIR:-}" ]; then
+    # The only supported relocated source root is the checkout's ordinary
+    # online path. The workflow moves the verified tree there before entering
+    # the empty network namespace, so this isolates source-root differences
+    # without accepting an arbitrary path from a dispatch input.
+    [ -n "${GITHUB_WORKSPACE:-}" ] ||
+        { echo 'GITHUB_WORKSPACE is required for a relocated source root' >&2; exit 1; }
+    workspace=$(CDPATH='' cd -- "$GITHUB_WORKSPACE" && pwd -P)
+    expected_source_dir=$workspace/openwrt-src
+    [ "$OPENWRT_SOURCE_DIR" = "$expected_source_dir" ] ||
+        { echo 'relocated source root must be GITHUB_WORKSPACE/openwrt-src' >&2; exit 1; }
+    if [ ! -d "$OPENWRT_SOURCE_DIR" ] || [ -L "$OPENWRT_SOURCE_DIR" ]; then
+        echo 'relocated source root is missing or symlinked' >&2
+        exit 1
+    fi
+    source_root=$(CDPATH='' cd -- "$OPENWRT_SOURCE_DIR" && pwd -P)
+    [ "$source_root" = "$expected_source_dir" ] ||
+        { echo 'relocated source root is not canonical' >&2; exit 1; }
+else
+    source_root=$(CDPATH='' cd -- "$default_source_dir" && pwd -P)
+fi
+export OPENWRT_SOURCE_DIR="$source_root"
 export ARTIFACT_DIR="$work/artifacts"
 export SOURCE_DATE_EPOCH
 SOURCE_DATE_EPOCH=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["source_date_epoch"])' "$work/bundle/source-review.json")
@@ -70,4 +92,10 @@ python3 "$project/tests/check-atags.py" "$kernel_tree"
 rootfs=$(find "$OPENWRT_SOURCE_DIR/build_dir" -maxdepth 2 -type d -name root-mvebu -print)
 [ "$(printf '%s\n' "$rootfs" | wc -l)" -eq 1 ] && [ -d "$rootfs" ]
 python3 "$script_dir/audit-rootfs.py" "$rootfs" "$work/offline-rootfs-inventory.json"
+python3 "$script_dir/repro_payload_evidence.py" \
+    --rootfs "$rootfs" --source-root "$OPENWRT_SOURCE_DIR" \
+    --output "$work/offline-payload-evidence.json"
+python3 "$script_dir/repro_build_inputs.py" \
+    --source-root "$OPENWRT_SOURCE_DIR" --work-root "$work" \
+    --project-root "$project" --output "$work/offline-build-inputs.json"
 python3 "$script_dir/report-offline-products.py" "$work"

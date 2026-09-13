@@ -6,16 +6,19 @@ The earlier zero-filled dummy RAMdisk is not this configuration archive.
 
 ## 1. Obtain and verify the generic build
 
-At the source-publication stage, CI builds the firmware but uploads only
-text-only compile evidence. There is **no downloadable generic kernel yet**;
-see [the distribution gate](distribution.md). Do not try to boot an evidence
-archive. The intended next step is a reviewed source-complete GitHub firmware
-bundle; no mandatory local full build is introduced by this gate.
+Ordinary CI uploads compile evidence, not bootable firmware. Repository users
+with push access can download the generic image, example companion, matching
+sources and notices from an unpublished candidate draft; see
+[the candidate guide](candidate-build.md). Public binary distribution remains
+subject to [the distribution gate](distribution.md). Do not try to boot an
+evidence archive, and do not start a new build merely to retrieve an existing
+candidate.
 
-If you build locally using [the build guide](build.md), verify the generated
-`SHA256SUMS` in the artifact directory with `sha256sum -c SHA256SUMS`. Once
-binary uploads are enabled through review, do the same for a downloaded bundle.
-Keep the source commit ID, build manifest and exact pair used for each test.
+Verify the downloaded bundle with `sha256sum -c SHA256SUMS`. Keep the source
+commit ID, build manifest and exact pair used for each test. Preserve the sources
+and notices alongside their matching firmware. A local build remains an
+alternative described in [the build guide](build.md), not a required deployment
+step.
 
 The separate lightweight example artifact contains only the anonymous companion,
 this guide, the MIT license and checksums. It is not a full firmware build. Development artifacts
@@ -151,6 +154,10 @@ pair and a proven recovery route before trying a new one.
 - Interactive changes and package installations affect RAM only and do not
   survive reboot. They are not an update mechanism.
 
-The 25.12.2 pilot proved the mechanism. This repository's native 25.12.5 image
-still needs hardware acceptance; neither the example artifact nor a green CI
-badge constitutes that acceptance.
+The native 25.12.5 candidate has passed specific boot, companion-only update,
+rollback, RTC-wake and small storage tests on one device. See the
+[dated hardware record](findings/native-hardware-20260912.md) for the exact source
+commit, image hash and remaining limits. This is partial hardware acceptance,
+not a supported public release. The archived candidate also passed a
+[byte-for-byte offline rebuild at its original source path](findings/offline-source-path.md).
+This does not establish reproducibility at arbitrary paths or on all runner images.
