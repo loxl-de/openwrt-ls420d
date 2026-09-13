@@ -36,6 +36,15 @@ It does not establish reproducibility across arbitrary paths, repositories or
 runner images, nor isolate every compiler-level cause: the two runs used separate
 runner instances, and the earlier run lacked equivalent build-input diagnostics.
 
+## Build timestamps
+
+The build-input report records `1782770622` as the outer shell's
+`SOURCE_DATE_EPOCH`, taken from archive metadata. OpenWrt's `include/toplevel.mk`
+recomputes and exports the effective build epoch from the archived root
+`version.date`: `1782737960`. Both offline build logs report that same effective
+value. The collector runs after `make` in the parent shell, so its top-level epoch
+must not be mistaken for the value used by child compilation jobs.
+
 ## Using the verified path
 
 The offline workflow defaults `same_workspace_path` to `true`. It moves only the

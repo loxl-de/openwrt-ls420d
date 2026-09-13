@@ -158,5 +158,6 @@ The native 25.12.5 candidate has passed specific boot, companion-only update,
 rollback, RTC-wake and small storage tests on one device. See the
 [dated hardware record](findings/native-hardware-20260912.md) for the exact source
 commit, image hash and remaining limits. This is partial hardware acceptance,
-not a supported public release. Byte-for-byte offline reproducibility is a
-separate, unresolved claim; it does not invalidate the recorded hardware tests.
+not a supported public release. The archived candidate also passed a
+[byte-for-byte offline rebuild at its original source path](findings/offline-source-path.md).
+This does not establish reproducibility at arbitrary paths or on all runner images.
