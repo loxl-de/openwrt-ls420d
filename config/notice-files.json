@@ -37,12 +37,6 @@
       "source_sha256": "7ab6301f7f34eef90a4d278647c260bc0762e0e14561f4649854cf4b0d4bea21"
     },
     {
-      "member": "dnsmasq-2.93/COPYING",
-      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
-      "source": "dnsmasq-2.93.tar.xz",
-      "source_sha256": "0c00d4e5c97c8306e5fb932b348b34269c9c29a0e7df0e8e82958b407092bc19"
-    },
-    {
       "member": "dropbear-2025.89/LICENSE",
       "sha256": "a99ce657d790b761c132ee7e0de18edb437ae6361e536d991c6a12f36e770445",
       "source": "dropbear-2025.89.tar.bz2",
@@ -1235,18 +1229,6 @@
       "sha256": "4ee1e51baf5f3166712fa0c3e01338c7257e50ddef245d28bb14ad68f6070ba5",
       "source": "nftables-1.1.6.tar.xz",
       "source_sha256": "372931bda8556b310636a2f9020adc710f9bab66f47efe0ce90bff800ac2530c"
-    },
-    {
-      "member": "ppp-2.5.2/pppd/main.c",
-      "sha256": "a67e8a2759e5d3f95e40173ced7ba9dc99b53f70bd04d9040030d2eeaf241c8a",
-      "source": "ppp-2.5.2.tar.zst",
-      "source_sha256": "381668ce1547afeaf599f08ae37935bfd3d5841747c62bca5a870c11e3e9bedb"
-    },
-    {
-      "member": "ppp-2.5.2/pppd/plugins/pppoe/plugin.c",
-      "sha256": "4aba240bec526caeb901810dc685b11c54fb28146a0012d062af2ab196ce2b28",
-      "source": "ppp-2.5.2.tar.zst",
-      "source_sha256": "381668ce1547afeaf599f08ae37935bfd3d5841747c62bca5a870c11e3e9bedb"
     },
     {
       "member": "procd-2026.03.13~58eb263d/container.h",

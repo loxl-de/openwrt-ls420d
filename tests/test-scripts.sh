@@ -225,4 +225,48 @@ for pair in rsync:usr/bin/rsync ethtool:usr/sbin/ethtool hdparm:sbin/hdparm; do
         require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
 done
 
+grep -qx '# CONFIG_PACKAGE_uboot-envtools is not set' "$REPO_ROOT/config/ls420d.config"
+if grep -q 'ubootenv_add_uci_config' "$REPO_ROOT/openwrt/patches/100-add-buffalo-ls420d-ram-initramfs-support.patch"; then
+    fail 'LS420D must not add a writable bootloader environment configuration'
+fi
+grep -q '^+.*read-only;' "$REPO_ROOT/openwrt/patches/100-add-buffalo-ls420d-ram-initramfs-support.patch"
+grep -q '/soc/spi@10600/spi-flash@0/partitions/partition@f0000' "$REPO_ROOT/scripts/package-buffalo.sh"
+ok 'RAM image protects SPI NOR and omits the environment writer'
+
+printf '%s\trefs/tags/v25.12.4\n%s\trefs/tags/v25.12.4^{}\n%s\trefs/tags/v25.12.10-rc1\n%s\trefs/tags/v25.12.10\n%s\trefs/tags/v25.12.10^{}\n%s\trefs/tags/v25.12.5\n%s\trefs/tags/v25.12.5^{}\n%s\trefs/tags/v26.1.0\n' \
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
+    cccccccccccccccccccccccccccccccccccccccc dddddddddddddddddddddddddddddddddddddddd \
+    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ffffffffffffffffffffffffffffffffffffffff \
+    0000000000000000000000000000000000000000 1111111111111111111111111111111111111111 > "$TEST_TMP/tags"
+[ "$(newest_release_tag 25.12 < "$TEST_TMP/tags")" = '25.12.10 dddddddddddddddddddddddddddddddddddddddd' ]
+[ "$(peeled_tag_commit v25.12.10 < "$TEST_TMP/tags")" = eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ]
+expect_failure 'a lightweight tag without a peeled commit is rejected' peeled_tag_commit v26.1.0 < "$TEST_TMP/tags"
+expect_failure 'a series without release tags is rejected' newest_release_tag 24.10 < "$TEST_TMP/tags"
+ok 'newest point release is chosen numerically and release candidates are ignored'
+
+cat > "$TEST_TMP/feeds.conf.default" <<'EOF_FEEDS'
+src-git packages https://git.openwrt.org/feed/packages.git^1111111111111111111111111111111111111111
+src-git luci https://git.openwrt.org/project/luci.git^2222222222222222222222222222222222222222
+src-git-full routing https://git.openwrt.org/feed/routing.git^3333333333333333333333333333333333333333
+src-git telephony https://git.openwrt.org/feed/telephony.git^4444444444444444444444444444444444444444
+src-git video https://github.com/openwrt/video.git^5555555555555555555555555555555555555555
+#src-git extra https://example.invalid/extra.git
+EOF_FEEDS
+feeds_lock_from_conf "$TEST_TMP/feeds.conf.default" "$REPO_ROOT/feeds.lock" "$TEST_TMP/feeds.lock" 25.12.10
+grep -q '^packages|https://github.com/openwrt/packages.git|1111111111111111111111111111111111111111$' "$TEST_TMP/feeds.lock"
+grep -q '^routing|https://github.com/openwrt/routing.git|3333333333333333333333333333333333333333$' "$TEST_TMP/feeds.lock"
+grep -q 'OpenWrt v25.12.10 feeds.conf.default' "$TEST_TMP/feeds.lock"
+sed '/^src-git luci/d' "$TEST_TMP/feeds.conf.default" > "$TEST_TMP/feeds.short"
+expect_failure 'a feed missing from feeds.conf.default is rejected' \
+    feeds_lock_from_conf "$TEST_TMP/feeds.short" "$REPO_ROOT/feeds.lock" "$TEST_TMP/feeds.bad" 25.12.10
+ok 'feed lock is rewritten with upstream commits and the chosen mirror URLs'
+
+printf '%s\n' 'CONFIG_THERMAL_GOV_USER_SPACE=y' '# CONFIG_MTD_PARTITIONED_MASTER is not set' > "$TEST_TMP/kernel.config"
+require_ram_kernel_config "$TEST_TMP/kernel.config"
+ok 'kernel config keeps thermal protection and hides the whole-flash writer'
+sed '/THERMAL_GOV_USER_SPACE/d' "$TEST_TMP/kernel.config" > "$TEST_TMP/kernel-no-governor.config"
+expect_failure 'missing user_space governor is rejected' require_ram_kernel_config "$TEST_TMP/kernel-no-governor.config"
+sed 's/# CONFIG_MTD_PARTITIONED_MASTER is not set/CONFIG_MTD_PARTITIONED_MASTER=y/' "$TEST_TMP/kernel.config" > "$TEST_TMP/kernel-master.config"
+expect_failure 'writable partitioned MTD master is rejected' require_ram_kernel_config "$TEST_TMP/kernel-master.config"
+
 printf '1..%d\n' "$pass"

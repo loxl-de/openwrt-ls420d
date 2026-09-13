@@ -45,9 +45,31 @@ shutdown. Changes made interactively disappear at reboot unless incorporated
 into the appropriate source or private configuration and regenerated.
 
 Backup disks are independent data devices. Their lifecycle, sleep policy and
-backup schedules are not provisioned by the example. RAM root alone does not
+backup schedules are not provisioned by the anonymous companion. The optional
+private pull-job configuration is described in [the reference job](pull-backup-example.md). RAM root alone does not
 prove disk standby: drivetemp polling and any backup or monitoring program
 must be tested for interference with the intended sleep policy.
+
+### Persistent state and boot source
+
+The companion is the source of persistent OS configuration; editing live UCI
+files alone is not an update. Keep a private copy of its inputs and a known-good
+kernel/companion pair away from the NAS.
+
+Logs and in-progress job status in RAM disappear on shutdown. Forward logs to a
+trusted syslog receiver when history is needed; writing frequent logs to a backup
+disk defeats standby. Completed snapshots and durable backup results belong on
+the data volume. Check SMART on demand or during a planned awake window, not
+with an untested periodic poll.
+
+TFTP keeps the data disks free of boot partitions and allows remote staging. It
+depends on a reachable boot server and exposes the private companion on that
+network. Restrict the server and isolate the boot link where practical; source-IP
+restrictions alone do not authenticate a client or protect against interception.
+A SATA boot partition avoids that server dependency but reserves space on a disk
+and exposes its contents to anyone who can read that disk. After RAM boot, no OS
+overlay needs the partition to remain mounted. Neither route authenticates images,
+and neither alone proves that the data disks will stay asleep.
 
 ## Common hardware services
 

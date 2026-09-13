@@ -83,8 +83,9 @@ def discover(downloads, inventory, selection):
                 records.setdefault(key, item)
         if digest(path) != expected:
             raise ValueError('source changed during notice discovery')
-    if any(source not in seen for source, _ in records):
-        raise ValueError('selected source missing from inventory')
+    missing = sorted({source for source, _ in records} - seen)
+    if missing:
+        raise ValueError('selected source missing from inventory: ' + ', '.join(missing))
     return {'files': [records[key] for key in sorted(records)]}
 
 

@@ -23,7 +23,7 @@ class DiscoveryTests(fixtures.NoticeTests):
             MOD.discover(self.root, inventory, self.selection)
 
     def test_source_not_in_inventory(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, self.source.name):
             MOD.discover(self.root, {'downloads': []}, self.selection)
 
     def test_conflicting_selected_notice(self):

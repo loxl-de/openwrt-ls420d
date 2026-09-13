@@ -105,13 +105,21 @@ For a static IPv4 address replace the network object, for example:
 
 Use addresses appropriate to your network. These Linux settings do not change
 U-Boot's TFTP addresses. The generator intentionally supports only this small
-schema; arbitrary scripts, extra files, IPv6 provisioning and application secrets
-are not accepted. Extend the schema and tests deliberately if needed.
+schema, with an optional [single pull-backup job](pull-backup-example.md).
+Arbitrary scripts, extra files and IPv6 provisioning are not accepted. The backup
+option carries an additional private client key and trusted job configuration;
+it requires a generic image containing `ls420d-pull`.
 
 ```sh
 python3 scripts/make_initrd.py --config private/site.json --output private/initrd.buffalo
 sha256sum private/initrd.buffalo
 ```
+
+Ordinary configuration files use mode 0644 and directories 0755. The Dropbear
+credential directory stays 0700 and its files 0600. Optional backup credentials,
+job configuration and the generated crontab also use 0600; their directories use
+0700. The archive itself remains
+private, regardless of individual configuration-file modes.
 
 The output is deterministic for identical inputs, including the same host key.
 Changing configuration requires no kernel compile and no generic-image rebuild.

@@ -86,6 +86,19 @@ Record exact tools, durations, data sizes, hashes, kernel messages, and SMART da
 - [ ] Malformed companion failure and recovery to a known-good pair are recorded.
 - [ ] No flash/sysupgrade operation is offered or required.
 
+## F. Backup and standby acceptance
+
+- [ ] Record filesystem UUIDs, separate-volume layout and the intended mountpoints.
+- [ ] Run a restore test including ownership, ACLs and extended attributes.
+- [ ] Missing/wrong destination and simultaneous job starts fail without writing
+      backup data into RAM root or a different mounted volume.
+- [ ] Transfer failure is observable and is not replaced by a logger exit status.
+- [ ] Run at least 24 hours including the planned idle window, normal monitoring,
+      one backup and its return to standby. Record spin-up counters and the
+      commands used; the measurement itself must not wake disks.
+- [ ] Attribute unexpected disk wakeups before enabling unattended operation.
+- [ ] Confirm CPU/PHY protection remains active with disks in standby.
+
 ## Result
 
 - Overall: PASS / FAIL / PARTIAL

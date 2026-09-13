@@ -10,7 +10,8 @@ it does not silently edit a downloaded DTB or patch a firmware binary.
 | --- | --- | --- |
 | `openwrt/patches/100-add-buffalo-ls420d-ram-initramfs-support.patch` | Native LS420D DTS derived from the official LS421DE hardware description | Disable absent NAND/PCIe/SD, describe USB power and board GPIOs, identify the actual board, preserve documented PHY settings |
 | Same patch: image profile | RAM-only LS420D kernel image and packages | No LS421DE NAND/sysupgrade layout |
-| Same patch: network and environment tools | Native identity handling and environment on mtd1 | Avoid reliance on a false LS421DE compatible identity |
+| Same patch: network identity | Read the MAC from the named environment partition, without an environment writer | Avoid reliance on a false LS421DE compatible identity |
+| Same patch: flash and thermal configuration | Read-only environment partition and user_space thermal governor | Protect SPI NOR and retain kernel critical trips in enabled zones |
 | Same patch: linkstation-poweroff driver | Add LS420D match | Retain poweroff without the compatibility alias |
 | Same patch: upgrade guard | Refuse flash/sysupgrade | This is a RAM boot project, not an installer |
 | `openwrt/patches/110-serialize-toolchain-version-check.patch` | Serialize OpenWrt's BUILDBOT toolchain stamp check | Prevent concurrent checks from removing a toolchain while another make is using it |
@@ -30,14 +31,16 @@ and the actual package manifest are recorded by the build. Storage diagnostics,
 ethtool and cooling dependencies are part of the generic product.
 
 `openwrt/files/` supplies DHCP-client networking, firewall and disabled/key-only
-SSH defaults, plus PHY and fan services. These are additional runtime changes,
+SSH defaults, plus PHY, fan and optional pull-job programs. These are additional runtime changes,
 not part of the tiny ATAG fix. The fan policy starts CPU cooling at 60 °C,
 uses other temperature sources too, and includes fault handling. Disk standby
 and full native-board hardware behavior still require measurement.
 
 `scripts/install-public-files.sh` installs only this public overlay.
-`scripts/make_initrd.py` creates a separate data-only companion. Site and secret
-inputs are never needed by the generic build.
+`scripts/make_initrd.py` creates a separate configuration companion. Its optional
+backup definition generates a fixed-command crontab, mount identity and SSH
+credentials, not arbitrary program files. The crontab is trusted executable
+configuration. Site and secret inputs are never needed by the generic build.
 
 ## Inspect a particular build
 

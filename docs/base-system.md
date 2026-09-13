@@ -11,7 +11,7 @@ Rsync belongs in this shared pull-backup base; destinations and jobs do not.
 | Storage capability | Btrfs/ext4, mount discovery, SMART and standby tools | Present; disks are not mounted or put to sleep automatically |
 | Site data | Hostname, addresses and SSH identities | Format-2 companion generated locally |
 | Backup transport | rsync with ACL/xattr support and the existing Dropbear SSH client | Selected in the image; no rsync daemon |
-| Backup jobs | Schedule, volume identity, retention and restore rules | Not provisioned yet |
+| Backup jobs | Private daily job and volume identity | Optional single-job companion example; retention remains site policy |
 
 ## What to preserve
 
@@ -23,10 +23,12 @@ image; they are not installed on the NAS.
 
 Fan supervision is more code than a temperature curve because sensor reads can
 stall and stopped workers must leave cooling enabled. Simplifying it requires
-equivalent failure handling and hardware tests. Its present thermal-zone takeover
-disables the kernel governor and relies on userspace critical limits. Retaining
-kernel critical-trip handling is a separate safety improvement to evaluate,
-not something this repository cleanup silently changes.
+equivalent failure handling and hardware tests. The selected kernel provides the
+user_space governor: bound thermal zones stay enabled and retain kernel critical
+trips. The older disabled-zone fallback remains for kernels without that governor;
+it is not the expected configuration of this image. Disk temperature reads are
+skipped in standby, while CPU and PHY monitoring continue. These runtime changes
+still require the new candidate's hardware acceptance tests.
 
 The PHY service uses `ethtool wol g` as a warm-reboot workaround. Its presence
 does not establish magic-packet wake from poweroff.
@@ -45,14 +47,19 @@ Keep source hosts, client keys, known-host pins, filesystem UUIDs and schedules
 private. A reusable backup example needs an identity-checked mounted destination,
 a job lock, bounded logging, the real transfer exit status and no automatic
 deletion by default. Installing a cron line alone does not satisfy those needs.
-Extend the companion schema only for the configuration that this example uses;
-do not add a second general-purpose UCI or backup-archive parser pre-emptively.
+The optional [reference job](pull-backup-example.md) provisions only those inputs,
+including the mount configuration and a daily cron entry. It does not import
+arbitrary UCI files, archives or scripts. It is a current-copy example, not a
+versioned or ransomware-resistant backup policy.
 
-Consider removing inherited router and flash-management packages in a
-separate runtime change. The current tested image still contains such packages;
-a sysupgrade guard is not a kernel-enforced read-only SPI-NOR policy. Likewise,
-iperf3, tcpdump and USB tools are useful diagnostics, not mandatory backup
-dependencies. Measure their cost in the resolved image before trading away
+The NAS profile deselects dnsmasq, odhcpd, PPP and the U-Boot environment tools.
+DHCP-client networking and the host firewall remain. Both SPI-NOR partitions must
+be read-only in the compiled DTB, and packaging rejects router daemons or
+environment tools that return through dependencies. The retained older hardware
+candidate does not have these protections.
+
+The existing hdparm tool is sufficient for manual standby tests; no additional
+idle daemon starts automatically. iperf3, tcpdump and USB tools remain useful for
 remote diagnosis on a device with inconvenient serial access.
 
 Nano, tmux and UPS integration are optional application choices. They do not
