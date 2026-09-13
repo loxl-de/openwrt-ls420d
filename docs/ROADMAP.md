@@ -15,8 +15,10 @@ configuration, not another boot architecture.
    SPI-NOR partitions and the router-package removal. On the new image:
    - the fan-bound thermal zones show `policy` `user_space` with `mode`
      `enabled` after boot, and one fan state change under load is observed;
-   - a write to `/dev/mtd1` fails with EROFS, `fw_printenv` is absent, and
-     `/proc/mtd` lists both partitions read-only;
+   - identify both SPI-NOR partitions by name using `/proc/mtd`, then check
+     that their `/sys/class/mtd/mtd*/flags` have `MTD_WRITEABLE` (0x400)
+     cleared and `fw_printenv` is absent. `/proc/mtd` does not expose write
+     permissions. Do not write test bytes or erase flash to check protection;
    - the pull job runs end to end from a companion with the `backup` object,
      and a wrong `volume_uuid`, a missing marker and a detached mount each
      fail before rsync starts;

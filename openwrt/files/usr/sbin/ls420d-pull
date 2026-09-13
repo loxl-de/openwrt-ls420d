@@ -37,7 +37,7 @@ device=$(awk -v target="$TARGET" '$2 == target && $3 == "btrfs" && $4 ~ /(^|,)rw
 case "$device" in /dev/*) ;; *) fail unexpected-mount-source;; esac
 # Extract the UUID field and compare it exactly; do not depend on which
 # field block(1) prints after it.
-actual=$(block info "$device" | sed -n 's/^[^:]*: .*UUID="\([^"]*\)".*$/\1/p')
+actual=$(block info "$device" | sed -n 's/^[^:]*://; s/.*[[:space:]]UUID="\([^"]*\)".*$/\1/p')
 [ "$actual" = "$uuid" ] || fail wrong-volume
 if [ ! -f .ls420d-volume ] || [ -L .ls420d-volume ]; then
     fail missing-volume-marker

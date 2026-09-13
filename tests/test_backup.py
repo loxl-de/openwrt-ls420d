@@ -144,9 +144,15 @@ rsync() {{
         code, status, args, _, _, _ = self.run_job(block_line=last_field)
         self.assertEqual(code, 0, status)
         self.assertNotEqual(args, '')
+        code, status, args, _, _, _ = self.run_job(
+            block_line=f'/dev/sda1: UUID="{VOLUME}" PARTUUID="different" TYPE="btrfs"')
+        self.assertEqual(code, 0, status)
+        self.assertNotEqual(args, '')
         for line in (f'/dev/sda1: UUID="{VOLUME}0" TYPE="btrfs"',
                      f'/dev/sda1: UUID="{VOLUME[1:]}" TYPE="btrfs"',
                      f'/dev/sda1: LABEL="{VOLUME}" TYPE="btrfs"',
+                     f'/dev/sda1: PARTUUID="{VOLUME}" TYPE="btrfs"',
+                     f'/dev/sda1: UUID="wrong" PARTUUID="{VOLUME}" TYPE="btrfs"',
                      '/dev/sda1: TYPE="btrfs"'):
             with self.subTest(line=line):
                 code, status, args, _, _, _ = self.run_job(block_line=line)
