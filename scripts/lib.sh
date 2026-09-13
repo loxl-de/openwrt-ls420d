@@ -172,3 +172,12 @@ validate_kernel_footprint() {
         case $footprint_seen in *" $footprint_key "*) ;; *) fail "missing kernel footprint key: $footprint_key" ;; esac
     done
 }
+
+# rsync is part of the pull-backup base, not a transient post-boot install.
+require_rsync() {
+    grep -Eq '^rsync - [^[:space:]]+$' "$1" || fail 'rsync is missing from the image package manifest'
+    if [ ! -f "$2/usr/bin/rsync" ] || [ -L "$2/usr/bin/rsync" ] || \
+        [ ! -x "$2/usr/bin/rsync" ] || [ ! -s "$2/usr/bin/rsync" ]; then
+        fail 'rsync executable is missing from the built rootfs'
+    fi
+}

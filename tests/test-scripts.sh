@@ -189,4 +189,30 @@ grep -qx 'CONFIG_KERNEL_BUILD_USER="builder"' "$REPO_ROOT/config/ls420d.config"
 grep -qx 'CONFIG_KERNEL_BUILD_DOMAIN="buildhost"' "$REPO_ROOT/config/ls420d.config"
 ok 'release mode keeps package verification without extra build products or sysupgrade client'
 
+for option in PACKAGE_rsync RSYNC_acl RSYNC_xattr DROPBEAR_DBCLIENT; do
+    grep -qx "CONFIG_$option=y" "$REPO_ROOT/config/ls420d.config"
+done
+grep -qx '# CONFIG_PACKAGE_rsyncd is not set' "$REPO_ROOT/config/ls420d.config"
+ok 'pull-backup image selects rsync with ACL/xattr and SSH but no rsync daemon'
+
+rsync_root=$TEST_TMP/rsync-root
+mkdir -p "$rsync_root/usr/bin"
+printf 'rsync - 3.4.3-r1\n' > "$TEST_TMP/rsync.manifest"
+printf '#!/bin/sh\nexit 0\n' > "$rsync_root/usr/bin/rsync"
+chmod 0755 "$rsync_root/usr/bin/rsync"
+require_rsync "$TEST_TMP/rsync.manifest" "$rsync_root"
+ok 'rsync packaging accepts a listed package and installed executable'
+printf 'rsyncd - 3.4.3-r1\n' > "$TEST_TMP/not-rsync.manifest"
+expect_failure 'rsync daemon does not substitute for the rsync package' \
+    require_rsync "$TEST_TMP/not-rsync.manifest" "$rsync_root"
+chmod 0644 "$rsync_root/usr/bin/rsync"
+expect_failure 'rsync packaging rejects a non-executable file' \
+    require_rsync "$TEST_TMP/rsync.manifest" "$rsync_root"
+mv "$rsync_root/usr/bin/rsync" "$rsync_root/usr/bin/fixture"
+expect_failure 'rsync packaging rejects a missing executable' \
+    require_rsync "$TEST_TMP/rsync.manifest" "$rsync_root"
+ln -s fixture "$rsync_root/usr/bin/rsync"
+expect_failure 'rsync packaging rejects a substituted symlink' \
+    require_rsync "$TEST_TMP/rsync.manifest" "$rsync_root"
+
 printf '1..%d\n' "$pass"
