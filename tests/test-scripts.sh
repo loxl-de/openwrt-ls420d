@@ -25,7 +25,8 @@ expect_failure() {
 }
 
 load_openwrt_lock "$REPO_ROOT/openwrt.lock"
-[ "$OPENWRT_COMMIT" = f0a60eee2fe051741c643ea6118718aae1ef17fb ]
+expected_commit=$(sed -n 's/^OPENWRT_COMMIT=//p' "$REPO_ROOT/openwrt.lock")
+[ "$OPENWRT_COMMIT" = "$expected_commit" ]
 ok 'versioned OpenWrt lock parses without shell evaluation'
 
 cp "$REPO_ROOT/openwrt.lock" "$TEST_TMP/duplicate.lock"
@@ -49,7 +50,7 @@ validate_feeds_lock "$REPO_ROOT/feeds.lock"
 generate_feeds_conf "$REPO_ROOT/feeds.lock" "$TEST_TMP/feeds.conf"
 [ "$(wc -l < "$TEST_TMP/feeds.conf" | tr -d ' ')" -eq 5 ]
 [ "$(sed -n '1p' "$TEST_TMP/feeds.conf")" = \
-  'src-git packages https://github.com/openwrt/packages.git^5caa62e0bc9f7fb9b0c12a23267bceb7724214dd' ]
+  "$(awk -F '|' '$1 == "packages" { print "src-git " $1 " " $2 "^" $3 }' "$REPO_ROOT/feeds.lock")" ]
 ok 'feed lock produces exact commit-qualified feed configuration'
 
 awk '1; /^packages\|/ { print }' "$REPO_ROOT/feeds.lock" > "$TEST_TMP/duplicate-feeds.lock"

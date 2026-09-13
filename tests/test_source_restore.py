@@ -116,5 +116,22 @@ class SourceRestoreTests(unittest.TestCase):
         self.assertFalse(self.output.exists())
 
 
+    def test_legacy_bundle_without_optional_notices_restores(self):
+        legacy = self.fixture.root/'legacy.zip'
+        with zipfile.ZipFile(self.archive) as source, zipfile.ZipFile(legacy, 'w') as target:
+            for name in source.namelist():
+                if name == 'THIRD-PARTY-NOTICES.tar':
+                    continue
+                data = source.read(name)
+                if name == 'SHA256SUMS':
+                    data = b''.join(line + b'\n' for line in data.splitlines()
+                                    if not line.endswith(b'  THIRD-PARTY-NOTICES.tar'))
+                target.writestr(name, data)
+        MODULE.restore(legacy, hashlib.sha256(legacy.read_bytes()).hexdigest(), self.output)
+        self.assertTrue((self.output/'RESTORED.json').is_file())
+        self.assertFalse((self.output/'bundle/THIRD-PARTY-NOTICES.tar').exists())
+        self.assertEqual((self.output/'project/README').read_text(), 'Committed source\n')
+
+
 if __name__ == '__main__':
     unittest.main()

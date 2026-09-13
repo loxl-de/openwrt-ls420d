@@ -1,133 +1,81 @@
 # OpenWrt for the Buffalo LinkStation LS420D
 
-This repository provides build recipes, documented patches and configuration
-tools for running OpenWrt on the Buffalo LinkStation LS420D. Its purpose is to
-make the firmware reproducible and updatable as OpenWrt evolves, while allowing
-owners to adapt it to their own devices and uses.
+A disk-independent OpenWrt base system for a quiet pull-backup NAS. Linux and
+the operating system run entirely in RAM, leaving both SATA bays available for
+data. The disks can be unmounted and stopped between backups without taking
+the operating system offline.
 
-The design separates the firmware into two boot artifacts: a shared kernel and
-base system, kept as close to official OpenWrt as possible, and a custom initrd
-companion for deployment-specific configuration.
+The repository maintains a small integration layer over official OpenWrt:
+the LS420D hardware description, the changes needed for RAM boot, shared
+hardware services, and tools to build and configure the result.
 
-## Design: minimal kernel changes, flexible initrd companion
+## Two boot files, two update paths
 
-1. **Keep the custom kernel close to upstream.** Change only what is needed for
-   the LS420D and this boot method. Keep those changes small and documented so
-   they can be reviewed and carried forward when OpenWrt is updated.
-   Device-specific settings and credentials belong outside the shared image.
-2. **Put customization in a separate initrd.** The shared image should be usable
-   across different deployments. A locally generated companion supplies the
-   files that configure it for a particular NAS, without rebuilding the kernel
-   or putting private settings into the public build.
+- **`uImage.buffalo`** contains the Linux kernel, LS420D device tree and generic
+  OpenWrt root filesystem. Keep this image close to upstream and identical
+  across deployments. Build it on GitHub Actions from pinned sources.
+- **`initrd.buffalo`** is a small, locally generated configuration companion.
+  Linux unpacks it over the generic filesystem in RAM before starting services.
+  A configuration or key change needs a new companion, not a kernel build.
 
-The two artifacts use the filenames expected by Buffalo's bootloader:
+The kernel patch forwards the external initramfs address and size while
+preserving OpenWrt's boot-argument filtering. There is no post-boot downloader,
+persistent disk overlay or replacement bootloader. The
+[upstream delta](docs/upstream-delta.md) lists the actual changes, including the
+two build-system fixes.
 
-- `uImage.buffalo` contains the Linux kernel, the LS420D hardware description
-  and the shared OpenWrt base system. It includes selected tools and common
-  services such as fan control. It is more than a kernel binary; the same
-  image can serve multiple devices.
-- `initrd.buffalo` is the custom companion. Linux unpacks its files over the
-  base system in RAM before starting services. This is the place for
-  deployment-specific configuration, including credentials.
+The current companion generator supplies hostname, DHCP/static IPv4 settings,
+SSH authorization and a persistent SSH host identity. Linux's archive mechanism
+can replace other files too, but the generator intentionally accepts only its
+documented schema. Configuration and credentials stay outside the public build.
 
-The companion uses Linux's existing initramfs mechanism, an archive of files
-loaded during boot. Configuration takes effect before services start, without
-a separate post-boot loader. The archive can add or replace files in the base
-system; its design is not limited to a fixed set of network or SSH settings.
+## What the base system provides
 
-The current generator implements a small subset of that flexibility: hostname,
-network settings and SSH access credentials. It creates the companion locally
-from your settings and keys. Supporting additional files or settings through
-this generator requires extending its schema and tests; it does not yet accept
-arbitrary custom files or scripts.
+Btrfs/ext4 support, storage and network diagnostics, CPU/HDD-aware fan control,
+and the Ethernet PHY workaround used by the tested warm-boot path. Normal-boot
+SSH is disabled until a private, key-only companion enables it.
 
-A kernel or package update needs a new shared image. A configuration change
-needs only a new companion, provided it remains compatible with the base system.
-Changing a hostname or SSH key therefore needs no Linux compilation. Keep a
-known-good pair so you can return to it if an update fails.
+Boot files may come from an existing SATA boot partition or an established
+TFTP setup. Once Linux starts, neither is needed for the running root filesystem.
+TFTP allows boot-file updates without moving disks, but requires a boot server
+and a trusted network: the private companion is not encrypted in transit.
 
-## Use case: an off-disk backup system
+This is a base system, not a configured backup appliance. The current image
+does not include rsync or provision backup accounts, schedules, disk identities,
+retention, UPS shutdown or RTC alarms. Interactive package installations and
+configuration changes disappear at reboot. See
+[the base-system boundary](docs/base-system.md) before extending it.
 
-The intended use is a quiet pull-backup NAS that fetches backups from other
-machines on its own schedule. Between backups, its hard drives can stay in
-standby while the NAS remains reachable over the network.
+## Current evidence
 
-The operating system runs entirely in RAM, so both drive bays can hold data
-without a permanently mounted system partition keeping a disk spinning.
-Boot files can come from a SATA boot partition or a separately configured TFTP
-server. Once Linux is running, it no longer needs that boot storage. Network
-boot also removes the need for a local boot partition and lets you prepare
-updates on the server without removing a disk from the NAS.
+The retained OpenWrt 25.12.5 / Linux 6.12.94 candidate has completed native boot,
+warm reboot, a configuration-only update, rollback, one RTC-wake cycle and
+small storage tests on one LS420D. The
+[hardware record](docs/findings/native-hardware-20260912.md) names the exact
+image and limits. Full hardware qualification remains incomplete; Wake-on-LAN
+from poweroff is not established.
 
-You configure backup jobs, storage layout and disk standby separately.
-Backup jobs and temperature monitoring must avoid unwanted disk access;
-running from RAM alone does not put the disks into standby. This repository
-provides the operating-system build and configuration tools, not a finished
-backup appliance.
+The candidate also passed a cache-free, network-isolated
+[rebuild from archived sources at the original build path](docs/findings/offline-source-path.md).
+Independent main-branch builds matched in
+[run 34739045121](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34739045121).
+This does not establish reproducibility at arbitrary build paths or on every
+runner image.
 
-Interactive changes disappear at reboot. To make them permanent, put them in
-the build inputs or your local configuration and regenerate the relevant file.
+The anonymous example companion is downloadable and leaves SSH disabled.
+Generic firmware and matching sources are retained in an unpublished candidate
+draft, accessible to repository users with push access. Public firmware
+distribution remains subject to [release review](docs/distribution.md).
+Do not rebuild an existing candidate merely to retrieve it.
 
-## OpenWrt with a small set of changes
+## Use and development
 
-OpenWrt provides a compact Linux system, a package collection and an established
-build process. This project uses it to run a NAS rather than a router. The
-selected tools include Btrfs support, SMART diagnostics, disk and network tools;
-shared hardware services handle the fan and Ethernet setup.
-
-The changes to upstream OpenWrt are:
-
-- An LS420D-specific hardware description and RAM-boot image profile, based on
-  OpenWrt's support for the related LS421DE but accounting for hardware differences.
-- A small kernel change that lets the external configuration archive reach
-  Linux. OpenWrt's boot-argument filtering otherwise removes the information
-  needed to load it.
-- Build recipes, a configuration generator and tests to maintain this setup
-  across OpenWrt updates.
-
-The [upstream change guide](docs/upstream-delta.md) explains each modification.
-Full builds are intended to run on standard GitHub Actions runners, which are
-free for public repositories. OpenWrt and its package sources are pinned to
-exact revisions. Others can rebuild from the same inputs without maintaining
-a local compiler setup.
-
-## Current status
-
-An earlier OpenWrt 25.12.2 / Linux 6.12.74 pilot booted on a real LS420D,
-ran from RAM and provided SSH access. Configuration from the second boot file
-appeared in the running system. See the
-[hardware bring-up record](docs/findings/local-bringup.md).
-
-The current repository targets OpenWrt 25.12.5 / Linux 6.12.94. Full firmware
-builds have succeeded on GitHub Actions. Two independent builds also produced
-matching product hashes in [this comparison](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34652481060).
-The newer version still needs testing on the NAS before it can be called
-supported firmware.
-
-An offline rebuild from the supplied source archive has also compiled and
-packaged successfully. Its kernel-image hash differs from the online build;
-that reproducibility investigation is separate from image creation and hardware
-testing. The immediate goal is to provide the generic image and example companion
-with their corresponding sources and notices, without adding optional features.
-
-You can download the example `initrd.buffalo`, which contains neutral settings,
-no keys and disabled SSH. There is currently no downloadable generic kernel.
-The GitHub Actions workflow can compile it, but downloads remain on hold until
-the accompanying source and license package is ready. The [build guide](docs/build.md)
-and [distribution policy](docs/distribution.md) describe that process.
-
-## Where to go next
-
-The [configuration guide](docs/deployment.md) shows how the example becomes
-your own `initrd.buffalo`. The [architecture document](docs/architecture.md)
-explains the boot sequence and treatment of credentials. For development,
-see the [hardware test checklist](docs/hardware-test-protocol.md) and
-[contribution guide](CONTRIBUTING.md).
+- [Create your own companion](docs/deployment.md).
+- [Build and test](docs/build.md), or [retrieve a retained candidate](docs/candidate-build.md).
+- [Understand boot and credential handling](docs/architecture.md).
+- [Review the remaining work](docs/ROADMAP.md) and [hardware protocol](docs/hardware-test-protocol.md).
+- [Contribute](CONTRIBUTING.md); see [security](SECURITY.md) and [attribution](NOTICE.md).
 
 Establish a recovery route before booting a candidate. These tools do not
-configure the bootloader, flash the NAS or partition disks. LS421DE NAND
+partition disks, flash the NAS or configure its bootloader. LS421DE NAND
 installation instructions do not apply to the LS420D.
-
-Keep your configuration file private and use a trusted boot network: it
-contains credentials, and TFTP does not encrypt or authenticate the transfer.
-See [security](SECURITY.md) and [licenses and attribution](NOTICE.md).

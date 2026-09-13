@@ -41,10 +41,6 @@ fi
 
 assert_managed_source "$SOURCE_DIR"
 
-if [ -d "$SOURCE_DIR/.git/rebase-apply" ]; then
-    git -C "$SOURCE_DIR" am --abort || fail 'unable to recover script-owned checkout from previous git am state'
-fi
-
 actual_origin=$(git -C "$SOURCE_DIR" remote get-url origin)
 case $actual_origin in
     "$OPENWRT_SOURCE_URL"|"$OPENWRT_FALLBACK_URL") ;;

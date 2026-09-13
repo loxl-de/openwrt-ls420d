@@ -10,8 +10,6 @@ work=$(CDPATH='' cd -- "$1" && pwd)
 # ordinary runner user. Fail rather than silently running this test online.
 python3 "$script_dir/check-offline-network.py"
 [ "$(id -u)" -ne 0 ] || { echo 'do not compile as root' >&2; exit 1; }
-printf 'Rust inside isolation with runner PATH: '
-rustc --version 2>/dev/null || echo unavailable
 
 project=$work/project
 default_source_dir=$work/openwrt
@@ -75,8 +73,8 @@ cmp "$work/bundle/openwrt.config" "$OPENWRT_SOURCE_DIR/.config"
 
 # No restored toolchain, object files or compiler cache. Every build input must
 # already exist in the verified downloads or archived source trees.
-sh "$script_dir/make-with-diagnostics.sh" -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_DIR="$work/downloads/dl" download
-sh "$script_dir/make-with-diagnostics.sh" -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" V=s DL_DIR="$work/downloads/dl"
+make -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" DL_DIR="$work/downloads/dl" download
+make -C "$OPENWRT_SOURCE_DIR" -j"$JOBS" V=s DL_DIR="$work/downloads/dl"
 kernel_tree=$(find "$OPENWRT_SOURCE_DIR/build_dir/target-"* -maxdepth 2 -type d -name 'linux-6.12.*' -print)
 [ "$(printf '%s\n' "$kernel_tree" | wc -l)" -eq 1 ] && [ -d "$kernel_tree" ]
 config_status=0
@@ -92,10 +90,4 @@ python3 "$project/tests/check-atags.py" "$kernel_tree"
 rootfs=$(find "$OPENWRT_SOURCE_DIR/build_dir" -maxdepth 2 -type d -name root-mvebu -print)
 [ "$(printf '%s\n' "$rootfs" | wc -l)" -eq 1 ] && [ -d "$rootfs" ]
 python3 "$script_dir/audit-rootfs.py" "$rootfs" "$work/offline-rootfs-inventory.json"
-python3 "$script_dir/repro_payload_evidence.py" \
-    --rootfs "$rootfs" --source-root "$OPENWRT_SOURCE_DIR" \
-    --output "$work/offline-payload-evidence.json"
-python3 "$script_dir/repro_build_inputs.py" \
-    --source-root "$OPENWRT_SOURCE_DIR" --work-root "$work" \
-    --project-root "$project" --output "$work/offline-build-inputs.json"
 python3 "$script_dir/report-offline-products.py" "$work"

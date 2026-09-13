@@ -1,5 +1,9 @@
 # First source bundle review
 
+Historical review of the first bundle. Its then-outstanding build questions
+were resolved by [the later offline rebuild](offline-source-path.md).
+For the retained candidate see [the release review](release-review-20260913.md).
+
 The first successful native build is
 [run 34539424333](https://github.com/loxl-de/openwrt-ls420d/actions/runs/34539424333).
 It tested merge commit `95f6e5745e663bfa12ccf034b459483efb8486de`, with

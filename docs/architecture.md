@@ -51,7 +51,7 @@ must be tested for interference with the intended sleep policy.
 
 ## Common hardware services
 
-The public overlay includes a PHY service that reapplies Wake-on-LAN setup,
+The public overlay includes a PHY service that reapplies the warm-reboot workaround,
 and a fan service using CPU, PHY and HDD temperatures. CPU cooling starts at
 60 °C; missing/stale sensor data triggers conservative cooling. The service
 also implements shutdown thresholds and a supervisor. These are shared board

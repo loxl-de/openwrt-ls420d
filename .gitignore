@@ -7,7 +7,6 @@
 
 # Generated firmware and local evidence (commit curated text manifests instead)
 /artifacts/*
-!/artifacts/.gitkeep
 !/artifacts/*.manifest
 !/artifacts/*.sha256
 !/artifacts/*.txt

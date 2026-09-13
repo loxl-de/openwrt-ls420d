@@ -106,5 +106,21 @@ class PublicRootfsTests(unittest.TestCase):
                 self.assertEqual(result.returncode, expected)
                 self.assertEqual(b'committed' in result.stdout, batch == 0)
 
+    def test_arbitrary_package_database_and_elf_bytes_are_hashed_without_parsing(self):
+        # The safety audit must not depend on obsolete APK/ELF diagnostic formats.
+        for name, payload in [('lib/apk/db/scripts.tar.gz', b'opaque package data'),
+                              ('usr/bin/fixture', b'\x7fELFopaque-format')]:
+            path = self.root/name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(payload)
+        self.assertEqual(self.audit(), 0)
+        inventory = json.loads((self.base/'inventory.json').read_text())
+        for name in ('lib/apk/db/scripts.tar.gz', 'usr/bin/fixture'):
+            entry = inventory[name]
+            self.assertEqual(entry['sha256'], hashlib.sha256((self.root/name).read_bytes()).hexdigest())
+            self.assertNotIn('apk_details', entry)
+            self.assertNotIn('elf_details', entry)
+
+
 if __name__ == '__main__':
     unittest.main()
