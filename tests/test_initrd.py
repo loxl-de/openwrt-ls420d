@@ -50,6 +50,13 @@ class InitrdTests(unittest.TestCase):
         self.assertEqual(stat.S_IMODE(entries['etc/dropbear'].mode), 0o700)
         self.assertEqual(stat.S_IMODE(entries['etc/dropbear/dropbear_ed25519_host_key'].mode), 0o600)
 
+    def test_configuration_modes_preserve_secret_permissions(self):
+        for example in (False, True):
+            entries = self.entries(self.example if example else self.config, example)
+            for name, entry in entries.items():
+                expected = (0o700 if name == 'etc/dropbear' else 0o755) if stat.S_ISDIR(entry.mode) else (0o600 if name.startswith('etc/dropbear/') else 0o644)
+                self.assertEqual(stat.S_IMODE(entry.mode), expected, name)
+
     def test_no_executable_or_link_members(self):
         for e in self.entries().values():
             self.assertFalse(stat.S_ISLNK(e.mode))

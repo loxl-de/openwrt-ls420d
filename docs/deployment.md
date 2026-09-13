@@ -113,6 +113,10 @@ python3 scripts/make_initrd.py --config private/site.json --output private/initr
 sha256sum private/initrd.buffalo
 ```
 
+Ordinary configuration files use mode 0644 and directories 0755. The Dropbear
+credential directory stays 0700 and its files 0600. The archive itself remains
+private, regardless of individual configuration-file modes.
+
 The output is deterministic for identical inputs, including the same host key.
 Changing configuration requires no kernel compile and no generic-image rebuild.
 The private archive enables SSH on port 22 with public-key authentication only.

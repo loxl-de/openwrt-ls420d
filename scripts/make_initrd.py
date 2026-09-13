@@ -89,7 +89,8 @@ def image(config, root, example=False):
     entries = [Entry('etc', stat.S_IFDIR | 0o755), Entry('etc/config', stat.S_IFDIR | 0o755)]
     if not example:
         entries.append(Entry('etc/dropbear', stat.S_IFDIR | 0o700))
-    entries += [Entry(name, stat.S_IFREG | 0o600, data) for name, data in sorted(files.items())]
+    entries += [Entry(name, stat.S_IFREG | (0o600 if name.startswith('etc/dropbear/') else 0o644), data)
+                for name, data in sorted(files.items())]
     payload = encode(entries)
     if len(payload) > MAX_PAYLOAD:
         raise ValueError('companion exceeds pilot memory budget')
