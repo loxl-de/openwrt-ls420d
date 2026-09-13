@@ -31,19 +31,20 @@ documented schema. Configuration and credentials stay outside the public build.
 
 ## What the base system provides
 
-Btrfs/ext4 support, storage and network diagnostics, CPU/HDD-aware fan control,
-and the Ethernet PHY workaround used by the tested warm-boot path. Normal-boot
-SSH is disabled until a private, key-only companion enables it.
+Btrfs/ext4 support, rsync with ACL/xattr support, storage and network diagnostics,
+CPU/HDD-aware fan control, and the Ethernet PHY workaround used by the tested
+warm-boot path. Normal-boot SSH is disabled until a private, key-only companion enables it.
 
 Boot files may come from an existing SATA boot partition or an established
 TFTP setup. Once Linux starts, neither is needed for the running root filesystem.
 TFTP allows boot-file updates without moving disks, but requires a boot server
 and a trusted network: the private companion is not encrypted in transit.
 
-This is a base system, not a configured backup appliance. The current image
-does not include rsync or provision backup accounts, schedules, disk identities,
-retention, UPS shutdown or RTC alarms. Interactive package installations and
-configuration changes disappear at reboot. See
+The image configuration selects rsync and the Dropbear SSH client. It does not
+provision backup accounts, schedules, disk identities, retention, UPS shutdown
+or RTC alarms. This addition requires a new image; the retained hardware-tested
+candidate predates it. Interactive package installations and configuration
+changes disappear at reboot. See
 [the base-system boundary](docs/base-system.md) before extending it.
 
 ## Current evidence

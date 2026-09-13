@@ -172,3 +172,13 @@ validate_kernel_footprint() {
         case $footprint_seen in *" $footprint_key "*) ;; *) fail "missing kernel footprint key: $footprint_key" ;; esac
     done
 }
+
+# Arguments: package manifest, rootfs, exact package name, relative binary path.
+require_package_binary() {
+    awk -v name="$3" '$1 == name && $2 == "-" && NF == 3 { found = 1 }
+        END { exit !found }' "$1" || fail "$3 is missing from the image package manifest"
+    if [ ! -f "$2/$4" ] || [ -L "$2/$4" ] || \
+        [ ! -x "$2/$4" ] || [ ! -s "$2/$4" ]; then
+        fail "$3 executable is missing from the built rootfs: $4"
+    fi
+}

@@ -189,4 +189,40 @@ grep -qx 'CONFIG_KERNEL_BUILD_USER="builder"' "$REPO_ROOT/config/ls420d.config"
 grep -qx 'CONFIG_KERNEL_BUILD_DOMAIN="buildhost"' "$REPO_ROOT/config/ls420d.config"
 ok 'release mode keeps package verification without extra build products or sysupgrade client'
 
+for option in PACKAGE_rsync RSYNC_acl RSYNC_xattr DROPBEAR_DBCLIENT; do
+    grep -qx "CONFIG_$option=y" "$REPO_ROOT/config/ls420d.config"
+done
+grep -qx '# CONFIG_PACKAGE_rsyncd is not set' "$REPO_ROOT/config/ls420d.config"
+ok 'pull-backup image selects rsync with ACL/xattr and SSH but no rsync daemon'
+
+for pair in rsync:usr/bin/rsync ethtool:usr/sbin/ethtool hdparm:sbin/hdparm; do
+    package_name=${pair%%:*}
+    binary_path=${pair#*:}
+    package_root=$TEST_TMP/$package_name-root
+    mkdir -p "$package_root/${binary_path%/*}"
+    printf '%s - 1.0-r1\n' "$package_name" > "$TEST_TMP/package.manifest"
+    printf '#!/bin/sh\nexit 0\n' > "$package_root/$binary_path"
+    chmod 0755 "$package_root/$binary_path"
+    require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
+    ok "$package_name packaging accepts a listed package and installed executable"
+    printf '%s-extra - 1.0-r1\n' "$package_name" > "$TEST_TMP/not-package.manifest"
+    expect_failure "$package_name packaging rejects a different package with the same prefix" \
+        require_package_binary "$TEST_TMP/not-package.manifest" "$package_root" "$package_name" "$binary_path"
+    chmod 0644 "$package_root/$binary_path"
+    expect_failure "$package_name packaging rejects a non-executable file" \
+        require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
+    chmod 0755 "$package_root/$binary_path"
+    : > "$package_root/$binary_path"
+    expect_failure "$package_name packaging rejects an empty executable" \
+        require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
+    mv "$package_root/$binary_path" "$package_root/$binary_path.fixture"
+    expect_failure "$package_name packaging rejects a missing executable" \
+        require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
+    printf '#!/bin/sh\nexit 0\n' > "$package_root/$binary_path.fixture"
+    chmod 0755 "$package_root/$binary_path.fixture"
+    ln -s "${binary_path##*/}.fixture" "$package_root/$binary_path"
+    expect_failure "$package_name packaging rejects a substituted symlink" \
+        require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
+done
+
 printf '1..%d\n' "$pass"

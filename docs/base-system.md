@@ -2,7 +2,7 @@
 
 The shared image should contain what every supported LS420D needs to boot,
 remain reachable and cool itself. A site companion supplies deployment data.
-Keep application choices separate from board support.
+Rsync belongs in this shared pull-backup base; destinations and jobs do not.
 
 | Layer | Belongs here | Current implementation |
 | --- | --- | --- |
@@ -10,7 +10,8 @@ Keep application choices separate from board support.
 | Common runtime | DHCP-client networking, key-only provisioning, fan control, PHY restart workaround | Public overlay; no disk overlay or automatic flash writer |
 | Storage capability | Btrfs/ext4, mount discovery, SMART and standby tools | Present; disks are not mounted or put to sleep automatically |
 | Site data | Hostname, addresses and SSH identities | Format-2 companion generated locally |
-| Backup application | Pull transport, schedule, volume identity, retention and restore rules | Not provisioned yet |
+| Backup transport | rsync with ACL/xattr support and the existing Dropbear SSH client | Selected in the image; no rsync daemon |
+| Backup jobs | Schedule, volume identity, retention and restore rules | Not provisioned yet |
 
 ## What to preserve
 
@@ -30,12 +31,15 @@ not something this repository cleanup silently changes.
 The PHY service uses `ethtool wol g` as a warm-reboot workaround. Its presence
 does not establish magic-packet wake from poweroff.
 
-## Next runtime change
+## Backup configuration
 
-Add the actual pull-backup transport to the shared image before calling it a
-backup-ready base. The present hardware test installed rsync into RAM temporarily;
-it is absent after reboot. The package choice and outgoing SSH support should
-be built together and checked against the companion memory budget.
+Rsync is now selected in the generic image, including ACL and extended-attribute
+support. The existing Dropbear client supplies SSH without a second SSH package.
+Packaging requires both the rsync package manifest entry and its executable in
+the built rootfs. The kernel/companion memory checks still apply.
+
+The retained hardware-tested candidate predates this addition and installed
+rsync only temporarily. Do not mistake that older image for the new build.
 
 Keep source hosts, client keys, known-host pins, filesystem UUIDs and schedules
 private. A reusable backup example needs an identity-checked mounted destination,
@@ -44,7 +48,7 @@ deletion by default. Installing a cron line alone does not satisfy those needs.
 Extend the companion schema only for the configuration that this example uses;
 do not add a second general-purpose UCI or backup-archive parser pre-emptively.
 
-Consider removing inherited router and flash-management packages only in that
+Consider removing inherited router and flash-management packages in a
 separate runtime change. The current tested image still contains such packages;
 a sysupgrade guard is not a kernel-enforced read-only SPI-NOR policy. Likewise,
 iperf3, tcpdump and USB tools are useful diagnostics, not mandatory backup
@@ -52,5 +56,5 @@ dependencies. Measure their cost in the resolved image before trading away
 remote diagnosis on a device with inconvenient serial access.
 
 Nano, tmux and UPS integration are optional application choices. They do not
-belong in the minimal board-support patch. No runtime package selection, cooling
-policy or boot behavior changes as part of the repository cleanup.
+belong in the minimal board-support patch. Adding rsync changes the package
+selection, not the cooling policy, device tree or boot mechanism.
