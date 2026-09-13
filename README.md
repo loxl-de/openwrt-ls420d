@@ -25,7 +25,9 @@ persistent disk overlay or replacement bootloader. The
 two build-system fixes.
 
 The current companion generator supplies hostname, DHCP/static IPv4 settings,
-SSH authorization and a persistent SSH host identity. Linux's archive mechanism
+SSH authorization and a persistent SSH host identity. An optional private backup
+object supplies a daily pull job, source-server pin, client key and destination
+UUID. Linux's archive mechanism
 can replace other files too, but the generator intentionally accepts only its
 documented schema. Configuration and credentials stay outside the public build.
 
@@ -40,12 +42,13 @@ TFTP setup. Once Linux starts, neither is needed for the running root filesystem
 TFTP allows boot-file updates without moving disks, but requires a boot server
 and a trusted network: the private companion is not encrypted in transit.
 
-The image configuration selects rsync and the Dropbear SSH client. It does not
-provision backup accounts, schedules, disk identities, retention, UPS shutdown
-or RTC alarms. This addition requires a new image; the retained hardware-tested
-candidate predates it. Interactive package installations and configuration
-changes disappear at reboot. See
-[the base-system boundary](docs/base-system.md) before extending it.
+The generic image starts no backup job and mounts no backup volume by default.
+The optional [private pull example](docs/pull-backup-example.md) provisions one
+daily current-copy job; source-account setup and retention remain site policy.
+It is not a two-volume or ransomware-resistant backup design. UPS shutdown and
+RTC alarms are not provisioned. These NAS-base changes require a new image;
+the retained hardware-tested candidate predates them. Interactive changes
+disappear at reboot. See [the base-system boundary](docs/base-system.md).
 
 ## Current evidence
 

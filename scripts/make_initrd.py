@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a deterministic data-only Buffalo companion; no network or compiler."""
+"""Build a deterministic Buffalo configuration companion; no network or compiler."""
 import argparse
 import base64
 import hashlib

@@ -261,4 +261,12 @@ expect_failure 'a feed missing from feeds.conf.default is rejected' \
     feeds_lock_from_conf "$TEST_TMP/feeds.short" "$REPO_ROOT/feeds.lock" "$TEST_TMP/feeds.bad" 25.12.10
 ok 'feed lock is rewritten with upstream commits and the chosen mirror URLs'
 
+printf '%s\n' 'CONFIG_THERMAL_GOV_USER_SPACE=y' '# CONFIG_MTD_PARTITIONED_MASTER is not set' > "$TEST_TMP/kernel.config"
+require_ram_kernel_config "$TEST_TMP/kernel.config"
+ok 'kernel config keeps thermal protection and hides the whole-flash writer'
+sed '/THERMAL_GOV_USER_SPACE/d' "$TEST_TMP/kernel.config" > "$TEST_TMP/kernel-no-governor.config"
+expect_failure 'missing user_space governor is rejected' require_ram_kernel_config "$TEST_TMP/kernel-no-governor.config"
+sed 's/# CONFIG_MTD_PARTITIONED_MASTER is not set/CONFIG_MTD_PARTITIONED_MASTER=y/' "$TEST_TMP/kernel.config" > "$TEST_TMP/kernel-master.config"
+expect_failure 'writable partitioned MTD master is rejected' require_ram_kernel_config "$TEST_TMP/kernel-master.config"
+
 printf '1..%d\n' "$pass"

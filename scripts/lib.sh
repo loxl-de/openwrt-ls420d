@@ -243,3 +243,12 @@ feeds_lock_from_conf() (
     } > "$output"
     validate_feeds_lock "$output"
 )
+
+# The configured governor must exist, and partition protection must not expose
+# a writable whole-flash master alongside the read-only child partitions.
+require_ram_kernel_config() {
+    grep -qx 'CONFIG_THERMAL_GOV_USER_SPACE=y' "$1" ||
+        fail 'RAM kernel lacks the user_space thermal governor'
+    grep -qx '# CONFIG_MTD_PARTITIONED_MASTER is not set' "$1" ||
+        fail 'RAM kernel must not expose a writable partitioned MTD master'
+}

@@ -76,6 +76,7 @@ kernel_size=$(wc -c < "$kernel" | tr -d ' ')
 kernel_tree=$(find "$SOURCE_DIR/build_dir/target-"* -maxdepth 2 -type d -name 'linux-6.12.*' -print)
 [ "$(printf '%s\n' "$kernel_tree" | grep -c .)" -eq 1 ] || fail 'expected exactly one prepared Linux tree'
 [ -s "$kernel_tree/vmlinux" ] || fail 'uncompressed kernel ELF image missing'
+require_ram_kernel_config "$kernel_tree/.config"
 mkdir -p "$ARTIFACT_DIR"
 # The records go to the evidence file; show them in the log in both outcomes.
 if ! python3 "$SCRIPT_DIR/check-kernel-footprint.py" "$kernel_tree/vmlinux" "$kernel" \

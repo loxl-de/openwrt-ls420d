@@ -22,7 +22,7 @@ index 45a54c1d22bb5e8b7e117be76526f4c362a8e010..5664c7e5d16973a0fda6c96a13343695
  platform_check_image() {
  	case "$(board_name)" in
 +	buffalo,ls420d)
-+		echo "NAND sysupgrade is disabled: LS420D boots an initramfs from SATA."
++		echo "Sysupgrade is disabled: LS420D runs from RAM; replace the boot files."
 +		return 1
 +		;;
  	cznic,turris-omnia|\
