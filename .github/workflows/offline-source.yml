@@ -90,12 +90,8 @@ jobs:
           fi
       - name: Rebuild with no network or compiler cache
         run: |
-          printf 'Rust before isolation: '
-          rustc --version 2>/dev/null || echo unavailable
           sudo unshare --net -- sh -eu -c '
             ip link set lo up
-            printf "Rust under sudo PATH: "
-            runuser -u "$1" -- sh -c "rustc --version 2>/dev/null || echo unavailable"
             exec runuser -u "$1" -- env PATH="$4" GITHUB_WORKSPACE="$5" \
               OPENWRT_SOURCE_DIR="$6" OFFLINE_RESTORED_SOURCE_DIR="$3/openwrt" JOBS=4 \
               sh "$2" "$3"
@@ -110,8 +106,6 @@ jobs:
             ${{ runner.temp }}/offline-source/offline-result.json
             ${{ runner.temp }}/offline-source/offline-config-result.json
             ${{ runner.temp }}/offline-source/offline-rootfs-inventory.json
-            ${{ runner.temp }}/offline-source/offline-payload-evidence.json
-            ${{ runner.temp }}/offline-source/offline-build-inputs.json
           if-no-files-found: warn
           retention-days: 14
       - name: Report final disk usage

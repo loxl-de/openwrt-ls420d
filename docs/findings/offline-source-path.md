@@ -55,6 +55,8 @@ absolute build path; matching a different checkout's default path is not suffici
 
 Evidence artifact `10310334444` contains the product comparison, kernel-config
 comparison, rootfs inventory, ELF fingerprints and build-input fingerprints.
-It expires on 2026-09-27; retain the reports before then. It contains no firmware.
+It expires on 2026-09-27 and contains no firmware. The product/configuration
+verdicts remain in this tree; detailed fingerprints are preserved in
+[the pre-cleanup revision](https://github.com/loxl-de/openwrt-ls420d/tree/8900f62/docs/findings/offline-34731496493).
 This build result does not grant firmware distribution approval or complete the
 separate licensing review. No NAS deployment was changed for this experiment.

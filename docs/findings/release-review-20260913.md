@@ -33,7 +33,7 @@ source files from eleven packages whose notices are in source headers rather
 than separately named license files. Original files and third-party attribution
 are preserved, including components with different terms within one package.
 
-The [package map](release-package-map-20260913.json) resolves all 141 installed
+The [package map retained with this review](https://github.com/loxl-de/openwrt-ls420d/blob/8900f62/docs/findings/release-package-map-20260913.json) resolves all 141 installed
 packages to retained, hash-checked sources. It distinguishes package metadata
 from original component terms. In particular, libc, libpthread and librt come
 from musl, not GCC. The map deliberately does not turn metadata declarations
@@ -56,13 +56,13 @@ declarations are preserved without inventing upstream attribution.
 
 Remaining publication steps:
 
-- Review this change and retain the supplements and review record alongside
-  the existing sources and binaries in the release draft.
+- Review the source change. Both supplements, this review and the package map
+  have been retained in the unpublished draft; the original assets are unchanged.
 - Agree on release qualification. The [hardware report](native-hardware-20260912.md)
   remains partial; no full-support claim is justified. The firmware is not a
   completed backup appliance and does not promise working WoL.
 - Publish only after that decision and a final check of the draft's asset
-  inventory. This review has not published or replaced any release asset.
+  inventory. No release has been published and no original release asset replaced.
 
 Build reproducibility is no longer an open blocker. The independent offline
 rebuild and main-branch A/B check are linked in

@@ -13,6 +13,8 @@ it does not silently edit a downloaded DTB or patch a firmware binary.
 | Same patch: network and environment tools | Native identity handling and environment on mtd1 | Avoid reliance on a false LS421DE compatible identity |
 | Same patch: linkstation-poweroff driver | Add LS420D match | Retain poweroff without the compatibility alias |
 | Same patch: upgrade guard | Refuse flash/sysupgrade | This is a RAM boot project, not an installer |
+| `openwrt/patches/110-serialize-toolchain-version-check.patch` | Serialize OpenWrt's BUILDBOT toolchain stamp check | Prevent concurrent checks from removing a toolchain while another make is using it |
+| `openwrt/patches/120-ignore-empty-package-version-date.patch` | Ignore empty package version.date files | Select the source directory's timestamp instead of a generated directory with no usable date |
 | `kernel-patches/301-preserve-initrd2-with-mangle.patch` | Move ATAG_INITRD2 conversion outside the command-line-mangling exclusion; correct Kconfig help | Allow the external companion to reach Linux without accepting vendor memory tags or abandoning command-line filtering |
 
 The external-initramfs change reuses the existing conversion code. It does not

@@ -1,23 +1,28 @@
-# Findings and experiment archive
+# Evidence worth carrying forward
 
-Keep successful and failed experiments here. Use one Markdown file per coherent
-experiment and store large raw captures outside Git with a checked-in manifest
-containing their filename, SHA-256, location/access constraints, and retention
-plan. Small serial logs may be committed after secrets and unique identifiers are
-redacted.
+Current evidence:
 
-Every record should contain:
+- [Hardware origin and older mechanism pilot](local-bringup.md).
+- [Native candidate: boot, companion update and hardware limits](native-hardware-20260912.md).
+- [Successful offline reproduction and the build-path limitation](offline-source-path.md).
+- [Source provenance](source-review-25.12.5.md),
+  [component notice review](runtime-notices-25.12.5.md) and
+  [candidate release review](release-review-20260913.md).
+- [Hardware references](prior-art.md).
 
-- date, author, device pseudonym, and board revision;
-- exact repository/OpenWrt commits and artifact checksum;
-- question or hypothesis;
-- wiring, commands, configuration, and starting state;
-- complete relevant output or a content-addressed reference to it;
-- expected versus observed result;
-- interpretation, confidence, and competing explanations;
-- whether persistent state changed and how it was recovered;
-- next experiment or the decision supported by the evidence.
+Keep conclusions and the evidence needed to check them here. Large generated
+inventories belong with the candidate's release assets. The small original
+offline product/configuration verdicts remain in `offline-34731496493/`.
 
-Do not “clean up” historical failures after finding a workaround. Add a dated
-follow-up and cross-link both records so future maintainers can distinguish a
-disproved idea from an untested one.
+## Archived investigation
+
+The complete pre-cleanup tree is retained at
+[revision 8900f62](https://github.com/loxl-de/openwrt-ls420d/tree/8900f62/docs/findings).
+It includes the APK duplicate-member investigation, intermediate non-reproducible
+builds, the BUILDBOT experiment, initial host-only checks, detailed offline ELF
+and toolchain fingerprints, and the generated 141-package release map.
+
+Those records are historical evidence, not current blockers or instructions.
+Their diagnostic tools and dedicated tests are recoverable from the same
+revision. Removing them from the current checkout does not erase failed runs,
+rewrite their results or change the firmware.

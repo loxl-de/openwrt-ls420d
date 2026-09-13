@@ -133,7 +133,7 @@ def restore(archive, expected, output):
         output.mkdir(parents=True)
         bundle = output/'bundle'
         bundle.mkdir()
-        for name in sorted(MEMBERS):
+        for name in sorted(names):
             with z.open(name) as src, (bundle/name).open('xb') as dst:
                 shutil.copyfileobj(src, dst)
     extract_tree(bundle/'project.tar', output/'project')

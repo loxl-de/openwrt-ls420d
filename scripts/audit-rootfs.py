@@ -8,8 +8,6 @@ from pathlib import Path
 import stat
 import sys
 
-from apk_database_evidence import database_evidence
-from elf_evidence import elf_evidence
 
 root, output = map(Path, sys.argv[1:])
 for name in ('etc', 'etc/config'):
@@ -38,16 +36,7 @@ for path in sorted(root.rglob('*')):
                 checksum.update(chunk)
         entry['sha256'] = checksum.hexdigest()
         entry['size'] = path.stat().st_size
-        with path.open('rb') as stream:
-            if stream.read(4) == b'\x7fELF':
-                if entry['size'] > 64 * 1024 * 1024:
-                    raise SystemExit('ELF exceeds diagnostic size limit')
-                stream.seek(0)
-                entry['elf_details'] = elf_evidence(stream.read(64 * 1024 * 1024 + 1))
     elif kind == 'symlink':
         entry['target'] = os.readlink(path)
     inventory[path.relative_to(root).as_posix()] = entry
-if (root/'lib/apk/db').exists() or (root/'lib/apk/db').is_symlink():
-    for name, details in database_evidence(root).items():
-        inventory[name]['apk_details'] = details
 output.write_text(json.dumps(inventory, sort_keys=True, indent=2)+'\n')

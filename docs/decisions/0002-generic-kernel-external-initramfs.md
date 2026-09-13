@@ -1,6 +1,6 @@
 # ADR 0002: Generic embedded root plus external configuration initramfs
 
-Status: accepted design; native 25.12.5 hardware validation pending.
+Status: accepted design; native 25.12.5 mechanism tests passed, full hardware qualification incomplete.
 
 ## Context
 
@@ -23,8 +23,8 @@ or automatic flash writer is introduced.
 ## Evidence and consequences
 
 A 25.12.2/Linux 6.12.74 hardware pilot demonstrated external configuration
-reaching the running RAM root. The locked 25.12.5 native board build still needs
-its own hardware checks. Host tests check archive construction, failure-closed
+reaching the running RAM root. The native 25.12.5 candidate also passed boot and a companion-only update;
+see [the hardware record](../findings/native-hardware-20260912.md). Host tests check archive construction, failure-closed
 defaults, fan policy and ATAG conversion, not actual hardware.
 
 Configuration-only changes need no kernel build. Credentials remain in a local
