@@ -35,6 +35,8 @@ worker() {
                 drivetemp)
                     [ "$((now-disk_time))" -ge 20 ] || continue
                     disks="$((disks+1))"
+                    # Skip disk I/O in standby; CPU and PHY monitoring continue.
+                    ! fan_disk_asleep "$h" || continue
                     t="$(fan_temperature "$h/temp1_input")" || { disk_bad=1; continue; }
                     [ "$t" -le "$disk" ] || disk="$t";;
                 gpio_fan) fanhw="$h";;
