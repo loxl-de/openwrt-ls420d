@@ -58,7 +58,7 @@ jobs:
       - name: Parse workflow YAML
         run: >-
           ruby -e 'require "yaml";
-          YAML.load_file(".github/workflows/ci.yml", aliases: true)'
+          Dir[".github/workflows/*.yml"].each { |path| YAML.load_file(path, aliases: true) }'
       - name: Install host test tools
         run: sudo apt-get update && sudo apt-get install --yes busybox shellcheck
       - name: Lint OpenWrt runtime scripts

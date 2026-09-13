@@ -79,3 +79,26 @@ They do not substitute for hardware testing. The
 [delta guide](upstream-delta.md) explains the maintained patches and runtime
 additions; the [hardware record](findings/native-hardware-20260912.md) records
 what actually ran.
+
+## Updating the OpenWrt pin
+
+The helper `scripts/bump-openwrt-lock.sh --check` reports the newest point
+release in the locked series without changing files. Without `--check`, it
+rewrites both lock files using the annotated release tag and that release's
+pinned feeds. It verifies that the fetched tag and peeled commit match the
+remote listing; this is not a signature or release-trust verification. Review
+the diff, release announcement and upstream authenticity before adopting it.
+A new minor series remains a deliberate maintenance change.
+
+The weekly `Lock bump` workflow checks only by default. To let it create
+proposals, an owner must enable repository variable `ENABLE_LOCK_BUMP_PR=true`
+and allow Actions to create pull requests in repository settings. These settings
+are not changed by the build. Proposal branches are never overwritten, and a
+closed unmerged proposal is not reopened. A missing PR for an existing branch
+can be created; a later version receives a different branch name.
+
+A proposal made with the default workflow token does not trigger ordinary PR
+CI. Run the build manually for the proposed branch (including the reproducibility
+option), or configure the optional repository-scoped `LOCK_BUMP_TOKEN` for that
+automation. Keep this secret outside source files. Neither route auto-merges a
+proposal, changes the running NAS, or grants firmware release approval.
