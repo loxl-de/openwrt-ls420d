@@ -7,30 +7,21 @@ configuration, not another boot architecture.
 1. Finish review of the exact candidate's paired sources, notices and release
    inventory. Source availability, reproducibility and hardware support are
    separate checks.
-2. Build a new candidate from `main` and re-run the acceptance checks that
-   the NAS-base changes touch. The
-   [current record](findings/native-hardware-20260912.md) covers `9b2ebca`,
-   which predates rsync and `ls420d-pull`, the companion's volume mount, the
-   `user_space` fan governor and standby-gated disk reads, the read-only
-   SPI-NOR partitions and the router-package removal. On the new image:
-   - the fan-bound thermal zones show `policy` `user_space` with `mode`
-     `enabled` after boot, and one fan state change under load is observed;
-   - identify both SPI-NOR partitions by name using `/proc/mtd`, then check
-     that their `/sys/class/mtd/mtd*/flags` have `MTD_WRITEABLE` (0x400)
-     cleared and `fw_printenv` is absent. `/proc/mtd` does not expose write
-     permissions. Do not write test bytes or erase flash to check protection;
-   - the pull job runs end to end from a companion with the `backup` object,
-     and a wrong `volume_uuid`, a missing marker and a detached mount each
-     fail before rsync starts;
-   - protocol section F is run with the volume mounted as the companion
-     mounts it, because the recorded standby result was obtained with the
-     disks unmounted.
+2. Complete qualification of the new `994e3c8` candidate. The
+   [13 September record](findings/native-hardware-20260913.md) covers its actual
+   pull job and restores on both disks, RAM root, MTD flags, enabled
+   `user_space` PHY zone, load response, stalled-worker recovery and paired
+   update/rollback. The controlled unmounted idle interval is still running.
+   Remaining checks include the missing marker, detach during transfer and
+   protocol section F with the volume mounted as the companion mounts it.
+   Check flash protection through MTD flags, never by writing test bytes.
 3. Complete the cases the protocol still lacks on any image: repeated cold
    starts, sustained load, absent and malformed companion, and cooling
    failure handling with injected sensor and fan faults.
-4. Prove a restore from the pull destination on the new image, not only the
-   transfer: the [reference job](pull-backup-example.md) is a current-copy
-   example until a restore of ownership, ACLs and xattrs has been checked.
+4. Qualify unattended scheduling and recovery beyond the synthetic fixture.
+   Restores of ownership, ACLs and xattrs now pass on both test disks. The
+   [reference job](pull-backup-example.md) remains a current-copy example;
+   those tests do not add retention or prove production source permissions.
 5. Carry the small downstream changes to newer pinned OpenWrt versions.
    Remove a workaround only when the corresponding upstream fix and regression
    test establish that it is no longer needed. Upstream submissions are useful,
