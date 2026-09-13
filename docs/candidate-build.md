@@ -31,8 +31,9 @@ Keep the sources and notices with their matching firmware.
 
 The workflow must run from `main`: GitHub's built-in Actions token cannot create
 a release for a commit whose workflow files differ from the default branch.
-Only this manually started, main-branch job receives repository write permission;
-the ordinary pull-request CI remains read-only.
+This manually started, main-branch job retains firmware in a draft. The separate
+lock-bump workflow can create source-only proposal branches when explicitly
+enabled; ordinary pull-request CI remains read-only.
 
 Keeping a draft is not hardware acceptance or public distribution approval.
 The [public distribution requirements](distribution.md) still apply before

@@ -45,7 +45,8 @@ shutdown. Changes made interactively disappear at reboot unless incorporated
 into the appropriate source or private configuration and regenerated.
 
 Backup disks are independent data devices. Their lifecycle, sleep policy and
-backup schedules are not provisioned by the example. RAM root alone does not
+backup schedules are not provisioned by the anonymous companion. The optional
+private pull-job configuration is described in [the reference job](pull-backup-example.md). RAM root alone does not
 prove disk standby: drivetemp polling and any backup or monitoring program
 must be tested for interference with the intended sleep policy.
 
