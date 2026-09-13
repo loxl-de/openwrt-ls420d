@@ -14,7 +14,7 @@ for name in ('etc', 'etc/config'):
     if (root/name).is_symlink() or not (root/name).is_dir():
         raise SystemExit('unsafe generic rootfs configuration parent')
 public = Path(__file__).resolve().parents[1]/'openwrt/files'
-for name in ('dropbear', 'network', 'dhcp', 'firewall'):
+for name in ('dropbear', 'network', 'firewall'):
     path = root/'etc/config'/name
     if path.is_symlink() or path.read_bytes() != (public/'etc/config'/name).read_bytes():
         raise SystemExit('generic rootfs defaults differ from the reviewed public overlay')
@@ -24,6 +24,12 @@ for name in ('etc/dropbear', 'root/.ssh'):
         raise SystemExit('unsafe generic rootfs key directory')
     if path.exists() and any(path.iterdir()):
         raise SystemExit('generic rootfs contains SSH key or authorization files')
+# Deselected router and flash-writing tools must not return through dependencies.
+for name in ('etc/init.d/dnsmasq', 'etc/init.d/odhcpd', 'usr/sbin/pppd',
+             'usr/sbin/fw_setenv', 'usr/sbin/fw_printenv', 'etc/config/dhcp'):
+    path = root/name
+    if path.exists() or path.is_symlink():
+        raise SystemExit('unexpected router or environment tool in NAS rootfs: ' + name)
 inventory = {}
 for path in sorted(root.rglob('*')):
     mode = path.lstat().st_mode

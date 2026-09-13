@@ -25,6 +25,16 @@ class PublicRootfsTests(unittest.TestCase):
                                str(self.root), str(self.base/'inventory.json')],
                               capture_output=True).returncode
 
+    def test_router_and_environment_tools_are_rejected(self):
+        for name in ('etc/init.d/dnsmasq', 'etc/init.d/odhcpd', 'usr/sbin/pppd',
+                     'usr/sbin/fw_setenv', 'usr/sbin/fw_printenv', 'etc/config/dhcp'):
+            with self.subTest(name=name):
+                path = self.root/name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.touch()
+                self.assertNotEqual(self.audit(), 0)
+                path.unlink()
+
     def test_public_defaults(self):
         self.assertEqual(self.audit(), 0)
         inventory = json.loads((self.base/'inventory.json').read_text())
