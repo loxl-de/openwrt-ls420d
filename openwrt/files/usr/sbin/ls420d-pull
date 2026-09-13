@@ -1,0 +1,62 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# One optional reference pull job. No retention or automatic deletion policy.
+set -u
+umask 077
+RUN=/var/run/ls420d-pull
+TARGET=/mnt/backup
+mkdir -p "$RUN" || exit 1
+exec 9>"$RUN/lock"
+flock -n 9 || exit 75
+
+record() {
+    printf '%s %s %s\n' "$(date -u +%FT%TZ)" "$1" "$2" >"$RUN/status.new" &&
+        mv "$RUN/status.new" "$RUN/status"
+}
+fail() {
+    record failed "$1"
+    logger -p daemon.err -t ls420d-pull "$1"
+    exit 1
+}
+trap 'rm -f "$RUN/rsync.rc"' EXIT
+trap 'record failed interrupted; exit 1' INT TERM HUP
+
+host=$(uci -q get ls420d-backup.main.host) || fail missing-config
+user=$(uci -q get ls420d-backup.main.user) || fail missing-config
+source=$(uci -q get ls420d-backup.main.source) || fail missing-config
+uuid=$(uci -q get ls420d-backup.main.volume_uuid) || fail missing-config
+if [ -z "$host" ] || [ -z "$user" ] || [ -z "$source" ] || [ -z "$uuid" ]; then
+    fail empty-config
+fi
+
+# Hold a working-directory reference to the filesystem. Subsequent writes are
+# relative to it, so a detached mount cannot redirect the transfer into RAM root.
+cd "$TARGET" || fail no-volume
+device=$(awk -v target="$TARGET" '$2 == target && $3 == "btrfs" && $4 ~ /(^|,)rw(,|$)/ {print $1}' /proc/mounts)
+[ -n "$device" ] || fail no-writable-btrfs-mount
+case "$device" in /dev/*) ;; *) fail unexpected-mount-source;; esac
+block info "$device" | grep -Fq " UUID=\"$uuid\" " || fail wrong-volume
+if [ ! -f .ls420d-volume ] || [ -L .ls420d-volume ]; then
+    fail missing-volume-marker
+fi
+IFS= read -r marker <.ls420d-volume || fail invalid-volume-marker
+[ "$marker" = "$uuid" ] || fail wrong-volume-marker
+[ ! -L pull ] || fail symlink-destination
+mkdir -p pull || fail cannot-create-destination
+
+record running transfer
+rm -f "$RUN/rsync.rc"
+{
+    rsync -aHAX --numeric-ids --timeout=300 \
+        -e 'dbclient -o BatchMode=yes -o StrictHostKeyChecking=yes -i /root/.ssh/backup_ed25519' \
+        -- "$user@$host:$source" ./pull/ 2>&1
+    printf '%s\n' "$?" >"$RUN/rsync.rc"
+} | tail -c 8192 | tail -n 50 | logger -t ls420d-pull
+status=$(cat "$RUN/rsync.rc" 2>/dev/null) || fail missing-transfer-status
+case "$status" in
+    0) record ok 0; logger -p daemon.info -t ls420d-pull 'transfer complete';;
+    24) record warn 24; logger -p daemon.warning -t ls420d-pull 'source files vanished during transfer';;
+    ''|*[!0-9]*) fail invalid-transfer-status;;
+    *) record failed "$status"; logger -p daemon.err -t ls420d-pull "rsync failed: $status";;
+esac
+exit "$status"

@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 import stat
 import struct
+from backup_config import backup_files
 from cpio_newc import Entry, encode, decode, wrap_ramdisk, unwrap_ramdisk
 
 MAX_PAYLOAD = 1024 * 1024
@@ -17,7 +18,7 @@ MAX_PAYLOAD = 1024 * 1024
 
 def config_files(config, root, example=False):
     allowed = {'hostname', 'network'} | (set() if example else {'ssh_public_key', 'dropbear_host_key'})
-    if set(config) != allowed:
+    if set(config) - (set() if example else {'backup'}) != allowed:
         raise ValueError('unexpected or missing configuration fields')
     hostname = config['hostname']
     if not isinstance(hostname, str) or not re.fullmatch(r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?', hostname):
@@ -81,6 +82,8 @@ def config_files(config, root, example=False):
         if len(host_key) < 64 or not host_key.startswith(struct.pack('>I', 11)+b'ssh-ed25519'):
             raise ValueError('host key must be a Dropbear Ed25519 private key, not an OpenSSH key')
         files['etc/dropbear/dropbear_ed25519_host_key'] = host_key
+    if 'backup' in config:
+        files.update(backup_files(config['backup'], root))
     return files
 
 
@@ -89,7 +92,11 @@ def image(config, root, example=False):
     entries = [Entry('etc', stat.S_IFDIR | 0o755), Entry('etc/config', stat.S_IFDIR | 0o755)]
     if not example:
         entries.append(Entry('etc/dropbear', stat.S_IFDIR | 0o700))
-    entries += [Entry(name, stat.S_IFREG | (0o600 if name.startswith('etc/dropbear/') else 0o644), data)
+    if 'backup' in config:
+        entries += [Entry('etc/crontabs', stat.S_IFDIR | 0o700),
+                    Entry('root', stat.S_IFDIR | 0o700),
+                    Entry('root/.ssh', stat.S_IFDIR | 0o700)]
+    entries += [Entry(name, stat.S_IFREG | (0o600 if name.startswith(('etc/dropbear/', 'root/.ssh/', 'etc/crontabs/')) or name == 'etc/config/ls420d-backup' else 0o644), data)
                 for name, data in sorted(files.items())]
     payload = encode(entries)
     if len(payload) > MAX_PAYLOAD:

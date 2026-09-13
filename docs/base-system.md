@@ -11,7 +11,7 @@ Rsync belongs in this shared pull-backup base; destinations and jobs do not.
 | Storage capability | Btrfs/ext4, mount discovery, SMART and standby tools | Present; disks are not mounted or put to sleep automatically |
 | Site data | Hostname, addresses and SSH identities | Format-2 companion generated locally |
 | Backup transport | rsync with ACL/xattr support and the existing Dropbear SSH client | Selected in the image; no rsync daemon |
-| Backup jobs | Schedule, volume identity, retention and restore rules | Not provisioned yet |
+| Backup jobs | Private daily job and volume identity | Optional single-job companion example; retention remains site policy |
 
 ## What to preserve
 
@@ -47,8 +47,10 @@ Keep source hosts, client keys, known-host pins, filesystem UUIDs and schedules
 private. A reusable backup example needs an identity-checked mounted destination,
 a job lock, bounded logging, the real transfer exit status and no automatic
 deletion by default. Installing a cron line alone does not satisfy those needs.
-Extend the companion schema only for the configuration that this example uses;
-do not add a second general-purpose UCI or backup-archive parser pre-emptively.
+The optional [reference job](pull-backup-example.md) provisions only those inputs,
+including the mount configuration and a daily cron entry. It does not import
+arbitrary UCI files, archives or scripts. It is a current-copy example, not a
+versioned or ransomware-resistant backup policy.
 
 The NAS profile deselects dnsmasq, odhcpd, PPP and the U-Boot environment tools.
 DHCP-client networking and the host firewall remain. Both SPI-NOR partitions must
