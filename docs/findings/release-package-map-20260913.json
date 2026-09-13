@@ -1,0 +1,2572 @@
+{
+  "firmware_distribution_authorized": false,
+  "format": 1,
+  "kernel_and_host_toolchain_review_complete": false,
+  "license_review_complete": false,
+  "package_count": 141,
+  "packages": [
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "LICENSE"
+      ],
+      "declared_source": "apk-3.0.5.tar.zst",
+      "installed_version": "3.0.5-r3",
+      "metadata_version": "3.0.5-r3",
+      "package": "apk-mbedtls",
+      "recipe": "package/system/apk/Makefile",
+      "resolved_source_archive": "apk-3.0.5.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "1~f5dae5ece4",
+      "metadata_version": "0~f5dae5ece4",
+      "notice_followup": "See recipe and license files in openwrt-upstream.tar; no separate notice selected from this archive",
+      "package": "base-files",
+      "recipe": "package/base-files/Makefile",
+      "resolved_source_archive": "openwrt-upstream.tar",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "fstools-2026.05.23~16718b6e3c0fc7db7be6ae5848db0eae88ac8a8b.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.05.23~16718b6e-r1",
+      "metadata_version": "2026.05.23~16718b6e3c0fc7db7be6ae5848db0eae88ac8a8b-r1",
+      "package": "block-mount",
+      "recipe": "package/system/fstools/Makefile",
+      "resolved_source_archive": "fstools-2026.05.23~16718b6e.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "btrfs-progs-v6.11.tar.xz",
+      "installed_version": "6.11-r3",
+      "metadata_version": "6.11-r3",
+      "package": "btrfs-progs",
+      "recipe": "package/feeds/packages/btrfs-progs/Makefile",
+      "resolved_source_archive": "btrfs-progs-v6.11.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [
+        "LICENSE",
+        "archival/libarchive/bz/LICENSE"
+      ],
+      "declared_source": "busybox-1.37.0.tar.bz2",
+      "installed_version": "1.37.0-r6",
+      "metadata_version": "1.37.0-r6",
+      "package": "busybox",
+      "recipe": "package/utils/busybox/Makefile",
+      "resolved_source_archive": "busybox-1.37.0.tar.bz2",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-or-later MPL-2.0",
+      "declared_license_files": [
+        "debian/copyright"
+      ],
+      "declared_source": "ca-certificates_20260601.tar.xz",
+      "installed_version": "20260601-r1",
+      "metadata_version": "20260601-r1",
+      "package": "ca-bundle",
+      "recipe": "package/system/ca-certificates/Makefile",
+      "resolved_source_archive": "ca-certificates_20260601.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "dnsmasq-2.93.tar.xz",
+      "installed_version": "2.93-r1",
+      "metadata_version": "2.93-r1",
+      "package": "dnsmasq",
+      "recipe": "package/network/services/dnsmasq/Makefile",
+      "resolved_source_archive": "dnsmasq-2.93.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "MIT",
+      "declared_license_files": [
+        "LICENSE",
+        "libtomcrypt/LICENSE",
+        "libtommath/LICENSE"
+      ],
+      "declared_source": "dropbear-2025.89.tar.bz2",
+      "installed_version": "2025.89-r3",
+      "metadata_version": "2025.89-r3",
+      "package": "dropbear",
+      "recipe": "package/network/services/dropbear/Makefile",
+      "resolved_source_archive": "dropbear-2025.89.tar.bz2",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [
+        "NOTICE"
+      ],
+      "declared_source": "e2fsprogs-1.47.3.tar.xz",
+      "installed_version": "1.47.3-r1",
+      "metadata_version": "1.47.3-r1",
+      "package": "e2fsprogs",
+      "recipe": "package/utils/e2fsprogs/Makefile",
+      "resolved_source_archive": "e2fsprogs-1.47.3.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "ethtool-6.15.tar.xz",
+      "installed_version": "6.15-r1",
+      "metadata_version": "6.15-r1",
+      "package": "ethtool",
+      "recipe": "package/network/utils/ethtool/Makefile",
+      "resolved_source_archive": "ethtool-6.15.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "firewall4-2025.03.17~b6e5157527d361f99ad52eaa6da273cb0f2dfd59.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2025.03.17~b6e51575-r2",
+      "metadata_version": "2025.03.17~b6e5157527d361f99ad52eaa6da273cb0f2dfd59-r2",
+      "notice_followup": "See recipe and license files in openwrt-upstream.tar; no separate notice selected from this archive",
+      "package": "firewall4",
+      "recipe": "package/network/config/firewall4/Makefile",
+      "resolved_source_archive": "firewall4-2025.03.17~b6e51575.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "fstools-2026.05.23~16718b6e3c0fc7db7be6ae5848db0eae88ac8a8b.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.05.23~16718b6e-r1",
+      "metadata_version": "2026.05.23~16718b6e3c0fc7db7be6ae5848db0eae88ac8a8b-r1",
+      "package": "fstools",
+      "recipe": "package/system/fstools/Makefile",
+      "resolved_source_archive": "fstools-2026.05.23~16718b6e.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "fwtool-2025.10.03~04cd252e4e9394ffacd51f56f1f124abc534f715.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2025.10.03~04cd252e-r1",
+      "metadata_version": "2025.10.03~04cd252e4e9394ffacd51f56f1f124abc534f715-r1",
+      "package": "fwtool",
+      "recipe": "package/system/fwtool/Makefile",
+      "resolved_source_archive": "fwtool-2025.10.03~04cd252e.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "ubox-2025.10.30~6f78fa496bf36c55864a41e353df7d13f04b1077.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2025.10.30~6f78fa49-r1",
+      "metadata_version": "2025.10.30~6f78fa496bf36c55864a41e353df7d13f04b1077-r1",
+      "package": "getrandom",
+      "recipe": "package/system/ubox/Makefile",
+      "resolved_source_archive": "ubox-2025.10.30~6f78fa49.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "BSD-2-Clause",
+      "declared_license_files": [
+        "LICENSE.TXT"
+      ],
+      "declared_source": "hdparm-9.65.tar.gz",
+      "installed_version": "9.65-r2",
+      "metadata_version": "9.65-r2",
+      "package": "hdparm",
+      "recipe": "package/feeds/packages/hdparm/Makefile",
+      "resolved_source_archive": "hdparm-9.65.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "iproute2-6.18.0.tar.xz",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "6.18.0-r2",
+      "metadata_version": "6.18.0-r2",
+      "package": "ip-full",
+      "recipe": "package/network/utils/iproute2/Makefile",
+      "resolved_source_archive": "iproute2-6.18.0.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "BSD-3-Clause",
+      "declared_license_files": [],
+      "declared_source": "iperf-3.20.tar.gz",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "3.20-r1",
+      "metadata_version": "3.20-r1",
+      "package": "iperf3",
+      "recipe": "package/feeds/packages/iperf3/Makefile",
+      "resolved_source_archive": "iperf-3.20.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "MIT",
+      "declared_license_files": [
+        "LICENSE"
+      ],
+      "declared_source": "jansson-2.14.1.tar.gz",
+      "installed_version": "2.14.1-r1",
+      "metadata_version": "2.14.1-r1",
+      "package": "jansson4",
+      "recipe": "package/libs/jansson/Makefile",
+      "resolved_source_archive": "jansson-2.14.1.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "libubox-2026.06.19~7dd127841e82eb1cfb61185da37dde7b9bd9ba6d.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.06.19~7dd12784-r1",
+      "metadata_version": "2026.06.19~7dd127841e82eb1cfb61185da37dde7b9bd9ba6d-r1",
+      "package": "jshn",
+      "recipe": "package/libs/libubox/Makefile",
+      "resolved_source_archive": "libubox-2026.06.19~7dd12784.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "jsonfilter-2026.03.16~b9034210bd331749673416c6bf389cccd4e23610.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.03.16~b9034210-r1",
+      "metadata_version": "2026.03.16~b9034210bd331749673416c6bf389cccd4e23610-r1",
+      "package": "jsonfilter",
+      "recipe": "package/utils/jsonfilter/Makefile",
+      "resolved_source_archive": "jsonfilter-2026.03.16~b9034210.tar.zst",
+      "review_complete": false
+    },
+    {
+      "finding": "missing metadata",
+      "installed_version": "6.12.94~163ce323a8869edeb4f08bf54693b3a2-r1",
+      "package": "kernel",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-ata-core",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-crypto-acompress",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-crypto-blake2b",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-crypto-crc32c",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-crypto-hash",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-crypto-xxhash",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-fs-btrfs",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-fs-ext4",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "6.12.94-r5",
+      "metadata_version": "<LINUX_VERSION>-r5",
+      "notice_followup": "See recipe and license files in openwrt-upstream.tar; no separate notice selected from this archive",
+      "package": "kmod-gpio-button-hotplug",
+      "recipe": "package/kernel/gpio-button-hotplug/Makefile",
+      "resolved_source_archive": "openwrt-upstream.tar",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-hwmon-core",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-hwmon-drivetemp",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-hwmon-gpiofan",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-i2c-core",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-lib-crc-ccitt",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-lib-crc16",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-lib-crc32c",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-lib-lzo",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-lib-raid6",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-lib-xor",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-lib-xxhash",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-lib-zlib-deflate",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-lib-zlib-inflate",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-lib-zstd",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-linkstation-poweroff",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nf-conntrack",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nf-conntrack6",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nf-flow",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nf-log",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nf-log6",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nf-nat",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nf-reject",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nf-reject6",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nfnetlink",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nft-core",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nft-fib",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nft-nat",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nft-offload",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-nls-base",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-ppp",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-pppoe",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-pppox",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-rtc-rs5c372a",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-scsi-core",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-slhc",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-usb-common",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-usb-core",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "",
+      "installed_version": "6.12.94-r1",
+      "metadata_version": "<LINUX_VERSION>-r",
+      "package": "kmod-usb-storage",
+      "recipe": "package/kernel/linux/Makefile",
+      "resolved_source_archive": "linux-6.12.94.tar.xz",
+      "review_complete": false
+    },
+    {
+      "component_note": "GCC runtime; review COPYING3 and COPYING.RUNTIME together",
+      "declared_license": "GPL-3.0-with-GCC-exception",
+      "declared_license_files": [],
+      "declared_source": "",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "14.3.0-r5",
+      "metadata_version": "<LIBGCC_VERSION>-r5",
+      "package": "libatomic1",
+      "recipe": "package/libs/toolchain/Makefile",
+      "resolved_source_archive": "gcc-14.3.0.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1-or-later",
+      "declared_license_files": [
+        "doc/COPYING.LGPL"
+      ],
+      "declared_source": "attr-2.5.2.tar.xz",
+      "installed_version": "2.5.2-r3",
+      "metadata_version": "2.5.2-r3",
+      "package": "libattr",
+      "recipe": "package/feeds/packages/attr/Makefile",
+      "resolved_source_archive": "attr-2.5.2.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1-or-later",
+      "declared_license_files": [
+        "Documentation/licenses/COPYING.LGPL-2.1-or-later"
+      ],
+      "declared_source": "util-linux-2.41.5.tar.xz",
+      "installed_version": "2.41.5-r1",
+      "metadata_version": "2.41.5-r1",
+      "package": "libblkid1",
+      "recipe": "package/utils/util-linux/Makefile",
+      "resolved_source_archive": "util-linux-2.41.5.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "libubox-2026.06.19~7dd127841e82eb1cfb61185da37dde7b9bd9ba6d.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.06.19~7dd12784-r1",
+      "metadata_version": "2026.06.19~7dd127841e82eb1cfb61185da37dde7b9bd9ba6d-r1",
+      "package": "libblobmsg-json20260213",
+      "recipe": "package/libs/libubox/Makefile",
+      "resolved_source_archive": "libubox-2026.06.19~7dd12784.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1 OR BSD-2-Clause",
+      "declared_license_files": [],
+      "declared_source": "libbpf-1.6.2.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "1.6.2-r1",
+      "metadata_version": "1.6.2-r1",
+      "package": "libbpf1",
+      "recipe": "package/libs/libbpf/Makefile",
+      "resolved_source_archive": "libbpf-1.6.2.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-3.0-with-GCC-exception",
+      "declared_license_files": [],
+      "declared_source": "",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "1.2.5-r5",
+      "license_metadata_correction": "musl: MIT and bundled component notices, not the inherited GCC exception declaration",
+      "metadata_version": "<LIBC_VERSION>-r5",
+      "package": "libc",
+      "recipe": "package/libs/toolchain/Makefile",
+      "resolved_source_archive": "musl-1.2.5.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [
+        "NOTICE"
+      ],
+      "declared_source": "e2fsprogs-1.47.3.tar.xz",
+      "installed_version": "1.47.3-r1",
+      "metadata_version": "1.47.3-r1",
+      "package": "libcomerr0",
+      "recipe": "package/utils/e2fsprogs/Makefile",
+      "resolved_source_archive": "e2fsprogs-1.47.3.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [
+        "NOTICE"
+      ],
+      "declared_source": "e2fsprogs-1.47.3.tar.xz",
+      "installed_version": "1.47.3-r1",
+      "metadata_version": "1.47.3-r1",
+      "package": "libe2p2",
+      "recipe": "package/utils/e2fsprogs/Makefile",
+      "resolved_source_archive": "e2fsprogs-1.47.3.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-or-later OR LGPL-3.0-or-later",
+      "declared_license_files": [
+        "COPYING",
+        "COPYING-GPLV2",
+        "COPYING-LGPLV3"
+      ],
+      "declared_source": "elfutils-0.192.tar.bz2",
+      "installed_version": "0.192-r1",
+      "metadata_version": "0.192-r1",
+      "package": "libelf1",
+      "recipe": "package/libs/elfutils/Makefile",
+      "resolved_source_archive": "elfutils-0.192.tar.bz2",
+      "review_complete": false
+    },
+    {
+      "declared_license": "MIT",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "libevdev-1.13.4.tar.xz",
+      "installed_version": "1.13.4-r1",
+      "metadata_version": "1.13.4-r1",
+      "package": "libevdev",
+      "recipe": "package/feeds/packages/libevdev/Makefile",
+      "resolved_source_archive": "libevdev-1.13.4.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [
+        "NOTICE"
+      ],
+      "declared_source": "e2fsprogs-1.47.3.tar.xz",
+      "installed_version": "1.47.3-r1",
+      "metadata_version": "1.47.3-r1",
+      "package": "libext2fs2",
+      "recipe": "package/utils/e2fsprogs/Makefile",
+      "resolved_source_archive": "e2fsprogs-1.47.3.tar.xz",
+      "review_complete": false
+    },
+    {
+      "component_note": "GCC runtime; review COPYING3 and COPYING.RUNTIME together",
+      "declared_license": "GPL-3.0-with-GCC-exception",
+      "declared_license_files": [],
+      "declared_source": "",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "14.3.0-r5",
+      "metadata_version": "<LIBGCC_VERSION>-r5",
+      "package": "libgcc1",
+      "recipe": "package/libs/toolchain/Makefile",
+      "resolved_source_archive": "gcc-14.3.0.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "BSD-3-Clause",
+      "declared_license_files": [],
+      "declared_source": "iperf-3.20.tar.gz",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "3.20-r1",
+      "metadata_version": "3.20-r1",
+      "package": "libiperf3",
+      "recipe": "package/feeds/packages/iperf3/Makefile",
+      "resolved_source_archive": "iperf-3.20.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "MIT",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "json-c-0.18-nodoc.tar.gz",
+      "installed_version": "0.18-r1",
+      "metadata_version": "0.18-r1",
+      "package": "libjson-c5",
+      "recipe": "package/libs/libjson-c/Makefile",
+      "resolved_source_archive": "json-c-0.18-nodoc.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "libubox-2026.06.19~7dd127841e82eb1cfb61185da37dde7b9bd9ba6d.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.06.19~7dd12784-r1",
+      "metadata_version": "2026.06.19~7dd127841e82eb1cfb61185da37dde7b9bd9ba6d-r1",
+      "package": "libjson-script20260213",
+      "recipe": "package/libs/libubox/Makefile",
+      "resolved_source_archive": "libubox-2026.06.19~7dd12784.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-or-later",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "lzo-2.10.tar.gz",
+      "installed_version": "2.10-r5",
+      "metadata_version": "2.10-r5",
+      "package": "liblzo2",
+      "recipe": "package/feeds/packages/lzo/Makefile",
+      "resolved_source_archive": "lzo-2.10.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-or-later",
+      "declared_license_files": [
+        "LICENSE"
+      ],
+      "declared_source": "mbedtls-3.6.6.tar.bz2",
+      "installed_version": "3.6.6-r2",
+      "metadata_version": "3.6.6-r2",
+      "package": "libmbedtls21",
+      "recipe": "package/libs/mbedtls/Makefile",
+      "resolved_source_archive": "mbedtls-3.6.6.tar.bz2",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1+",
+      "declared_license_files": [],
+      "declared_source": "libmnl-1.0.5.tar.bz2",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "1.0.5-r1",
+      "metadata_version": "1.0.5-r1",
+      "package": "libmnl0",
+      "recipe": "package/libs/libmnl/Makefile",
+      "resolved_source_archive": "libmnl-1.0.5.tar.bz2",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1-or-later",
+      "declared_license_files": [
+        "Documentation/licenses/COPYING.LGPL-2.1-or-later"
+      ],
+      "declared_source": "util-linux-2.41.5.tar.xz",
+      "installed_version": "2.41.5-r1",
+      "metadata_version": "2.41.5-r1",
+      "package": "libmount1",
+      "recipe": "package/utils/util-linux/Makefile",
+      "resolved_source_archive": "util-linux-2.41.5.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "MIT",
+      "declared_license_files": [
+        "README"
+      ],
+      "declared_source": "ncurses-6.4.tar.gz",
+      "installed_version": "6.4-r3",
+      "metadata_version": "6.4-r3",
+      "package": "libncurses6",
+      "recipe": "package/libs/ncurses/Makefile",
+      "resolved_source_archive": "ncurses-6.4.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-or-later",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "libnftnl-1.3.1.tar.xz",
+      "installed_version": "1.3.1-r1",
+      "metadata_version": "1.3.1-r1",
+      "package": "libnftnl11",
+      "recipe": "package/libs/libnftnl/Makefile",
+      "resolved_source_archive": "libnftnl-1.3.1.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1",
+      "declared_license_files": [],
+      "declared_source": "libnl-tiny-2025.12.02~40493a655d8caa2ccf5206dde1e733abe2920432.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2025.12.02~40493a65-r1",
+      "metadata_version": "2025.12.02~40493a655d8caa2ccf5206dde1e733abe2920432-r1",
+      "package": "libnl-tiny1",
+      "recipe": "package/libs/libnl-tiny/Makefile",
+      "resolved_source_archive": "libnl-tiny-2025.12.02~40493a65.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "BSD-3-Clause",
+      "declared_license_files": [
+        "LICENSE"
+      ],
+      "declared_source": "libpcap-1.10.6.tar.gz",
+      "installed_version": "1.10.6-r1",
+      "metadata_version": "1.10.6-r1",
+      "package": "libpcap1",
+      "recipe": "package/libs/libpcap/Makefile",
+      "resolved_source_archive": "libpcap-1.10.6.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-3.0-with-GCC-exception",
+      "declared_license_files": [],
+      "declared_source": "",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "1.2.5-r5",
+      "license_metadata_correction": "musl: MIT and bundled component notices, not the inherited GCC exception declaration",
+      "metadata_version": "<LIBC_VERSION>-r5",
+      "package": "libpthread",
+      "recipe": "package/libs/toolchain/Makefile",
+      "resolved_source_archive": "musl-1.2.5.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-3.0-with-GCC-exception",
+      "declared_license_files": [],
+      "declared_source": "",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "1.2.5-r5",
+      "license_metadata_correction": "musl: MIT and bundled component notices, not the inherited GCC exception declaration",
+      "metadata_version": "<LIBC_VERSION>-r5",
+      "package": "librt",
+      "recipe": "package/libs/toolchain/Makefile",
+      "resolved_source_archive": "musl-1.2.5.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1-or-later",
+      "declared_license_files": [
+        "Documentation/licenses/COPYING.LGPL-2.1-or-later"
+      ],
+      "declared_source": "util-linux-2.41.5.tar.xz",
+      "installed_version": "2.41.5-r1",
+      "metadata_version": "2.41.5-r1",
+      "package": "libsmartcols1",
+      "recipe": "package/utils/util-linux/Makefile",
+      "resolved_source_archive": "util-linux-2.41.5.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [
+        "NOTICE"
+      ],
+      "declared_source": "e2fsprogs-1.47.3.tar.xz",
+      "installed_version": "1.47.3-r1",
+      "metadata_version": "1.47.3-r1",
+      "package": "libss2",
+      "recipe": "package/utils/e2fsprogs/Makefile",
+      "resolved_source_archive": "e2fsprogs-1.47.3.tar.xz",
+      "review_complete": false
+    },
+    {
+      "component_note": "GCC runtime; review COPYING3 and COPYING.RUNTIME together",
+      "declared_license": "GPL-3.0-with-GCC-exception",
+      "declared_license_files": [],
+      "declared_source": "",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "14.3.0-r5",
+      "metadata_version": "<LIBGCC_VERSION>-r5",
+      "package": "libstdcpp6",
+      "recipe": "package/libs/toolchain/Makefile",
+      "resolved_source_archive": "gcc-14.3.0.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "libubox-2026.06.19~7dd127841e82eb1cfb61185da37dde7b9bd9ba6d.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.06.19~7dd12784-r1",
+      "metadata_version": "2026.06.19~7dd127841e82eb1cfb61185da37dde7b9bd9ba6d-r1",
+      "package": "libubox20260213",
+      "recipe": "package/libs/libubox/Makefile",
+      "resolved_source_archive": "libubox-2026.06.19~7dd12784.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1",
+      "declared_license_files": [],
+      "declared_source": "ubus-2026.06.28~24864e7840b3a02a9ef76284a373f6b2f00b8a9b.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.06.28~24864e78-r2",
+      "metadata_version": "2026.06.28~24864e7840b3a02a9ef76284a373f6b2f00b8a9b-r2",
+      "package": "libubus20251202",
+      "recipe": "package/system/ubus/Makefile",
+      "resolved_source_archive": "ubus-2026.06.28~24864e78.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1",
+      "declared_license_files": [],
+      "declared_source": "uci-2025.12.02~66127cd76c5d0bd46d5a90302cc6110f53a4e2f8.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2025.12.02~66127cd7-r1",
+      "metadata_version": "2025.12.02~66127cd76c5d0bd46d5a90302cc6110f53a4e2f8-r1",
+      "package": "libuci20250120",
+      "recipe": "package/system/uci/Makefile",
+      "resolved_source_archive": "uci-2025.12.02~66127cd7.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "uclient-2026.06.07~daad21fa2c17cae54d37149bf27bb3dd78e50a3f.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.06.07~daad21fa-r1",
+      "metadata_version": "2026.06.07~daad21fa2c17cae54d37149bf27bb3dd78e50a3f-r1",
+      "package": "libuclient20201210",
+      "recipe": "package/libs/uclient/Makefile",
+      "resolved_source_archive": "uclient-2026.06.07~daad21fa.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "ucode-2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.01.16~85922056-r1",
+      "metadata_version": "2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1-r1",
+      "package": "libucode20230711",
+      "recipe": "package/utils/ucode/Makefile",
+      "resolved_source_archive": "ucode-2026.01.16~85922056.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "udebug-2026.01.16~875e1a7af6ca9d86524d18169c3a79f4a1920053.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.01.16~875e1a7a",
+      "metadata_version": "2026.01.16~875e1a7af6ca9d86524d18169c3a79f4a1920053",
+      "package": "libudebug",
+      "recipe": "package/libs/udebug/Makefile",
+      "resolved_source_archive": "udebug-2026.01.16~875e1a7a.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [
+        "LICENSE"
+      ],
+      "declared_source": "libudev-zero-1.0.4.tar.gz",
+      "installed_version": "1.0.4-r1",
+      "metadata_version": "1.0.4-r1",
+      "package": "libudev-zero",
+      "recipe": "package/feeds/packages/libudev-zero/Makefile",
+      "resolved_source_archive": "libudev-zero-1.0.4.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1-or-later",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "libusb-1.0.29.tar.bz2",
+      "installed_version": "1.0.29-r1",
+      "metadata_version": "1.0.29-r1",
+      "package": "libusb-1.0-0",
+      "recipe": "package/libs/libusb/Makefile",
+      "resolved_source_archive": "libusb-1.0.29.tar.bz2",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "ustream-ssl-2026.03.01~99f1c0db5a729f615bc5114b3b52fd8ac8083f34.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.03.01~99f1c0db-r1",
+      "metadata_version": "2026.03.01~99f1c0db5a729f615bc5114b3b52fd8ac8083f34-r1",
+      "package": "libustream-mbedtls20201210",
+      "recipe": "package/libs/ustream-ssl/Makefile",
+      "resolved_source_archive": "ustream-ssl-2026.03.01~99f1c0db.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "BSD-3-Clause",
+      "declared_license_files": [
+        "Documentation/licenses/COPYING.BSD-3-Clause"
+      ],
+      "declared_source": "util-linux-2.41.5.tar.xz",
+      "installed_version": "2.41.5-r1",
+      "metadata_version": "2.41.5-r1",
+      "package": "libuuid1",
+      "recipe": "package/utils/util-linux/Makefile",
+      "resolved_source_archive": "util-linux-2.41.5.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "ubox-2025.10.30~6f78fa496bf36c55864a41e353df7d13f04b1077.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2025.10.30~6f78fa49-r1",
+      "metadata_version": "2025.10.30~6f78fa496bf36c55864a41e353df7d13f04b1077-r1",
+      "package": "logd",
+      "recipe": "package/system/ubox/Makefile",
+      "resolved_source_archive": "ubox-2025.10.30~6f78fa49.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-or-later",
+      "declared_license_files": [
+        "Documentation/licenses/COPYING.GPL-2.0-or-later"
+      ],
+      "declared_source": "util-linux-2.41.5.tar.xz",
+      "installed_version": "2.41.5-r1",
+      "metadata_version": "2.41.5-r1",
+      "package": "lsblk",
+      "recipe": "package/utils/util-linux/Makefile",
+      "resolved_source_archive": "util-linux-2.41.5.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0+",
+      "declared_license_files": [],
+      "declared_source": "",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "27",
+      "metadata_version": "27",
+      "notice_followup": "See recipe and license files in openwrt-upstream.tar; no separate notice selected from this archive",
+      "package": "mtd",
+      "recipe": "package/system/mtd/Makefile",
+      "resolved_source_archive": "openwrt-upstream.tar",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "netifd-2026.02.26~cbb83a1857407a28a63dc09412a1f209195914ef.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.02.26~cbb83a18-r1",
+      "metadata_version": "2026.02.26~cbb83a1857407a28a63dc09412a1f209195914ef-r1",
+      "package": "netifd",
+      "recipe": "package/network/config/netifd/Makefile",
+      "resolved_source_archive": "netifd-2026.02.26~cbb83a18.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "nftables-1.1.6.tar.xz",
+      "installed_version": "1.1.6-r2",
+      "metadata_version": "1.1.6-r2",
+      "package": "nftables-json",
+      "recipe": "package/network/utils/nftables/Makefile",
+      "resolved_source_archive": "nftables-1.1.6.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "odhcp6c-2026.06.20~07d324ee7222c0e15b9975281f18236fdccc11bd.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.06.20~07d324ee-r1",
+      "metadata_version": "2026.06.20~07d324ee7222c0e15b9975281f18236fdccc11bd-r1",
+      "package": "odhcp6c",
+      "recipe": "package/network/ipv6/odhcp6c/Makefile",
+      "resolved_source_archive": "odhcp6c-2026.06.20~07d324ee.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "odhcpd-2026.06.29~5d7be43f8b9dec0eb47e245cfab81108bb131273.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.06.29~5d7be43f-r1",
+      "metadata_version": "2026.06.29~5d7be43f8b9dec0eb47e245cfab81108bb131273-r1",
+      "package": "odhcpd-ipv6only",
+      "recipe": "package/network/services/odhcpd/Makefile",
+      "resolved_source_archive": "odhcpd-2026.06.29~5d7be43f.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "openwrt-keyring-2025.12.10~f0670054fd3aa9616bcd8d0d0357a1a15c65b758.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2025.12.10~f0670054-r1",
+      "metadata_version": "2025.12.10~f0670054fd3aa9616bcd8d0d0357a1a15c65b758-r1",
+      "notice_followup": "See recipe and license files in openwrt-upstream.tar; no separate notice selected from this archive",
+      "package": "openwrt-keyring",
+      "recipe": "package/system/openwrt-keyring/Makefile",
+      "resolved_source_archive": "openwrt-keyring-2025.12.10~f0670054.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-or-later",
+      "declared_license_files": [
+        "Documentation/licenses/COPYING.GPL-2.0-or-later"
+      ],
+      "declared_source": "util-linux-2.41.5.tar.xz",
+      "installed_version": "2.41.5-r1",
+      "metadata_version": "2.41.5-r1",
+      "package": "partx-utils",
+      "recipe": "package/utils/util-linux/Makefile",
+      "resolved_source_archive": "util-linux-2.41.5.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "BSD-4-Clause",
+      "declared_license_files": [],
+      "declared_source": "ppp-2.5.2.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2.5.2-r3",
+      "metadata_version": "2.5.2-r3",
+      "package": "ppp",
+      "recipe": "package/network/services/ppp/Makefile",
+      "resolved_source_archive": "ppp-2.5.2.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "BSD-4-Clause",
+      "declared_license_files": [],
+      "declared_source": "ppp-2.5.2.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2.5.2-r3",
+      "metadata_version": "2.5.2-r3",
+      "package": "ppp-mod-pppoe",
+      "recipe": "package/network/services/ppp/Makefile",
+      "resolved_source_archive": "ppp-2.5.2.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "procd-2026.03.13~58eb263d5abe03f8c1280bdfa65a3b052614215d.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.03.13~58eb263d-r1",
+      "metadata_version": "2026.03.13~58eb263d5abe03f8c1280bdfa65a3b052614215d-r1",
+      "package": "procd",
+      "recipe": "package/system/procd/Makefile",
+      "resolved_source_archive": "procd-2026.03.13~58eb263d.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "procd-2026.03.13~58eb263d5abe03f8c1280bdfa65a3b052614215d.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.03.13~58eb263d-r1",
+      "metadata_version": "2026.03.13~58eb263d5abe03f8c1280bdfa65a3b052614215d-r1",
+      "package": "procd-seccomp",
+      "recipe": "package/system/procd/Makefile",
+      "resolved_source_archive": "procd-2026.03.13~58eb263d.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "procd-2026.03.13~58eb263d5abe03f8c1280bdfa65a3b052614215d.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.03.13~58eb263d-r1",
+      "metadata_version": "2026.03.13~58eb263d5abe03f8c1280bdfa65a3b052614215d-r1",
+      "package": "procd-ujail",
+      "recipe": "package/system/procd/Makefile",
+      "resolved_source_archive": "procd-2026.03.13~58eb263d.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-or-later",
+      "declared_license_files": [
+        "COPYING"
+      ],
+      "declared_source": "smartmontools-7.5.tar.gz",
+      "installed_version": "7.5-r1",
+      "metadata_version": "7.5-r1",
+      "package": "smartmontools",
+      "recipe": "package/feeds/packages/smartmontools/Makefile",
+      "resolved_source_archive": "smartmontools-7.5.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "BSD-3-Clause",
+      "declared_license_files": [],
+      "declared_source": "tcpdump-4.99.6.tar.gz",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "4.99.6-r1",
+      "metadata_version": "4.99.6-r1",
+      "package": "tcpdump-mini",
+      "recipe": "package/network/utils/tcpdump/Makefile",
+      "resolved_source_archive": "tcpdump-4.99.6.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "MIT",
+      "declared_license_files": [
+        "README"
+      ],
+      "declared_source": "ncurses-6.4.tar.gz",
+      "installed_version": "6.4-r3",
+      "metadata_version": "6.4-r3",
+      "package": "terminfo",
+      "recipe": "package/libs/ncurses/Makefile",
+      "resolved_source_archive": "ncurses-6.4.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPLv2",
+      "declared_license_files": [],
+      "declared_source": "mtd-utils-2.3.0.tar.bz2",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2.3.0-r1",
+      "metadata_version": "2.3.0-r1",
+      "package": "ubi-utils",
+      "recipe": "package/utils/mtd-utils/Makefile",
+      "resolved_source_archive": "mtd-utils-2.3.0.tar.bz2",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0 GPL-2.0+",
+      "declared_license_files": [
+        "Licenses/README"
+      ],
+      "declared_source": "u-boot-2025.10.tar.bz2",
+      "installed_version": "2025.10-r2",
+      "metadata_version": "2025.10-r2",
+      "package": "uboot-envtools",
+      "recipe": "package/boot/uboot-tools/Makefile",
+      "resolved_source_archive": "u-boot-2025.10.tar.bz2",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0",
+      "declared_license_files": [],
+      "declared_source": "ubox-2025.10.30~6f78fa496bf36c55864a41e353df7d13f04b1077.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2025.10.30~6f78fa49-r1",
+      "metadata_version": "2025.10.30~6f78fa496bf36c55864a41e353df7d13f04b1077-r1",
+      "package": "ubox",
+      "recipe": "package/system/ubox/Makefile",
+      "resolved_source_archive": "ubox-2025.10.30~6f78fa49.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1",
+      "declared_license_files": [],
+      "declared_source": "ubus-2026.06.28~24864e7840b3a02a9ef76284a373f6b2f00b8a9b.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.06.28~24864e78-r2",
+      "metadata_version": "2026.06.28~24864e7840b3a02a9ef76284a373f6b2f00b8a9b-r2",
+      "package": "ubus",
+      "recipe": "package/system/ubus/Makefile",
+      "resolved_source_archive": "ubus-2026.06.28~24864e78.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1",
+      "declared_license_files": [],
+      "declared_source": "ubus-2026.06.28~24864e7840b3a02a9ef76284a373f6b2f00b8a9b.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.06.28~24864e78-r2",
+      "metadata_version": "2026.06.28~24864e7840b3a02a9ef76284a373f6b2f00b8a9b-r2",
+      "package": "ubusd",
+      "recipe": "package/system/ubus/Makefile",
+      "resolved_source_archive": "ubus-2026.06.28~24864e78.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "LGPL-2.1",
+      "declared_license_files": [],
+      "declared_source": "uci-2025.12.02~66127cd76c5d0bd46d5a90302cc6110f53a4e2f8.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2025.12.02~66127cd7-r1",
+      "metadata_version": "2025.12.02~66127cd76c5d0bd46d5a90302cc6110f53a4e2f8-r1",
+      "package": "uci",
+      "recipe": "package/system/uci/Makefile",
+      "resolved_source_archive": "uci-2025.12.02~66127cd7.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "uclient-2026.06.07~daad21fa2c17cae54d37149bf27bb3dd78e50a3f.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.06.07~daad21fa-r1",
+      "metadata_version": "2026.06.07~daad21fa2c17cae54d37149bf27bb3dd78e50a3f-r1",
+      "package": "uclient-fetch",
+      "recipe": "package/libs/uclient/Makefile",
+      "resolved_source_archive": "uclient-2026.06.07~daad21fa.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "ucode-2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.01.16~85922056-r1",
+      "metadata_version": "2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1-r1",
+      "package": "ucode",
+      "recipe": "package/utils/ucode/Makefile",
+      "resolved_source_archive": "ucode-2026.01.16~85922056.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "ucode-2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.01.16~85922056-r1",
+      "metadata_version": "2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1-r1",
+      "package": "ucode-mod-fs",
+      "recipe": "package/utils/ucode/Makefile",
+      "resolved_source_archive": "ucode-2026.01.16~85922056.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "ucode-2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.01.16~85922056-r1",
+      "metadata_version": "2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1-r1",
+      "package": "ucode-mod-ubus",
+      "recipe": "package/utils/ucode/Makefile",
+      "resolved_source_archive": "ucode-2026.01.16~85922056.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "ucode-2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.01.16~85922056-r1",
+      "metadata_version": "2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1-r1",
+      "package": "ucode-mod-uci",
+      "recipe": "package/utils/ucode/Makefile",
+      "resolved_source_archive": "ucode-2026.01.16~85922056.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "ucode-2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2026.01.16~85922056-r1",
+      "metadata_version": "2026.01.16~85922056ef7abeace3cca3ab28bc1ac2d88e31b1-r1",
+      "package": "ucode-mod-uloop",
+      "recipe": "package/utils/ucode/Makefile",
+      "resolved_source_archive": "ucode-2026.01.16~85922056.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [],
+      "declared_source": "",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "3",
+      "metadata_version": "3",
+      "notice_followup": "See recipe and license files in openwrt-upstream.tar; no separate notice selected from this archive",
+      "package": "urandom-seed",
+      "recipe": "package/system/urandom-seed/Makefile",
+      "resolved_source_archive": "openwrt-upstream.tar",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0 BSD-3-Clause",
+      "declared_license_files": [],
+      "declared_source": "urngd-2025.10.03~f17e33d9942750edbd73124e6f03118a98abb402.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2025.10.03~f17e33d9-r1",
+      "metadata_version": "2025.10.03~f17e33d9942750edbd73124e6f03118a98abb402-r1",
+      "package": "urngd",
+      "recipe": "package/system/urngd/Makefile",
+      "resolved_source_archive": "urngd-2025.10.03~f17e33d9.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-or-later",
+      "declared_license_files": [
+        "COPYING",
+        "LICENSE"
+      ],
+      "declared_source": "hwdata-0.407.tar.gz",
+      "installed_version": "0.407-r1",
+      "metadata_version": "0.407-r1",
+      "package": "usbids",
+      "recipe": "package/feeds/packages/hwdata/Makefile",
+      "resolved_source_archive": "hwdata-0.407.tar.gz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "GPL-2.0-only",
+      "declared_license_files": [
+        "LICENSES/GPL-2.0-only.txt"
+      ],
+      "declared_source": "usbutils-019.tar.xz",
+      "installed_version": "019-r1",
+      "metadata_version": "019-r1",
+      "package": "usbutils",
+      "recipe": "package/feeds/packages/usbutils/Makefile",
+      "resolved_source_archive": "usbutils-019.tar.xz",
+      "review_complete": false
+    },
+    {
+      "declared_license": "ISC",
+      "declared_license_files": [],
+      "declared_source": "usign-2025.10.03~c4c72b1b07945ee192361dc751291a7c98d6adcd.tar.zst",
+      "finding": "no explicit LicenseFiles field; inspect source notices",
+      "installed_version": "2025.10.03~c4c72b1b-r1",
+      "metadata_version": "2025.10.03~c4c72b1b07945ee192361dc751291a7c98d6adcd-r1",
+      "package": "usign",
+      "recipe": "package/system/usign/Makefile",
+      "resolved_source_archive": "usign-2025.10.03~c4c72b1b.tar.zst",
+      "review_complete": false
+    },
+    {
+      "declared_license": "Zlib",
+      "declared_license_files": [
+        "LICENSE"
+      ],
+      "declared_source": "zlib-1.3.1.tar.zst",
+      "installed_version": "1.3.1-r1",
+      "metadata_version": "1.3.1-r1",
+      "package": "zlib",
+      "recipe": "package/libs/zlib/Makefile",
+      "resolved_source_archive": "zlib-1.3.1.tar.zst",
+      "review_complete": false
+    }
+  ],
+  "scope": "Verified source archive mapping and retained notice inventory. Package declarations are not a substitute for original component terms.",
+  "sources": {
+    "apk-3.0.5.tar.zst": {
+      "sha256": "bdb70571302d4baeafd4558522a49ce4c834c2acb51b954a19a3eea7f20b01b7",
+      "retained_notice_members": [
+        "apk-3.0.5/LICENSE"
+      ]
+    },
+    "openwrt-upstream.tar": {
+      "sha256": "f26eaaa835cb2efb7c7d3ea45442faa1ba12c24949f6447be075fff7dfd56497",
+      "retained_notice_members": []
+    },
+    "fstools-2026.05.23~16718b6e.tar.zst": {
+      "sha256": "c266c906cc40b0422f1e74e0118f68bb123c04233dfbf4689847eba74abec4eb",
+      "retained_notice_members": [
+        "fstools-2026.05.23~16718b6e/block.c",
+        "fstools-2026.05.23~16718b6e/factoryreset.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/bitops.h",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/blkdev.h",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/blkid.h",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/blkidP.h",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/btrfs.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/encode.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/exfat.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/ext.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/f2fs.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/hfs.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/jffs2.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/libblkid-tiny.h",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/mkdev.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/ntfs.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/probe.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/squashfs.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/superblocks.h",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/swap.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/ubi.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/ubifs.c",
+        "fstools-2026.05.23~16718b6e/libblkid-tiny/vfat.c",
+        "fstools-2026.05.23~16718b6e/libfstools/common.c",
+        "fstools-2026.05.23~16718b6e/libfstools/common.h",
+        "fstools-2026.05.23~16718b6e/libfstools/extroot.c",
+        "fstools-2026.05.23~16718b6e/libfstools/find.c",
+        "fstools-2026.05.23~16718b6e/libfstools/fit.c",
+        "fstools-2026.05.23~16718b6e/libfstools/libfstools.h",
+        "fstools-2026.05.23~16718b6e/libfstools/mount.c",
+        "fstools-2026.05.23~16718b6e/libfstools/mtd.c",
+        "fstools-2026.05.23~16718b6e/libfstools/overlay.c",
+        "fstools-2026.05.23~16718b6e/libfstools/partname.c",
+        "fstools-2026.05.23~16718b6e/libfstools/rootdisk.c",
+        "fstools-2026.05.23~16718b6e/libfstools/snapshot.c",
+        "fstools-2026.05.23~16718b6e/libfstools/snapshot.h",
+        "fstools-2026.05.23~16718b6e/libfstools/ubi.c",
+        "fstools-2026.05.23~16718b6e/libfstools/volume.c",
+        "fstools-2026.05.23~16718b6e/libfstools/volume.h",
+        "fstools-2026.05.23~16718b6e/libubi/libubi-tiny.c",
+        "fstools-2026.05.23~16718b6e/libubi/libubi-tiny.h",
+        "fstools-2026.05.23~16718b6e/libubi/libubi.c",
+        "fstools-2026.05.23~16718b6e/libubi/libubi.h",
+        "fstools-2026.05.23~16718b6e/libubi/libubi_int.h",
+        "fstools-2026.05.23~16718b6e/libubi/ubi-media.h",
+        "fstools-2026.05.23~16718b6e/libubi/ubi-user.h",
+        "fstools-2026.05.23~16718b6e/libubi/ubiutils-common.c",
+        "fstools-2026.05.23~16718b6e/mount_root.c",
+        "fstools-2026.05.23~16718b6e/probe-libblkid.c",
+        "fstools-2026.05.23~16718b6e/probe.c",
+        "fstools-2026.05.23~16718b6e/probe.h",
+        "fstools-2026.05.23~16718b6e/snapshot.c",
+        "fstools-2026.05.23~16718b6e/ubi.c"
+      ]
+    },
+    "btrfs-progs-v6.11.tar.xz": {
+      "sha256": "ff9ae91521303a90d87e1c4be230f0121f39c44ddbe52c2aeae263c6fecfa099",
+      "retained_notice_members": [
+        "btrfs-progs-v6.11/COPYING",
+        "btrfs-progs-v6.11/libbtrfsutil/COPYING"
+      ]
+    },
+    "busybox-1.37.0.tar.bz2": {
+      "sha256": "3311dff32e746499f4df0d5df04d7eb396382d7e108bb9250e7b519b837043a4",
+      "retained_notice_members": [
+        "busybox-1.37.0/LICENSE",
+        "busybox-1.37.0/archival/libarchive/bz/LICENSE"
+      ]
+    },
+    "ca-certificates_20260601.tar.xz": {
+      "sha256": "7ab6301f7f34eef90a4d278647c260bc0762e0e14561f4649854cf4b0d4bea21",
+      "retained_notice_members": [
+        "ca-certificates/debian/copyright"
+      ]
+    },
+    "dnsmasq-2.93.tar.xz": {
+      "sha256": "0c00d4e5c97c8306e5fb932b348b34269c9c29a0e7df0e8e82958b407092bc19",
+      "retained_notice_members": [
+        "dnsmasq-2.93/COPYING",
+        "dnsmasq-2.93/COPYING-v3"
+      ]
+    },
+    "dropbear-2025.89.tar.bz2": {
+      "sha256": "0d1f7ca711cfc336dc8a85e672cab9cfd8223a02fe2da0a4a7aeb58c9e113634",
+      "retained_notice_members": [
+        "dropbear-2025.89/LICENSE",
+        "dropbear-2025.89/debian/copyright.in",
+        "dropbear-2025.89/libtomcrypt/LICENSE",
+        "dropbear-2025.89/libtommath/LICENSE",
+        "dropbear-2025.89/src/atomicio.c",
+        "dropbear-2025.89/src/loginrec.c",
+        "dropbear-2025.89/src/sshpty.c"
+      ]
+    },
+    "e2fsprogs-1.47.3.tar.xz": {
+      "sha256": "857e6ef800feaa2bb4578fbc810214be5d3c88b072ea53c5384733a965737329",
+      "retained_notice_members": [
+        "e2fsprogs-1.47.3/NOTICE",
+        "e2fsprogs-1.47.3/debian/copyright",
+        "e2fsprogs-1.47.3/ext2ed/COPYRIGHT",
+        "e2fsprogs-1.47.3/lib/e2p/feature.c",
+        "e2fsprogs-1.47.3/lib/et/com_err.c",
+        "e2fsprogs-1.47.3/lib/ext2fs/openfs.c",
+        "e2fsprogs-1.47.3/lib/ext2fs/tdb/patches/copyright",
+        "e2fsprogs-1.47.3/lib/ss/data.c",
+        "e2fsprogs-1.47.3/lib/uuid/COPYING"
+      ]
+    },
+    "ethtool-6.15.tar.xz": {
+      "sha256": "9477c365114d910120aaec5336a1d16196c833d8486f7c6da67bedef57880ade",
+      "retained_notice_members": [
+        "ethtool-6.15/COPYING",
+        "ethtool-6.15/LICENSE"
+      ]
+    },
+    "firewall4-2025.03.17~b6e51575.tar.zst": {
+      "sha256": "fb563b493411922a8fbddf6a5a6766cffa47f87621e056b8dcf38309091835eb",
+      "retained_notice_members": []
+    },
+    "fwtool-2025.10.03~04cd252e.tar.zst": {
+      "sha256": "d0c72a6326aa5a5ee8360b0727075643aec63febc4849ab8f13aed315115d7ab",
+      "retained_notice_members": [
+        "fwtool-2025.10.03~04cd252e/crc32.h",
+        "fwtool-2025.10.03~04cd252e/fwimage.h",
+        "fwtool-2025.10.03~04cd252e/fwtool.c",
+        "fwtool-2025.10.03~04cd252e/utils.h"
+      ]
+    },
+    "ubox-2025.10.30~6f78fa49.tar.zst": {
+      "sha256": "41c28d9152cdf2998a4d867827655548f823de9de522a113a45ed1efef97d3ae",
+      "retained_notice_members": [
+        "ubox-2025.10.30~6f78fa49/getrandom.c",
+        "ubox-2025.10.30~6f78fa49/kmodloader.c",
+        "ubox-2025.10.30~6f78fa49/log/logd.c",
+        "ubox-2025.10.30~6f78fa49/log/logread.c",
+        "ubox-2025.10.30~6f78fa49/log/syslog.c",
+        "ubox-2025.10.30~6f78fa49/log/syslog.h",
+        "ubox-2025.10.30~6f78fa49/lsbloader.c",
+        "ubox-2025.10.30~6f78fa49/validate/validate.c"
+      ]
+    },
+    "hdparm-9.65.tar.gz": {
+      "sha256": "d14929f910d060932e717e9382425d47c2e7144235a53713d55a94f7de535a4b",
+      "retained_notice_members": [
+        "hdparm-9.65/LICENSE.TXT",
+        "hdparm-9.65/debian/copyright"
+      ]
+    },
+    "iproute2-6.18.0.tar.xz": {
+      "sha256": "6ba520e1975e4c50dc931eeae91ea37c198b8a173744885f8895b84325f9d456",
+      "retained_notice_members": [
+        "iproute2-6.18.0/COPYING"
+      ]
+    },
+    "iperf-3.20.tar.gz": {
+      "sha256": "3acc572d1ecca4e0b20359c7bf0132ddc80d982efeee20c86f6726a9a6094388",
+      "retained_notice_members": [
+        "iperf-3.20/LICENSE",
+        "iperf-3.20/docs/_esnet/LICENSE"
+      ]
+    },
+    "jansson-2.14.1.tar.gz": {
+      "sha256": "979210eaffdffbcf54cfc34d047fccde13f21b529a381df26db871d886f729a4",
+      "retained_notice_members": [
+        "jansson-2.14.1/LICENSE"
+      ]
+    },
+    "libubox-2026.06.19~7dd12784.tar.zst": {
+      "sha256": "82f1a83069c0636722fc1c57d567a21f8b14d14904c8bf10059d2a467edd2a10",
+      "retained_notice_members": [
+        "libubox-2026.06.19~7dd12784/avl.c",
+        "libubox-2026.06.19~7dd12784/avl.h",
+        "libubox-2026.06.19~7dd12784/base64.c",
+        "libubox-2026.06.19~7dd12784/debian/copyright",
+        "libubox-2026.06.19~7dd12784/list.h",
+        "libubox-2026.06.19~7dd12784/md5.c",
+        "libubox-2026.06.19~7dd12784/ulog.c",
+        "libubox-2026.06.19~7dd12784/usock.c"
+      ]
+    },
+    "jsonfilter-2026.03.16~b9034210.tar.zst": {
+      "sha256": "e8616b3eee53c6dd3420a7d800337e13a61e1333dfbd8551b50ab15bafd94a0e",
+      "retained_notice_members": [
+        "jsonfilter-2026.03.16~b9034210/ast.c",
+        "jsonfilter-2026.03.16~b9034210/ast.h",
+        "jsonfilter-2026.03.16~b9034210/contrib/lemon.c",
+        "jsonfilter-2026.03.16~b9034210/contrib/lempar.c",
+        "jsonfilter-2026.03.16~b9034210/lexer.c",
+        "jsonfilter-2026.03.16~b9034210/lexer.h",
+        "jsonfilter-2026.03.16~b9034210/main.c",
+        "jsonfilter-2026.03.16~b9034210/matcher.c",
+        "jsonfilter-2026.03.16~b9034210/matcher.h",
+        "jsonfilter-2026.03.16~b9034210/parser.y"
+      ]
+    },
+    "linux-6.12.94.tar.xz": {
+      "sha256": "e998a232b9418db3301cb58468e291a4f41d6ab8306029b30d991f56251dc8d2",
+      "retained_notice_members": [
+        "linux-6.12.94/COPYING",
+        "linux-6.12.94/Documentation/images/COPYING-logo",
+        "linux-6.12.94/Documentation/process/license-rules.rst",
+        "linux-6.12.94/Documentation/scsi/LICENSE.FlashPoint",
+        "linux-6.12.94/Documentation/translations/it_IT/process/license-rules.rst",
+        "linux-6.12.94/Documentation/translations/zh_CN/process/license-rules.rst",
+        "linux-6.12.94/Documentation/translations/zh_TW/process/license-rules.rst",
+        "linux-6.12.94/LICENSES/deprecated/0BSD",
+        "linux-6.12.94/LICENSES/deprecated/GFDL-1.1",
+        "linux-6.12.94/LICENSES/deprecated/GFDL-1.2",
+        "linux-6.12.94/LICENSES/deprecated/GPL-1.0",
+        "linux-6.12.94/LICENSES/deprecated/ISC",
+        "linux-6.12.94/LICENSES/deprecated/Linux-OpenIB",
+        "linux-6.12.94/LICENSES/deprecated/X11",
+        "linux-6.12.94/LICENSES/deprecated/Zlib",
+        "linux-6.12.94/LICENSES/dual/Apache-2.0",
+        "linux-6.12.94/LICENSES/dual/CC-BY-4.0",
+        "linux-6.12.94/LICENSES/dual/CDDL-1.0",
+        "linux-6.12.94/LICENSES/dual/MPL-1.1",
+        "linux-6.12.94/LICENSES/dual/copyleft-next-0.3.1",
+        "linux-6.12.94/LICENSES/exceptions/GCC-exception-2.0",
+        "linux-6.12.94/LICENSES/exceptions/Linux-syscall-note",
+        "linux-6.12.94/LICENSES/preferred/BSD-2-Clause",
+        "linux-6.12.94/LICENSES/preferred/BSD-3-Clause",
+        "linux-6.12.94/LICENSES/preferred/BSD-3-Clause-Clear",
+        "linux-6.12.94/LICENSES/preferred/GPL-2.0",
+        "linux-6.12.94/LICENSES/preferred/LGPL-2.0",
+        "linux-6.12.94/LICENSES/preferred/LGPL-2.1",
+        "linux-6.12.94/LICENSES/preferred/MIT",
+        "linux-6.12.94/drivers/net/LICENSE.SRC",
+        "linux-6.12.94/drivers/net/wireless/marvell/libertas/LICENSE",
+        "linux-6.12.94/fs/jffs2/LICENCE",
+        "linux-6.12.94/include/linux/license.h",
+        "linux-6.12.94/scripts/package/debian/copyright",
+        "linux-6.12.94/tools/usb/usbip/COPYING"
+      ]
+    },
+    "gcc-14.3.0.tar.xz": {
+      "sha256": "e0dc77297625631ac8e50fa92fffefe899a4eb702592da5c32ef04e2293aca3a",
+      "retained_notice_members": [
+        "gcc-14.3.0/COPYING",
+        "gcc-14.3.0/COPYING.LIB",
+        "gcc-14.3.0/COPYING.RUNTIME",
+        "gcc-14.3.0/COPYING3",
+        "gcc-14.3.0/gcc/COPYING",
+        "gcc-14.3.0/gcc/COPYING.LIB",
+        "gcc-14.3.0/gcc/ada/doc/share/copyright.tex",
+        "gcc-14.3.0/gcc/go/gofrontend/LICENSE",
+        "gcc-14.3.0/gcc/m2/COPYING.FDL",
+        "gcc-14.3.0/gcc/m2/COPYING.RUNTIME",
+        "gcc-14.3.0/gcc/m2/images/LICENSE.IMG",
+        "gcc-14.3.0/gcc/testsuite/gcc.dg/params/LICENSE",
+        "gcc-14.3.0/gcc/testsuite/gcc.dg/vect/tsvc/license.txt",
+        "gcc-14.3.0/include/COPYING",
+        "gcc-14.3.0/libatomic/Makefile.am",
+        "gcc-14.3.0/libcody/LICENSE",
+        "gcc-14.3.0/libffi/LICENSE",
+        "gcc-14.3.0/libffi/LICENSE-BUILDTOOLS",
+        "gcc-14.3.0/libgcc/config/arm/lib1funcs.S",
+        "gcc-14.3.0/libgcc/libgcc2.c",
+        "gcc-14.3.0/libgo/LICENSE",
+        "gcc-14.3.0/libgo/go/golang.org/x/mod/LICENSE",
+        "gcc-14.3.0/libgo/go/golang.org/x/sync/LICENSE",
+        "gcc-14.3.0/libgo/go/golang.org/x/tools/LICENSE",
+        "gcc-14.3.0/libgo/go/golang.org/x/xerrors/LICENSE",
+        "gcc-14.3.0/libiberty/COPYING.LIB",
+        "gcc-14.3.0/libiberty/copying-lib.texi",
+        "gcc-14.3.0/libphobos/libdruntime/LICENSE.txt",
+        "gcc-14.3.0/libphobos/src/LICENSE_1_0.txt",
+        "gcc-14.3.0/libquadmath/COPYING.LIB",
+        "gcc-14.3.0/libsanitizer/LICENSE.TXT",
+        "gcc-14.3.0/libstdc++-v3/doc/html/manual/license.html",
+        "gcc-14.3.0/libstdc++-v3/include/pstl/LICENSE.txt",
+        "gcc-14.3.0/libstdc++-v3/src/c++11/chrono.cc",
+        "gcc-14.3.0/zlib/contrib/dotzlib/LICENSE_1_0.txt"
+      ]
+    },
+    "attr-2.5.2.tar.xz": {
+      "sha256": "f2e97b0ab7ce293681ab701915766190d607a1dba7fae8a718138150b700a70b",
+      "retained_notice_members": [
+        "attr-2.5.2/doc/COPYING",
+        "attr-2.5.2/doc/COPYING.LGPL"
+      ]
+    },
+    "util-linux-2.41.5.tar.xz": {
+      "sha256": "f586e35d320ff537aab3ffeca37e9ecd482ccbe013590db4429a414d8aa6a728",
+      "retained_notice_members": [
+        "util-linux-2.41.5/COPYING",
+        "util-linux-2.41.5/Documentation/licenses/COPYING.BSD-2-Clause",
+        "util-linux-2.41.5/Documentation/licenses/COPYING.BSD-3-Clause",
+        "util-linux-2.41.5/Documentation/licenses/COPYING.BSD-4-Clause-UC",
+        "util-linux-2.41.5/Documentation/licenses/COPYING.EUPL-1.2",
+        "util-linux-2.41.5/Documentation/licenses/COPYING.GPL-2.0-only",
+        "util-linux-2.41.5/Documentation/licenses/COPYING.GPL-2.0-or-later",
+        "util-linux-2.41.5/Documentation/licenses/COPYING.GPL-3.0-or-later",
+        "util-linux-2.41.5/Documentation/licenses/COPYING.ISC",
+        "util-linux-2.41.5/Documentation/licenses/COPYING.LGPL-2.1-or-later",
+        "util-linux-2.41.5/Documentation/licenses/COPYING.MIT",
+        "util-linux-2.41.5/lib/md5.c",
+        "util-linux-2.41.5/lib/randutils.c",
+        "util-linux-2.41.5/lib/sha1.c",
+        "util-linux-2.41.5/libblkid/COPYING",
+        "util-linux-2.41.5/libblkid/src/cache.c",
+        "util-linux-2.41.5/libfdisk/COPYING",
+        "util-linux-2.41.5/liblastlog2/COPYING",
+        "util-linux-2.41.5/libmount/COPYING",
+        "util-linux-2.41.5/libmount/src/context.c",
+        "util-linux-2.41.5/libsmartcols/COPYING",
+        "util-linux-2.41.5/libsmartcols/src/table.c",
+        "util-linux-2.41.5/libuuid/COPYING",
+        "util-linux-2.41.5/libuuid/src/gen_uuid.c",
+        "util-linux-2.41.5/pam_lastlog2/COPYING"
+      ]
+    },
+    "libbpf-1.6.2.tar.zst": {
+      "sha256": "9620f45b4fc0ee5e0f43502634fe48fbcb34ab49d2553b7275fa92f7e02d3dc7",
+      "retained_notice_members": [
+        "libbpf-1.6.2/LICENSE",
+        "libbpf-1.6.2/LICENSE.BSD-2-Clause",
+        "libbpf-1.6.2/LICENSE.LGPL-2.1"
+      ]
+    },
+    "musl-1.2.5.tar.gz": {
+      "sha256": "a9a118bbe84d8764da0ea0d28b3ab3fae8477fc7e4085d90102b8596fc7c75e4",
+      "retained_notice_members": [
+        "musl-1.2.5/COPYRIGHT",
+        "musl-1.2.5/src/crypt/crypt_blowfish.c",
+        "musl-1.2.5/src/crypt/crypt_des.c",
+        "musl-1.2.5/src/math/exp.c",
+        "musl-1.2.5/src/regex/regcomp.c",
+        "musl-1.2.5/src/regex/tre.h",
+        "musl-1.2.5/src/stdlib/qsort.c",
+        "musl-1.2.5/src/string/arm/memcpy.S"
+      ]
+    },
+    "elfutils-0.192.tar.bz2": {
+      "sha256": "616099beae24aba11f9b63d86ca6cc8d566d968b802391334c91df54eab416b4",
+      "retained_notice_members": [
+        "elfutils-0.192/COPYING",
+        "elfutils-0.192/COPYING-GPLV2",
+        "elfutils-0.192/COPYING-LGPLV3",
+        "elfutils-0.192/doc/COPYING-GFDL"
+      ]
+    },
+    "libevdev-1.13.4.tar.xz": {
+      "sha256": "f00ab8d42ad8b905296fab67e13b871f1a424839331516642100f82ad88127cd",
+      "retained_notice_members": [
+        "libevdev-1.13.4/COPYING",
+        "libevdev-1.13.4/doc/style/LICENSE"
+      ]
+    },
+    "json-c-0.18-nodoc.tar.gz": {
+      "sha256": "602cdefc1d2aab8318fc0814b7ce7d59e72514d4276ca3eff92f35f86cf1c160",
+      "retained_notice_members": [
+        "json-c-0.18/COPYING"
+      ]
+    },
+    "lzo-2.10.tar.gz": {
+      "sha256": "c0f892943208266f9b6543b3ae308fab6284c5c90e627931446fb49b4221a072",
+      "retained_notice_members": [
+        "lzo-2.10/COPYING"
+      ]
+    },
+    "mbedtls-3.6.6.tar.bz2": {
+      "sha256": "8fb65fae8dcae5840f793c0a334860a411f884cc537ea290ce1c52bb64ca007a",
+      "retained_notice_members": [
+        "mbedtls-3.6.6/LICENSE",
+        "mbedtls-3.6.6/framework/LICENSE"
+      ]
+    },
+    "libmnl-1.0.5.tar.bz2": {
+      "sha256": "274b9b919ef3152bfb3da3a13c950dd60d6e2bcd54230ffeca298d03b40d0525",
+      "retained_notice_members": [
+        "libmnl-1.0.5/COPYING"
+      ]
+    },
+    "ncurses-6.4.tar.gz": {
+      "sha256": "6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159",
+      "retained_notice_members": [
+        "ncurses-6.4/Ada95/package/debian/copyright",
+        "ncurses-6.4/COPYING",
+        "ncurses-6.4/README",
+        "ncurses-6.4/package/debian-mingw/copyright",
+        "ncurses-6.4/package/debian-mingw64/copyright",
+        "ncurses-6.4/package/debian/copyright",
+        "ncurses-6.4/test/package/debian-mingw/copyright",
+        "ncurses-6.4/test/package/debian-mingw64/copyright",
+        "ncurses-6.4/test/package/debian/copyright"
+      ]
+    },
+    "libnftnl-1.3.1.tar.xz": {
+      "sha256": "607da28dba66fbdeccf8ef1395dded9077e8d19f2995f9a4d45a9c2f0bcffba8",
+      "retained_notice_members": [
+        "libnftnl-1.3.1/COPYING"
+      ]
+    },
+    "libnl-tiny-2025.12.02~40493a65.tar.zst": {
+      "sha256": "b45c72c26961fa6eafc14f73693c2fe463912c4cb0488ccea232d61b425c60d5",
+      "retained_notice_members": [
+        "libnl-tiny-2025.12.02~40493a65/attr.c",
+        "libnl-tiny-2025.12.02~40493a65/cache.c",
+        "libnl-tiny-2025.12.02~40493a65/cache_mngt.c",
+        "libnl-tiny-2025.12.02~40493a65/error.c",
+        "libnl-tiny-2025.12.02~40493a65/genl.c",
+        "libnl-tiny-2025.12.02~40493a65/genl_ctrl.c",
+        "libnl-tiny-2025.12.02~40493a65/genl_family.c",
+        "libnl-tiny-2025.12.02~40493a65/genl_mngt.c",
+        "libnl-tiny-2025.12.02~40493a65/handlers.c",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink-generic.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink-local.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink-types.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/addr.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/attr.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/cache-api.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/cache.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/data.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/errno.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/genl/ctrl.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/genl/family.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/genl/genl.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/genl/mngt.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/handlers.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/list.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/msg.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/netlink-compat.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/netlink.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/object-api.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/object.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/socket.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/types.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/utils.h",
+        "libnl-tiny-2025.12.02~40493a65/include/netlink/version.h",
+        "libnl-tiny-2025.12.02~40493a65/msg.c",
+        "libnl-tiny-2025.12.02~40493a65/nl.c",
+        "libnl-tiny-2025.12.02~40493a65/object.c",
+        "libnl-tiny-2025.12.02~40493a65/socket.c"
+      ]
+    },
+    "libpcap-1.10.6.tar.gz": {
+      "sha256": "872dd11337fe1ab02ad9d4fee047c9da244d695c6ddf34e2ebb733efd4ed8aa9",
+      "retained_notice_members": [
+        "libpcap-1.10.6/LICENSE"
+      ]
+    },
+    "ubus-2026.06.28~24864e78.tar.zst": {
+      "sha256": "33072c12e6d9a1fd59e3774f029575df61393b5a465486726609ff59314b8a84",
+      "retained_notice_members": [
+        "ubus-2026.06.28~24864e78/debian/copyright"
+      ]
+    },
+    "uci-2025.12.02~66127cd7.tar.zst": {
+      "sha256": "ff23a9825aeac8da14a7142e985d598043c0287a463279f24863c580622bf18d",
+      "retained_notice_members": [
+        "uci-2025.12.02~66127cd7/blob.c",
+        "uci-2025.12.02~66127cd7/cli.c",
+        "uci-2025.12.02~66127cd7/delta.c",
+        "uci-2025.12.02~66127cd7/file.c",
+        "uci-2025.12.02~66127cd7/libuci.c",
+        "uci-2025.12.02~66127cd7/list.c",
+        "uci-2025.12.02~66127cd7/lua/uci.c",
+        "uci-2025.12.02~66127cd7/parse.c",
+        "uci-2025.12.02~66127cd7/sh/uci.sh",
+        "uci-2025.12.02~66127cd7/uci.h",
+        "uci-2025.12.02~66127cd7/uci_blob.h",
+        "uci-2025.12.02~66127cd7/uci_internal.h",
+        "uci-2025.12.02~66127cd7/ucimap.c",
+        "uci-2025.12.02~66127cd7/ucimap.h",
+        "uci-2025.12.02~66127cd7/util.c"
+      ]
+    },
+    "uclient-2026.06.07~daad21fa.tar.zst": {
+      "sha256": "35c51545ee092b816249799d283838ffba904292636c495818d864c56b554fe0",
+      "retained_notice_members": [
+        "uclient-2026.06.07~daad21fa/progress.c",
+        "uclient-2026.06.07~daad21fa/uclient-backend.h",
+        "uclient-2026.06.07~daad21fa/uclient-fetch.c",
+        "uclient-2026.06.07~daad21fa/uclient-http.c",
+        "uclient-2026.06.07~daad21fa/uclient-utils.c",
+        "uclient-2026.06.07~daad21fa/uclient-utils.h",
+        "uclient-2026.06.07~daad21fa/uclient.c",
+        "uclient-2026.06.07~daad21fa/uclient.h",
+        "uclient-2026.06.07~daad21fa/ucode.c"
+      ]
+    },
+    "ucode-2026.01.16~85922056.tar.zst": {
+      "sha256": "8c6f586f90e704827dc8736bf3726d15989a978c6a726a52d51e33f8019403b6",
+      "retained_notice_members": [
+        "ucode-2026.01.16~85922056/LICENSE",
+        "ucode-2026.01.16~85922056/debian/copyright"
+      ]
+    },
+    "udebug-2026.01.16~875e1a7a.tar.zst": {
+      "sha256": "3e311a05ddc9f2641d3bda4b83a3c70a80a03b4de5cae663d1b8be336fe8c878",
+      "retained_notice_members": [
+        "udebug-2026.01.16~875e1a7a/debian/copyright"
+      ]
+    },
+    "libudev-zero-1.0.4.tar.gz": {
+      "sha256": "10148cfd6047d387bf71eca72cd19c177084224d96434a118d8def6e0a3d6316",
+      "retained_notice_members": [
+        "libudev-zero-1.0.4/LICENSE"
+      ]
+    },
+    "libusb-1.0.29.tar.bz2": {
+      "sha256": "5977fc950f8d1395ccea9bd48c06b3f808fd3c2c961b44b0c2e6e29fc3a70a85",
+      "retained_notice_members": [
+        "libusb-1.0.29/COPYING"
+      ]
+    },
+    "ustream-ssl-2026.03.01~99f1c0db.tar.zst": {
+      "sha256": "631ce829a510895cdf0bcfa48970e963e6c910ccd09718b90d85e455ec35f290",
+      "retained_notice_members": [
+        "ustream-ssl-2026.03.01~99f1c0db/ustream-example-server.c",
+        "ustream-ssl-2026.03.01~99f1c0db/ustream-internal.h",
+        "ustream-ssl-2026.03.01~99f1c0db/ustream-io-openssl.c",
+        "ustream-ssl-2026.03.01~99f1c0db/ustream-io-wolfssl.c",
+        "ustream-ssl-2026.03.01~99f1c0db/ustream-mbedtls.c",
+        "ustream-ssl-2026.03.01~99f1c0db/ustream-mbedtls.h",
+        "ustream-ssl-2026.03.01~99f1c0db/ustream-openssl.c",
+        "ustream-ssl-2026.03.01~99f1c0db/ustream-openssl.h",
+        "ustream-ssl-2026.03.01~99f1c0db/ustream-ssl.c",
+        "ustream-ssl-2026.03.01~99f1c0db/ustream-ssl.h"
+      ]
+    },
+    "netifd-2026.02.26~cbb83a18.tar.zst": {
+      "sha256": "3fdfcd46ed319b38b79af708bd0d14c11471b8ed9e0bcfa120858a9db07423f8",
+      "retained_notice_members": [
+        "netifd-2026.02.26~cbb83a18/alias.c",
+        "netifd-2026.02.26~cbb83a18/bonding.c",
+        "netifd-2026.02.26~cbb83a18/bridge.c",
+        "netifd-2026.02.26~cbb83a18/config.c",
+        "netifd-2026.02.26~cbb83a18/config.h",
+        "netifd-2026.02.26~cbb83a18/config/network",
+        "netifd-2026.02.26~cbb83a18/device.c",
+        "netifd-2026.02.26~cbb83a18/device.h",
+        "netifd-2026.02.26~cbb83a18/extdev.c",
+        "netifd-2026.02.26~cbb83a18/extdev.h",
+        "netifd-2026.02.26~cbb83a18/handler.c",
+        "netifd-2026.02.26~cbb83a18/handler.h",
+        "netifd-2026.02.26~cbb83a18/interface-event.c",
+        "netifd-2026.02.26~cbb83a18/interface-ip.c",
+        "netifd-2026.02.26~cbb83a18/interface-ip.h",
+        "netifd-2026.02.26~cbb83a18/interface.c",
+        "netifd-2026.02.26~cbb83a18/interface.h",
+        "netifd-2026.02.26~cbb83a18/iprule.c",
+        "netifd-2026.02.26~cbb83a18/iprule.h",
+        "netifd-2026.02.26~cbb83a18/macvlan.c",
+        "netifd-2026.02.26~cbb83a18/main.c",
+        "netifd-2026.02.26~cbb83a18/netifd.h",
+        "netifd-2026.02.26~cbb83a18/proto-shell.c",
+        "netifd-2026.02.26~cbb83a18/proto-static.c",
+        "netifd-2026.02.26~cbb83a18/proto.c",
+        "netifd-2026.02.26~cbb83a18/proto.h",
+        "netifd-2026.02.26~cbb83a18/system-dummy.c",
+        "netifd-2026.02.26~cbb83a18/system-linux.c",
+        "netifd-2026.02.26~cbb83a18/system-log.h",
+        "netifd-2026.02.26~cbb83a18/system.c",
+        "netifd-2026.02.26~cbb83a18/system.h",
+        "netifd-2026.02.26~cbb83a18/tunnel.c",
+        "netifd-2026.02.26~cbb83a18/ubus.c",
+        "netifd-2026.02.26~cbb83a18/ubus.h",
+        "netifd-2026.02.26~cbb83a18/ucode.c",
+        "netifd-2026.02.26~cbb83a18/ucode.h",
+        "netifd-2026.02.26~cbb83a18/utils.c",
+        "netifd-2026.02.26~cbb83a18/utils.h",
+        "netifd-2026.02.26~cbb83a18/veth.c",
+        "netifd-2026.02.26~cbb83a18/vlan.c",
+        "netifd-2026.02.26~cbb83a18/vlandev.c"
+      ]
+    },
+    "nftables-1.1.6.tar.xz": {
+      "sha256": "372931bda8556b310636a2f9020adc710f9bab66f47efe0ce90bff800ac2530c",
+      "retained_notice_members": [
+        "nftables-1.1.6/COPYING"
+      ]
+    },
+    "odhcp6c-2026.06.20~07d324ee.tar.zst": {
+      "sha256": "f26733017c82f5397bae026c56df8e1225dfaa8cdbea3cf7b3f9192cfa9ba719",
+      "retained_notice_members": [
+        "odhcp6c-2026.06.20~07d324ee/COPYING"
+      ]
+    },
+    "odhcpd-2026.06.29~5d7be43f.tar.zst": {
+      "sha256": "b9bd30d14f79e34b9f3511a511ef1cd1c4541568448e91fd02ae9173f12a0b64",
+      "retained_notice_members": [
+        "odhcpd-2026.06.29~5d7be43f/COPYING"
+      ]
+    },
+    "openwrt-keyring-2025.12.10~f0670054.tar.zst": {
+      "sha256": "a8e0c09678109c576a54ed5101ac83131015533da899c10d9e276c200cf97b1b",
+      "retained_notice_members": []
+    },
+    "ppp-2.5.2.tar.zst": {
+      "sha256": "381668ce1547afeaf599f08ae37935bfd3d5841747c62bca5a870c11e3e9bedb",
+      "retained_notice_members": [
+        "ppp-2.5.2/COPYING",
+        "ppp-2.5.2/LICENSE.BSD",
+        "ppp-2.5.2/LICENSE.GPL-2",
+        "ppp-2.5.2/pppd/main.c",
+        "ppp-2.5.2/pppd/plugins/pppoatm/COPYING",
+        "ppp-2.5.2/pppd/plugins/pppoe/plugin.c",
+        "ppp-2.5.2/pppd/plugins/radius/COPYRIGHT"
+      ]
+    },
+    "procd-2026.03.13~58eb263d.tar.zst": {
+      "sha256": "8bd86938479609045e1ceebed904e4f5cb96fdb38220d41c3579b7e764fbb05b",
+      "retained_notice_members": [
+        "procd-2026.03.13~58eb263d/container.h",
+        "procd-2026.03.13~58eb263d/hotplug-dispatch.c",
+        "procd-2026.03.13~58eb263d/initd/early.c",
+        "procd-2026.03.13~58eb263d/initd/init.c",
+        "procd-2026.03.13~58eb263d/initd/init.h",
+        "procd-2026.03.13~58eb263d/initd/mkdev.c",
+        "procd-2026.03.13~58eb263d/initd/preinit.c",
+        "procd-2026.03.13~58eb263d/inittab.c",
+        "procd-2026.03.13~58eb263d/jail/capabilities.c",
+        "procd-2026.03.13~58eb263d/jail/capabilities.h",
+        "procd-2026.03.13~58eb263d/jail/cgroups-bpf.c",
+        "procd-2026.03.13~58eb263d/jail/cgroups-bpf.h",
+        "procd-2026.03.13~58eb263d/jail/cgroups.c",
+        "procd-2026.03.13~58eb263d/jail/cgroups.h",
+        "procd-2026.03.13~58eb263d/jail/elf.c",
+        "procd-2026.03.13~58eb263d/jail/elf.h",
+        "procd-2026.03.13~58eb263d/jail/fs.c",
+        "procd-2026.03.13~58eb263d/jail/fs.h",
+        "procd-2026.03.13~58eb263d/jail/jail.c",
+        "procd-2026.03.13~58eb263d/jail/jail.h",
+        "procd-2026.03.13~58eb263d/jail/log.h",
+        "procd-2026.03.13~58eb263d/jail/netifd.c",
+        "procd-2026.03.13~58eb263d/jail/netifd.h",
+        "procd-2026.03.13~58eb263d/jail/preload.c",
+        "procd-2026.03.13~58eb263d/jail/seccomp-bpf.h",
+        "procd-2026.03.13~58eb263d/jail/seccomp-oci.c",
+        "procd-2026.03.13~58eb263d/jail/seccomp-oci.h",
+        "procd-2026.03.13~58eb263d/jail/seccomp-syscalls-helpers.h",
+        "procd-2026.03.13~58eb263d/jail/seccomp.c",
+        "procd-2026.03.13~58eb263d/jail/seccomp.h",
+        "procd-2026.03.13~58eb263d/log.h",
+        "procd-2026.03.13~58eb263d/make_syscall_h.sh",
+        "procd-2026.03.13~58eb263d/plug/coldplug.c",
+        "procd-2026.03.13~58eb263d/plug/hotplug.c",
+        "procd-2026.03.13~58eb263d/plug/hotplug.h",
+        "procd-2026.03.13~58eb263d/plug/udevtrigger.c",
+        "procd-2026.03.13~58eb263d/preload.h",
+        "procd-2026.03.13~58eb263d/procd.c",
+        "procd-2026.03.13~58eb263d/procd.h",
+        "procd-2026.03.13~58eb263d/rcS.c",
+        "procd-2026.03.13~58eb263d/rcS.h",
+        "procd-2026.03.13~58eb263d/service/instance.c",
+        "procd-2026.03.13~58eb263d/service/instance.h",
+        "procd-2026.03.13~58eb263d/service/service.c",
+        "procd-2026.03.13~58eb263d/service/service.h",
+        "procd-2026.03.13~58eb263d/service/trigger.c",
+        "procd-2026.03.13~58eb263d/service/validate.c",
+        "procd-2026.03.13~58eb263d/service/watch.c",
+        "procd-2026.03.13~58eb263d/signal.c",
+        "procd-2026.03.13~58eb263d/state.c",
+        "procd-2026.03.13~58eb263d/system.c",
+        "procd-2026.03.13~58eb263d/sysupgrade.c",
+        "procd-2026.03.13~58eb263d/sysupgrade.h",
+        "procd-2026.03.13~58eb263d/trace/preload.c",
+        "procd-2026.03.13~58eb263d/trace/trace.c",
+        "procd-2026.03.13~58eb263d/ubus.c",
+        "procd-2026.03.13~58eb263d/upgraded/upgraded.c",
+        "procd-2026.03.13~58eb263d/utils/askfirst.c",
+        "procd-2026.03.13~58eb263d/utils/utils.c",
+        "procd-2026.03.13~58eb263d/utils/utils.h",
+        "procd-2026.03.13~58eb263d/uxc.c",
+        "procd-2026.03.13~58eb263d/watchdog.c",
+        "procd-2026.03.13~58eb263d/watchdog.h"
+      ]
+    },
+    "smartmontools-7.5.tar.gz": {
+      "sha256": "690b83ca331378da9ea0d9d61008c4b22dde391387b9bbad7f29387f2595f76e",
+      "retained_notice_members": [
+        "smartmontools-7.5/COPYING"
+      ]
+    },
+    "tcpdump-4.99.6.tar.gz": {
+      "sha256": "5839921a0f67d7d8fa3dacd9cd41e44c89ccb867e8a6db216d62628c7fd14b09",
+      "retained_notice_members": [
+        "tcpdump-4.99.6/LICENSE"
+      ]
+    },
+    "mtd-utils-2.3.0.tar.bz2": {
+      "sha256": "2db102908b232406ccb20719c0f43b61196aef4534493419fbf98a273c598c10",
+      "retained_notice_members": [
+        "mtd-utils-2.3.0/COPYING",
+        "mtd-utils-2.3.0/lib/LICENSE.libiniparser"
+      ]
+    },
+    "u-boot-2025.10.tar.bz2": {
+      "sha256": "b4f032848e56cc8f213ad59f9132c084dbbb632bc29176d024e58220e0efdf4a",
+      "retained_notice_members": [
+        "u-boot-2025.10/Licenses/Exceptions",
+        "u-boot-2025.10/Licenses/OFL.txt",
+        "u-boot-2025.10/Licenses/README",
+        "u-boot-2025.10/Licenses/bsd-2-clause.txt",
+        "u-boot-2025.10/Licenses/bsd-3-clause.txt",
+        "u-boot-2025.10/Licenses/bzip2-1.0.6.txt",
+        "u-boot-2025.10/Licenses/eCos-2.0.txt",
+        "u-boot-2025.10/Licenses/gpl-2.0.txt",
+        "u-boot-2025.10/Licenses/ibm-pibs.txt",
+        "u-boot-2025.10/Licenses/isc.txt",
+        "u-boot-2025.10/Licenses/lgpl-2.0.txt",
+        "u-boot-2025.10/Licenses/lgpl-2.1.txt",
+        "u-boot-2025.10/Licenses/mit.txt",
+        "u-boot-2025.10/Licenses/r8a779x_usb3.txt",
+        "u-boot-2025.10/Licenses/x11.txt",
+        "u-boot-2025.10/cmd/license.c",
+        "u-boot-2025.10/dts/upstream/COPYING",
+        "u-boot-2025.10/fs/jffs2/LICENCE",
+        "u-boot-2025.10/lib/lwip/lwip/COPYING",
+        "u-boot-2025.10/lib/lwip/lwip/contrib/apps/LwipMibCompiler/SharpSnmpLib/license.txt",
+        "u-boot-2025.10/lib/lzma/license.txt",
+        "u-boot-2025.10/lib/mbedtls/external/mbedtls/LICENSE",
+        "u-boot-2025.10/tools/u_boot_pylib/LICENSE"
+      ]
+    },
+    "urngd-2025.10.03~f17e33d9.tar.zst": {
+      "sha256": "7ca9e2e796b28df27b9b1ecd35987fe6e0ae2425e4ec92dff420386572dbbdc9",
+      "retained_notice_members": [
+        "urngd-2025.10.03~f17e33d9/3rdparty/jitterentropy-rngd/COPYING",
+        "urngd-2025.10.03~f17e33d9/3rdparty/jitterentropy-rngd/COPYING.bsd",
+        "urngd-2025.10.03~f17e33d9/3rdparty/jitterentropy-rngd/COPYING.gplv2"
+      ]
+    },
+    "hwdata-0.407.tar.gz": {
+      "sha256": "6a88f6f5cb510fbfaa9c49488348b7fcd7aa209b0a331f24dfebb1c8c339568b",
+      "retained_notice_members": [
+        "hwdata-0.407/COPYING",
+        "hwdata-0.407/LICENSE"
+      ]
+    },
+    "usbutils-019.tar.xz": {
+      "sha256": "659f40c440e31ba865c52c818a33d3ba6a97349e3353f8b1985179cb2aa71ec5",
+      "retained_notice_members": [
+        "usbutils-019/LICENSES/CC0-1.0.txt",
+        "usbutils-019/LICENSES/GPL-2.0-only.txt",
+        "usbutils-019/LICENSES/GPL-3.0-only.txt",
+        "usbutils-019/LICENSES/LGPL-2.1-or-later.txt",
+        "usbutils-019/LICENSES/MIT.txt"
+      ]
+    },
+    "usign-2025.10.03~c4c72b1b.tar.zst": {
+      "sha256": "889e58b295505bdde749ec260414fd24411ce2437e5049a7d5cf4e410e8cbe9d",
+      "retained_notice_members": [
+        "usign-2025.10.03~c4c72b1b/base64.c",
+        "usign-2025.10.03~c4c72b1b/main.c",
+        "usign-2025.10.03~c4c72b1b/sha512.c",
+        "usign-2025.10.03~c4c72b1b/sha512.h"
+      ]
+    },
+    "zlib-1.3.1.tar.zst": {
+      "sha256": "6558577038f4839057fad93afb295bf32e84dc9bd2c33512d40a5eab6d4889ef",
+      "retained_notice_members": [
+        "zlib-1.3.1/LICENSE",
+        "zlib-1.3.1/contrib/dotzlib/LICENSE_1_0.txt"
+      ]
+    }
+  }
+}
