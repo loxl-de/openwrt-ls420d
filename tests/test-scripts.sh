@@ -225,4 +225,12 @@ for pair in rsync:usr/bin/rsync ethtool:usr/sbin/ethtool hdparm:sbin/hdparm; do
         require_package_binary "$TEST_TMP/package.manifest" "$package_root" "$package_name" "$binary_path"
 done
 
+grep -qx '# CONFIG_PACKAGE_uboot-envtools is not set' "$REPO_ROOT/config/ls420d.config"
+if grep -q 'ubootenv_add_uci_config' "$REPO_ROOT/openwrt/patches/100-add-buffalo-ls420d-ram-initramfs-support.patch"; then
+    fail 'LS420D must not add a writable bootloader environment configuration'
+fi
+grep -q '^+.*read-only;' "$REPO_ROOT/openwrt/patches/100-add-buffalo-ls420d-ram-initramfs-support.patch"
+grep -q '/soc/spi@10600/spi-flash@0/partitions/partition@f0000' "$REPO_ROOT/scripts/package-buffalo.sh"
+ok 'RAM image protects SPI NOR and omits the environment writer'
+
 printf '1..%d\n' "$pass"
