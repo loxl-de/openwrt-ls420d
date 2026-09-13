@@ -13,13 +13,19 @@ VOLUME = '11111111-2222-4333-8444-555555555555'
 
 
 class BackupCompanionTests(unittest.TestCase):
-    setUp = fixtures.InitrdTests.setUp
+    def setUp(self):
+        fixtures.InitrdTests.setUp(self)
+        client = self.root/'backup-client'
+        client.write_bytes((self.root/'dropbear_ed25519_host_key').read_bytes())
+        client.chmod(0o600)
+        (self.root/'source-host.pub').write_text((self.root/'admin.pub').read_text())
+
     tearDown = fixtures.InitrdTests.tearDown
     entries = fixtures.InitrdTests.entries
     def job(self):
         return dict(host='source.example', user='backup', source='/srv/data/',
                     volume_uuid=VOLUME, hour=3, minute=15,
-                    client_key='dropbear_ed25519_host_key', host_public_key='admin.pub')
+                    client_key='backup-client', host_public_key='source-host.pub')
 
     def test_backup_entries_and_rights(self):
         config = dict(self.config, backup=self.job())
@@ -53,14 +59,14 @@ class BackupCompanionTests(unittest.TestCase):
             self.entries(dict(self.config, backup=job))
 
     def test_source_pin_must_be_one_valid_public_key(self):
-        key = self.root/'admin.pub'
+        key = self.root/'source-host.pub'
         original = key.read_text()
         for text in (original + original, 'source.example '+original, 'ssh-ed25519 invalid'):
             key.write_text(text)
             with self.assertRaises(ValueError):
                 self.entries(dict(self.config, backup=self.job()))
         key.write_text(original)
-        private = self.root/'dropbear_ed25519_host_key'
+        private = self.root/'backup-client'
         private.chmod(0o644)
         with self.assertRaises(ValueError):
             self.entries(dict(self.config, backup=self.job()))
