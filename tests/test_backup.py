@@ -75,7 +75,7 @@ class BackupCompanionTests(unittest.TestCase):
 class BackupRuntimeTests(unittest.TestCase):
     def run_job(self, status=0, mounted=True, marker=VOLUME, actual_uuid=VOLUME,
                 locked=False, huge=False, symlink=False, marker_newline=True,
-                block_line=None):
+                block_line=None, probe_status=0):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             volume = root/'volume'
@@ -97,7 +97,12 @@ class BackupRuntimeTests(unittest.TestCase):
   *) return 1;;
  esac
 }}
-block() {{ echo '{block_line or f'/dev/sda1: UUID="{actual_uuid}" TYPE="btrfs"'}'; }}
+block() {{ echo unexpected-global-probe >&2; return 99; }}
+btrfs() {{
+ [ "$*" = 'filesystem show --mounted .' ] || return 98
+ echo '{block_line if block_line is not None else f'Label: none  uuid: {actual_uuid}'}'
+ return {probe_status}
+}}
 flock() {{ return {75 if locked else 0}; }}
 logger() {{ if [ "$#" = 2 ]; then cat >>{root}/logged; fi; }}
 rsync() {{
@@ -139,13 +144,13 @@ rsync() {{
         self.assertIn('invalid-volume-marker', status)
         self.assertEqual(args, '')
 
-    def test_uuid_match_is_exact_regardless_of_field_order(self):
-        last_field = f'/dev/sda1: TYPE="btrfs" UUID="{VOLUME}"'
+    def test_mounted_uuid_match_is_exact_and_not_a_label(self):
+        last_field = f'Label: none  uuid: {VOLUME}'
         code, status, args, _, _, _ = self.run_job(block_line=last_field)
         self.assertEqual(code, 0, status)
         self.assertNotEqual(args, '')
         code, status, args, _, _, _ = self.run_job(
-            block_line=f'/dev/sda1: UUID="{VOLUME}" PARTUUID="different" TYPE="btrfs"')
+            block_line=f'Label: misleading uuid: wrong  uuid: {VOLUME}')
         self.assertEqual(code, 0, status)
         self.assertNotEqual(args, '')
         for line in (f'/dev/sda1: UUID="{VOLUME}0" TYPE="btrfs"',
@@ -158,6 +163,17 @@ rsync() {{
                 code, status, args, _, _, _ = self.run_job(block_line=line)
                 self.assertNotEqual(code, 0)
                 self.assertIn('wrong-volume', status)
+                self.assertEqual(args, '')
+
+    def test_mounted_probe_failure_and_ambiguity(self):
+        for kwargs in (
+                dict(probe_status=1),
+                dict(block_line=''),
+                dict(block_line=f'Label: none  uuid: {VOLUME}0'),
+                dict(block_line=f'Label: none  uuid: {VOLUME}\nLabel: none  uuid: {VOLUME}')):
+            with self.subTest(kwargs=kwargs):
+                code, _, args, _, _, _ = self.run_job(**kwargs)
+                self.assertNotEqual(code, 0)
                 self.assertEqual(args, '')
 
     def test_destination_and_lock_fail_before_transfer(self):

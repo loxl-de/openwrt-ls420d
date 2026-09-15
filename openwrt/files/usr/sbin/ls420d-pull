@@ -35,9 +35,10 @@ cd "$TARGET" || fail no-volume
 device=$(awk -v target="$TARGET" '$2 == target && $3 == "btrfs" && $4 ~ /(^|,)rw(,|$)/ {print $1}' /proc/mounts)
 [ -n "$device" ] || fail no-writable-btrfs-mount
 case "$device" in /dev/*) ;; *) fail unexpected-mount-source;; esac
-# Extract the UUID field and compare it exactly; do not depend on which
-# field block(1) prints after it.
-actual=$(block info "$device" | sed -n 's/^[^:]*://; s/.*[[:space:]]UUID="\([^"]*\)".*$/\1/p')
+# Query mounted filesystems only. block info scans other disks even when given
+# a device argument, waking unrelated backup volumes.
+volume_info=$(LC_ALL=C btrfs filesystem show --mounted .) || fail volume-query-failed
+actual=$(printf '%s\n' "$volume_info" | sed -n 's/^Label: .*  uuid: \([0-9a-f-]*\)$/\1/p')
 [ "$actual" = "$uuid" ] || fail wrong-volume
 if [ ! -f .ls420d-volume ] || [ -L .ls420d-volume ]; then
     fail missing-volume-marker
