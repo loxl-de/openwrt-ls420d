@@ -67,6 +67,16 @@ replaced it within twelve seconds; status reported full fan state 3 and no
 fault. Six seconds later that state was unchanged. This tests a stalled worker,
 not a mechanical fan failure or disconnected sensor.
 
+Ten consecutive clean warm reboots then passed without manual intervention.
+Each cycle unmounted the data volume before reboot and checked a new boot ID
+and the installed pull-job hash after SSH returned. The boot pair was unchanged.
+After the tenth cycle, the target was unmounted and both disks reported standby.
+This does not test cold starts or power-loss recovery.
+
+A separate read-only test repeated a synthetic file's checksum sixty times
+on each disk concurrently. All checksums matched the source. Because reads
+could be served from cache, this is not sustained physical I/O or memory stress.
+
 The remaining checks in the hardware protocol are still open. In particular,
 this run does not establish repeated cold-start reliability, sustained memory
 and concurrent I/O stability, physical enclosure functions, malformed-companion
