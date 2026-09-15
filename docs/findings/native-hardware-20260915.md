@@ -48,10 +48,24 @@ Missing mount, held lock, wrong UUID and missing source returned 1, 75, 1 and
 23 respectively. No destination appeared in RAM when the mount was absent.
 Restoring the source produced exit 0.
 
+A separate temporary crond instance invoked the installed job at a minute
+boundary. It returned `ok 0`; the other disk remained asleep with unchanged
+counters. The test stopped that daemon, unmounted the target and returned the
+disks to standby. This checks cron invocation, not production orchestration of
+mounting, backup and spindown. The normal cron service remains stopped.
+
+An SSH attempt restricted to password and keyboard-interactive authentication
+was rejected with `Permission denied (publickey)` and exit 255.
+
 A bounded 15-minute CPU load completed with 45 samples, a maximum of 68.933 C
 and no reported fan-service fault. An independent time limit and an 80 C abort
 check protected the run. After cooling, the CPU read 52.296 C; both disks were
 in standby and PHY thermal monitoring remained enabled under `user_space`.
+
+The identified fan worker was then stopped with SIGSTOP. The supervisor
+replaced it within twelve seconds; status reported full fan state 3 and no
+fault. Six seconds later that state was unchanged. This tests a stalled worker,
+not a mechanical fan failure or disconnected sensor.
 
 The remaining checks in the hardware protocol are still open. In particular,
 this run does not establish repeated cold-start reliability, sustained memory
