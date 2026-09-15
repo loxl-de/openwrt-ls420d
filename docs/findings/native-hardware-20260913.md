@@ -63,8 +63,10 @@ The final job also produced these results:
 | Source directory missing | Exit 23, recorded `failed 23` |
 | Source restored | Exit 0, recorded `ok 0` |
 
-The final-image missing-marker case and a detach during an active transfer were
-not exercised. A missing mount before transfer is not that detach test.
+On 15 September the missing-marker test returned exit 1 and
+`failed missing-volume-marker`. Restoring the original marker allowed the next
+pull to finish with `ok 0`. A detach during an active transfer was not exercised.
+A missing mount before transfer is not that detach test.
 
 ## Cooling and boot recovery
 
@@ -91,21 +93,27 @@ temporary RAM marker disappeared after each reboot. Data mounts were unmounted
 before reboot. One SSH restart took longer than the first check window but
 returned without physical intervention. This is not a ten-boot reliability test.
 
-## Standby test in progress
+## Controlled standby and return to service
 
 A controlled 24-hour idle interval started at `2026-09-13T23:23:06Z`, after the
-last successful pull and return to the final image. Both disks are unmounted
-and in standby. Cron is deliberately stopped for this interval; CPU, PHY and
-fan monitoring remain active. This is not unattended daily scheduling coverage
-or a mounted-volume standby test. The earliest endpoint is
-`2026-09-14T23:23:06Z`; no passing duration is claimed yet.
+last successful pull and return to the final image. The endpoint sample at
+`2026-09-15T00:29:23Z` recorded both disks in standby after 25 hours, 6 minutes
+and 17 seconds. Both were unmounted. Cron was deliberately stopped; CPU, PHY
+and fan monitoring remained active. This is not unattended daily scheduling
+coverage or a mounted-volume standby test.
 
-At the 23:34 UTC sample both disks remained asleep, the boot ID was unchanged,
-and block I/O counters matched the baseline. SMART start/stop and power-cycle
-counters were recorded before standby for the final comparison.
+Every recorded sample reported standby, with the same boot ID and unchanged
+block I/O counters. Sampling was intermittent; no continuous trace was taken.
+After the deliberate wake, SMART start/stop counts had increased by one per
+disk, while power-cycle counts were unchanged. Reallocated, pending and
+uncorrectable sector counts remained zero.
+
+Both disks then passed another actual pull and fresh RAM restore, including
+SHA-256, ownership, ACL, xattr, hardlink and symlink checks. Both were unmounted
+and returned to standby. Cron remains stopped in the test configuration.
 
 Still open: the rest of the [hardware protocol](../hardware-test-protocol.md),
 including repeated cold starts, sustained memory and concurrent storage load,
 physical USB/LED/button coverage, absent/malformed companions, actual sensor/fan
-faults, mounted-volume standby and the full idle duration. RTC and WoL were not
+faults and mounted-volume standby. RTC and WoL were not
 retested on this exact image. These omissions remain release-gate limitations.

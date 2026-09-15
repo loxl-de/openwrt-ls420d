@@ -11,7 +11,8 @@ configuration, not another boot architecture.
    [13 September record](findings/native-hardware-20260913.md) covers its actual
    pull job and restores on both disks, RAM root, MTD flags, enabled
    `user_space` PHY zone, load response, stalled-worker recovery and paired
-   update/rollback. The controlled unmounted idle interval is still running.
+   update/rollback. A 25-hour unmounted idle test and subsequent pull/restore passed;
+   unattended scheduling and mounted-volume standby remain untested.
    Remaining checks include the missing marker, detach during transfer and
    protocol section F with the volume mounted as the companion mounts it.
    Check flash protection through MTD flags, never by writing test bytes.
